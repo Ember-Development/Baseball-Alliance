@@ -1,25 +1,26 @@
 import React from "react";
-import heroVideo from "../assets/BA-Teaser-v4.mov";
-// optional: import heroPoster from "../assets/hero-poster.jpg";
+import heroVideo from "../assets/BA-Teaser-v4.mov"; // convert your .mov to H.264 .mp4
+import heroPoster from "../assets/baseballheader.png"; // optional poster image
 
 const Hero: React.FC = () => (
-  <section className="relative h-screen w-screen overflow-hidden">
-    {/* Background video */}
+  <section className="relative w-screen h-screen overflow-hidden">
+    {/* Video layer */}
     <video
       src={heroVideo}
-      // poster={heroPoster}
+      poster={heroPoster}
       autoPlay
       muted
       loop
       playsInline
-      className="absolute inset-0 z-0 w-full h-full object-cover"
+      preload="auto"
+      className="absolute inset-0 z-20 w-full h-full object-cover"
     />
 
-    {/* Overlay (tint) */}
-    <div className="absolute inset-0 z-10 bg-black/40 pointer-events-none" />
+    {/* Tint overlay */}
+    <div className="absolute inset-0 z-30 bg-black/40 pointer-events-none" />
 
-    {/* Foreground content */}
-    <div className="relative z-20 flex flex-col items-center justify-center text-center h-full px-4 text-white">
+    {/* Content */}
+    {/* <div className="relative z-20 flex flex-col items-center justify-center h-full px-4 text-center text-white">
       <p className="text-sm uppercase tracking-widest mb-4">
         An invite-only network for the nation’s top youth talent
       </p>
@@ -46,7 +47,7 @@ const Hero: React.FC = () => (
           />
         </svg>
       </div>
-    </div>
+    </div> */}
   </section>
 );
 

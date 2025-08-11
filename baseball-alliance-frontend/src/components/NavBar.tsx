@@ -1,27 +1,134 @@
-import React from 'react'
-import BA from '../assets/baseballheader.png';
+import React, { useState, useEffect } from "react";
+import BA from "../assets/baseballalliancelogo.png";
 
-const NavBar: React.FC = () => (
-  <nav className="fixed w-full z-50 backdrop-blur-md">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
-      {/* logo */}
-      <img src={BA} alt="Baseball Alliance" className="h-32 mt-12" />
+const NavBar: React.FC = () => {
+  const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
-      {/* links */}
-      <ul className="hidden md:flex space-x-6 text-sm uppercase tracking-wide">
-        {['Home','Members','Events','Resources','Alumni','About Us'].map(label => (
-          <li key={label} className="hover:text-red-500 cursor-pointer">
-            {label}
-          </li>
-        ))}
-      </ul>
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    onScroll();
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
-      {/* login */}
-      <button className="px-4 py-2 border border-white rounded-full text-sm hover:bg-white hover:text-black transition">
-        Login
-      </button>
-    </div>
-  </nav>
-)
+  const links = [
+    "Home",
+    "Members",
+    "Events",
+    "Resources",
+    "Alumni",
+    "About Us",
+  ];
 
-export default NavBar
+  return (
+    <nav
+      className={[
+        "fixed inset-x-0 top-0 z-50",
+        "backdrop-blur-md backdrop-saturate-150",
+        "transition-all duration-300",
+        scrolled
+          ? "bg-white/7 border-white/15 shadow-[0_8px_32px_rgba(0,0,0,0.25)]"
+          : "bg-white/5 border-white/10",
+        "border-b",
+      ].join(" ")}
+    >
+      {/* gradient hairline accent */}
+      <div className="absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-transparent via-red-400/70 to-transparent pointer-events-none" />
+
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+        {/* Brand */}
+        <div className="flex items-center gap-3">
+          <img
+            src={BA}
+            alt="Baseball Alliance"
+            className="h-32 mt-0 w-auto object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.4)]"
+          />
+        </div>
+
+        {/* Desktop nav */}
+        <ul className="hidden md:flex items-center gap-2">
+          {links.map((label) => (
+            <li key={label}>
+              <button
+                className="group relative px-3 py-2 text-sm font-semibold uppercase tracking-wide text-[#163968] hover:text-white transition"
+                aria-label={label}
+              >
+                {label}
+                {/* animated underline */}
+                <span className="pointer-events-none absolute left-3 right-3 -bottom-0.5 h-px scale-x-0 origin-left bg-gradient-to-r from-red-400 via-rose-400 to-red-400 transition-transform duration-300 group-hover:scale-x-100" />
+              </button>
+            </li>
+          ))}
+        </ul>
+
+        {/* Actions */}
+        <div className="flex items-center gap-3">
+          <button className="hidden sm:inline-flex px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wide border border-[#163968] bg-white/5 hover:bg-white/10 text-[#163968] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] transition">
+            Login
+          </button>
+
+          {/* Mobile menu button */}
+          <button
+            className="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 transition"
+            onClick={() => setOpen((v) => !v)}
+            aria-label="Toggle menu"
+          >
+            {/* hamburger / close */}
+            <svg
+              className={`h-5 w-5 text-white transition-transform ${
+                open ? "rotate-90" : ""
+              }`}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              {open ? (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              ) : (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3.5 6.5h17M3.5 12h17M3.5 17.5h17"
+                />
+              )}
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile drawer */}
+      <div
+        className={[
+          "md:hidden overflow-hidden transition-[max-height,opacity] duration-300",
+          open ? "max-h-96 opacity-100" : "max-h-0 opacity-0",
+        ].join(" ")}
+      >
+        <div className="mx-auto max-w-7xl px-4 pb-4">
+          <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-2">
+            {links.map((label) => (
+              <button
+                key={label}
+                className="w-full text-left px-3 py-3 rounded-xl text-sm uppercase tracking-wide text-[#163968] hover:text-white hover:bg-white/10 transition"
+              >
+                {label}
+              </button>
+            ))}
+            <div className="pt-2">
+              <button className="w-full px-4 py-3 rounded-xl text-sm uppercase tracking-wide border border-white/20 bg-white/5 hover:bg-white/10 text-white transition">
+                Login
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
+};
+
+export default NavBar;
