@@ -1,13 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import { useCountdown } from "../hooks/useCountdown";
 import ticketBg from "../assets/baseballldirt.jpg";
 import ballWatermark from "../assets/baseballheader.png";
 import barcodeImg from "../assets/barcode.png";
+import RegistrationModal from "./ui/RegistrationModal";
 
 const EventSection: React.FC = () => {
   const { days, hours, minutes, seconds } = useCountdown(
     new Date("2025-10-21T00:00:00")
   );
+  const [openReg, setOpenReg] = useState(false);
 
   return (
     <div className="mt-16 mx-auto max-w-7xl">
@@ -97,22 +99,21 @@ const EventSection: React.FC = () => {
             {/* RIGHT: register + barcode (becomes bottom row on mobile) */}
             <div className="relative flex flex-col md:flex-row items-center md:items-center justify-center gap-3 px-4 sm:px-6 py-4">
               {/* Mobile: full-width CTA button; Desktop: subtle link */}
-              <a
-                href="/register"
+              <button
+                onClick={() => setOpenReg(true)}
                 className="md:hidden w-full inline-flex items-center justify-center rounded-lg bg-[#163968] text-white font-semibold py-2.5 px-4 shadow hover:brightness-110 active:brightness-95 transition"
               >
                 Register Now
-              </a>
+              </button>
 
-              <a
-                href="/register"
+              <button
+                onClick={() => setOpenReg(true)}
                 className="hidden md:inline-block text-[#163968] items-center justify-center text-center ml-[2rem] text-lg font-bold leading-tight tracking-wide hover:text-white transition"
               >
                 Register
                 <br />
                 Here
-              </a>
-
+              </button>
               {/* Barcode: readable on mobile (no rotation), rotated on desktop */}
               <img
                 src={barcodeImg}
@@ -130,6 +131,15 @@ const EventSection: React.FC = () => {
 
       {/* baseline divider */}
       <div className="mt-6 h-px bg-black/10" />
+
+      <RegistrationModal
+        open={openReg}
+        onClose={() => setOpenReg(false)}
+        onSubmit={(form) => {
+          // TODO: send to your API
+          console.log("Submitted combine registration:", form);
+        }}
+      />
     </div>
   );
 };
