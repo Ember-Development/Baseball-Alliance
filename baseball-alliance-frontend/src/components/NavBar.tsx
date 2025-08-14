@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import BA from "../assets/baseballalliancelogo.png";
+import { Link } from "react-router-dom";
 
 const NavBar: React.FC = () => {
   const [open, setOpen] = useState(false);
@@ -39,19 +40,21 @@ const NavBar: React.FC = () => {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         {/* Brand */}
         <div className="flex items-center gap-3">
-          <img
-            src={BA}
-            alt="Baseball Alliance"
-            className="h-32 mt-0 w-auto object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.4)]"
-          />
+          <Link to="/" aria-label="Go to Home">
+            <img
+              src={BA}
+              alt="Baseball Alliance"
+              className="h-20 w-auto object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.4)] cursor-pointer"
+            />
+          </Link>
         </div>
 
         {/* Desktop nav */}
-        <ul className="hidden md:flex items-center gap-2">
+        <ul className="hidden lg:flex items-center gap-6">
           {links.map((label) => (
             <li key={label}>
               <button
-                className="group relative px-3 py-2 text-sm font-semibold uppercase tracking-wide text-[#163968] hover:text-white transition"
+                className="group relative px-3 py-2 text-base font-semibold uppercase tracking-wide text-[#163968] hover:text-red-500 transition"
                 aria-label={label}
               >
                 {label}
@@ -64,19 +67,22 @@ const NavBar: React.FC = () => {
 
         {/* Actions */}
         <div className="flex items-center gap-3">
-          <button className="hidden sm:inline-flex px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wide border border-[#163968] bg-white/5 hover:bg-white/10 text-[#163968] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] transition">
+          <a
+            href="mailto:keith@baseballalliance.co"
+            className="hidden lg:inline-flex px-5 py-2 rounded-full text-sm font-bold uppercase tracking-wide border border-[#163968] bg-white/5 hover:bg-white/10 text-[#163968] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] transition"
+          >
             Login
-          </button>
+          </a>
 
           {/* Mobile menu button */}
           <button
-            className="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 transition"
+            className="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl border border-[#163968]/45 bg-white/5 hover:bg-white/10 transition"
             onClick={() => setOpen((v) => !v)}
             aria-label="Toggle menu"
           >
             {/* hamburger / close */}
             <svg
-              className={`h-5 w-5 text-white transition-transform ${
+              className={`h-5 w-5 text-[#163968] transition-transform ${
                 open ? "rotate-90" : ""
               }`}
               viewBox="0 0 24 24"
@@ -105,24 +111,27 @@ const NavBar: React.FC = () => {
       {/* Mobile drawer */}
       <div
         className={[
-          "md:hidden overflow-hidden transition-[max-height,opacity] duration-300",
+          "lg:hidden overflow-hidden transition-[max-height,opacity] duration-300",
           open ? "max-h-96 opacity-100" : "max-h-0 opacity-0",
         ].join(" ")}
       >
         <div className="mx-auto max-w-7xl px-4 pb-4">
-          <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-2">
+          <div className="rounded-2xl border border-white/10 bg-black/5 backdrop-blur-md p-2">
             {links.map((label) => (
               <button
                 key={label}
-                className="w-full text-left px-3 py-3 rounded-xl text-sm uppercase tracking-wide text-[#163968] hover:text-white hover:bg-white/10 transition"
+                className="w-full text-left px-3 py-3 rounded-xl text-sm font-semibold uppercase tracking-wide text-[#163968] hover:text-red-500 hover:bg-white/10 transition"
               >
                 {label}
               </button>
             ))}
             <div className="pt-2">
-              <button className="w-full px-4 py-3 rounded-xl text-sm uppercase tracking-wide border border-white/20 bg-white/5 hover:bg-white/10 text-white transition">
-                Login
-              </button>
+              <a
+                href="mailto:keith@baseballalliance.co"
+                className="block w-full px-4 py-3 rounded-xl text-sm uppercase tracking-wide border border-white/20 bg-white/5 hover:bg-white/10 text-[#163968] font-semibold transition text-center"
+              >
+                Contact Us
+              </a>
             </div>
           </div>
         </div>

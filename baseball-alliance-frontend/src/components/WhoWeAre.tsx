@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import BA1 from "../assets/ba1.png";
 import BA2 from "../assets/ba2.png";
 import BA3 from "../assets/ba3.png";
+import CardCarousel from "./ui/carousel";
 
 type ImageCardProps = {
   title: string;
@@ -54,65 +55,50 @@ const ImageCard: React.FC<ImageCardProps> = ({ title, imageUrl }) => {
   );
 };
 
-const WhoWeAre: React.FC = () => (
-  <section className="mx-auto max-w-7xl px-4 lg:px-0 mt-16">
-    <div className="grid items-start gap-8 md:grid-cols-[380px,1fr]">
-      {/* Text column */}
-      <div className="pr-2">
-        <h2 className="text-2xl text-[#163968] font-bold uppercase tracking-wide mb-4">
-          Who We Are
-        </h2>
-        <p className="text-[#1E1E1E] leading-7">
-          Baseball Alliance exists to unite the best youth baseball teams,
-          providing member organizations with the tools, exposure, and support
-          to take their athletes to the next level – college or professional.
-        </p>
-      </div>
-
-      {/* Cards column */}
-      <div>
-        {/* Desktop 3-up */}
-        <div className="hidden sm:grid grid-cols-3 gap-6">
-          <ImageCard
-            title="Invite-Only Alliance Top Select Teams"
-            imageUrl={BA1}
-          />
-          <ImageCard
-            title="Elite Tournaments, Live Streams & Stats"
-            imageUrl={BA2}
-          />
-          <ImageCard
-            title="Athlete Education Workshops & Guides"
-            imageUrl={BA3}
-          />
+const WhoWeAre: React.FC = () => {
+  const items = [
+    { id: 1, title: "Invite-Only Alliance Top Select Teams", image: BA1 },
+    { id: 2, title: "Elite Tournaments & Development", image: BA2 },
+    { id: 3, title: "Athlete Education Workshops & Guides", image: BA3 },
+  ];
+  return (
+    <section className="mx-auto max-w-7xl px-4 lg:px-0 mt-16">
+      <div className="grid items-start gap-8 md:grid-cols-[380px,1fr]">
+        {/* Text column */}
+        <div className="pr-2">
+          <h2 className="text-2xl text-[#163968] font-bold uppercase tracking-wide mb-4">
+            Who We Are
+          </h2>
+          <p className="text-[#1E1E1E] leading-7">
+            Baseball Alliance exists to unite the best youth baseball teams,
+            providing member organizations with the tools, exposure, and support
+            to take their athletes to the next level – college or professional.
+          </p>
         </div>
 
-        {/* Mobile horizontal scroll */}
-        <div className="sm:hidden -mx-4 px-4 overflow-x-auto snap-x snap-mandatory no-scrollbar">
-          <div className="flex gap-4">
-            <div className="min-w-[78%] snap-start">
-              <ImageCard
-                title="Invite-Only Alliance Top Select Teams"
-                imageUrl={BA1}
-              />
-            </div>
-            <div className="min-w-[78%] snap-start">
-              <ImageCard
-                title="Elite Tournaments, Live Streams & Stats"
-                imageUrl={BA2}
-              />
-            </div>
-            <div className="min-w-[78%] snap-start">
-              <ImageCard
-                title="Athlete Education Workshops & Guides"
-                imageUrl={BA3}
-              />
-            </div>
+        {/* Cards column */}
+        <div>
+          {/* Desktop 3-up */}
+          <div className="hidden sm:grid grid-cols-3 gap-6">
+            <ImageCard
+              title="Invite-Only Alliance Top Select Teams"
+              imageUrl={BA1}
+            />
+            <ImageCard title="Elite Tournaments & Development" imageUrl={BA2} />
+            <ImageCard
+              title="Athlete Education Workshops & Guides"
+              imageUrl={BA3}
+            />
+          </div>
+
+          {/* Mobile horizontal scroll */}
+          <div className="sm:hidden -mx-4 px-4 overflow-x-auto snap-x snap-mandatory no-scrollbar">
+            <CardCarousel items={items} />
           </div>
         </div>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 export default WhoWeAre;

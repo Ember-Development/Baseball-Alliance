@@ -17,7 +17,7 @@ const Hero: React.FC = () => (
     />
 
     {/* Tint overlay */}
-    <div className="absolute inset-0 z-30 bg-black/40 pointer-events-none" />
+    <div className="absolute inset-0 z-30 bg-black/20 pointer-events-none" />
 
     {/* Content */}
     {/* <div className="relative z-20 flex flex-col items-center justify-center h-full px-4 text-center text-white">

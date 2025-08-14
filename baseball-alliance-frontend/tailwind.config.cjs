@@ -1,20 +1,17 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}"
-  ],
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
+      backgroundImage: {
+        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
+        "gradient-conic":
+          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+      },
       fontFamily: {
-        sans: [
-          'Oswald',
-          'ui-sans-serif',
-          'system-ui',
-          // …you can leave the rest of the default stack here
-        ],
+        sans: ["Oswald"],
       },
     },
   },
   plugins: [],
-}
+};

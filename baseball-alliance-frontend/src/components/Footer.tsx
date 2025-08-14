@@ -1,44 +1,56 @@
 import React from "react";
-import logo from "../assets/baseballalliance.png"; // swap to your BA logo
+import logo from "../assets/baseballalliance.png";
+import { FaInstagram, FaYoutube, FaTiktok } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
+import { Link } from "react-router-dom";
 
 const Footer: React.FC = () => {
   return (
-    <footer className="mt-16 border-t border-black/10 bg-[#ECEDE5]">
-      <div className="mx-auto max-w-7xl px-4 lg:px-0 py-10">
+    <footer className="mt-16 border-t border-black/10">
+      <div className="mx-auto max-w-7xl px-4 lg:px-0 py-10 space-y-6">
+        {/* Top: logo, links, socials */}
         <div className="grid grid-cols-1 sm:grid-cols-3 items-center gap-8">
           {/* Left: logo */}
           <div className="flex sm:justify-start justify-center">
-            <a href="/" className="inline-flex items-center gap-3">
+            <Link to="/" className="inline-flex items-center gap-3">
               <img
                 src={logo}
                 alt="Baseball Alliance"
                 className="h-12 w-auto object-contain"
               />
               <span className="sr-only">Baseball Alliance</span>
-            </a>
+            </Link>
           </div>
 
           {/* Center: links */}
           <ul className="flex items-center justify-center gap-10 text-sm text-black/80">
             <li>
-              <a
-                href="/privacy"
+              <Link
+                to="/waiver"
                 className="hover:text-black transition-colors underline-offset-4 hover:underline"
               >
-                Privacy
-              </a>
+                Waiver
+              </Link>
             </li>
             <li>
-              <a
-                href="/terms"
+              <Link
+                to="/privacy"
+                className="hover:text-black transition-colors underline-offset-4 hover:underline"
+              >
+                Privacy Policy
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/terms"
                 className="hover:text-black transition-colors underline-offset-4 hover:underline"
               >
                 Terms
-              </a>
+              </Link>
             </li>
             <li>
               <a
-                href="/support"
+                href="mailto:keith@baseballalliance.co"
                 className="hover:text-black transition-colors underline-offset-4 hover:underline"
               >
                 Support
@@ -48,62 +60,55 @@ const Footer: React.FC = () => {
 
           {/* Right: socials */}
           <div className="flex sm:justify-end justify-center gap-3">
-            {/* Instagram */}
             <a
               href="https://instagram.com"
               aria-label="Instagram"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-black/15 bg-white hover:bg-black hover:text-white transition"
+              className="inline-flex h-10 w-10 items-center justify-center text-white rounded-md border border-black/15 bg-[#163968] hover:bg-black hover:text-white transition"
               target="_blank"
               rel="noreferrer"
               title="Instagram"
             >
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
-                <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm5 3.5a5.5 5.5 0 1 1 0 11 5.5 5.5 0 0 1 0-11Zm0 2a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm5.75-.75a1.25 1.25 0 1 1-2.5 0 1.25 1.25 0 0 1 2.5 0Z" />
-              </svg>
+              <FaInstagram size={20} />
             </a>
-
-            {/* X / Twitter */}
             <a
               href="https://twitter.com"
-              aria-label="X"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-black/15 bg-white hover:bg-black hover:text-white transition"
+              aria-label="Twitter"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-md border text-white border-black/15 bg-[#163968] hover:bg-black hover:text-white transition"
               target="_blank"
               rel="noreferrer"
-              title="X"
+              title="Twitter"
             >
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
-                <path d="M3 3h3.6l5.1 6.9L16.6 3H21l-7 9.3L21 21h-3.6l-5.4-7.3L7.4 21H3l7-9.3L3 3Z" />
-              </svg>
+              <FaXTwitter size={20} />
             </a>
-
-            {/* YouTube */}
             <a
               href="https://youtube.com"
               aria-label="YouTube"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-black/15 bg-white hover:bg-black hover:text-white transition"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-md border text-white border-black/15 bg-[#163968] hover:bg-black hover:text-white transition"
               target="_blank"
               rel="noreferrer"
               title="YouTube"
             >
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
-                <path d="M23 7.5v9a3.5 3.5 0 0 1-3.5 3.5h-15A3.5 3.5 0 0 1 1 16.5v-9A3.5 3.5 0 0 1 4.5 4h15A3.5 3.5 0 0 1 23 7.5Zm-7.8 4.5-6-3.5v7l6-3.5Z" />
-              </svg>
+              <FaYoutube size={20} />
             </a>
-
-            {/* TikTok */}
             <a
               href="https://tiktok.com"
               aria-label="TikTok"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-black/15 bg-white hover:bg-black hover:text-white transition"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-md border text-white border-black/15 bg-[#163968] hover:bg-black hover:text-white transition"
               target="_blank"
               rel="noreferrer"
               title="TikTok"
             >
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
-                <path d="M14.5 3c1.1 1.8 2.7 2.9 4.8 3v3.2c-1.8 0-3.3-.5-4.8-1.6v6.6a6.1 6.1 0 1 1-2.4-4.9v3a3.1 3.1 0 1 0 1.5 2.7V3Z" />
-              </svg>
+              <FaTiktok size={20} />
             </a>
           </div>
+        </div>
+
+        {/* Bottom: contact info */}
+        <div className="text-center text-sm text-black/70 space-y-1">
+          <p>Baseball Alliance LLC</p>
+          <p>2100 Downing Lane, Ste A, Leander, TX 78641</p>
+          <p>Phone: (817) 320-4911</p>
+          <p>Customer Service: keith@baseballalliance.co</p>
         </div>
       </div>
     </footer>
