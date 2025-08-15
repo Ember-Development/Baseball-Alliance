@@ -16,11 +16,13 @@ const ContactCTA: React.FC = () => {
 
         {/* content */}
         <div className="relative z-10 flex flex-col items-center justify-center text-center px-6 py-16 sm:py-20">
-          <h2 className="text-white font-extrabold tracking-wide leading-tight text-3xl sm:text-4xl md:text-5xl drop-shadow-[0_4px_12px_rgba(0,0,0,0.6)]">
-            Be a part of the Elite.
-            <br className="hidden sm:block" />
-            Join the Alliance.
-          </h2>
+          <h3 className="text-white font-extrabold tracking-wide leading-tight text-2xl sm:text-4xl md:text-5xl drop-shadow-[0_4px_12px_rgba(0,0,0,0.6)]">
+            A better future.
+            <br />
+            Baseball Alliance.
+            <br />
+            Elevate your game.
+          </h3>
 
           <a
             href="/contact"

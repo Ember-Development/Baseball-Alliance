@@ -71,7 +71,7 @@ const NavBar: React.FC = () => {
             href="mailto:keith@baseballalliance.co"
             className="hidden lg:inline-flex px-5 py-2 rounded-full text-sm font-bold uppercase tracking-wide border border-[#163968] bg-white/5 hover:bg-white/10 text-[#163968] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] transition"
           >
-            Login
+            Contact Us
           </a>
 
           {/* Mobile menu button */}

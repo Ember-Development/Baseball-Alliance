@@ -58,7 +58,7 @@ const ImageCard: React.FC<ImageCardProps> = ({ title, imageUrl }) => {
 const WhoWeAre: React.FC = () => {
   const items = [
     { id: 1, title: "Invite-Only Alliance Top Select Teams", image: BA1 },
-    { id: 2, title: "Elite Tournaments & Development", image: BA2 },
+    { id: 2, title: "Elite Tournaments & Player Development", image: BA2 },
     { id: 3, title: "Athlete Education Workshops & Guides", image: BA3 },
   ];
   return (
@@ -71,7 +71,7 @@ const WhoWeAre: React.FC = () => {
           </h2>
           <p className="text-[#1E1E1E] leading-7">
             Baseball Alliance exists to unite the best youth baseball teams,
-            providing member organizations with the tools, exposure, and support
+            providing member organizations with the tools, exposure and support
             to take their athletes to the next level – college or professional.
           </p>
         </div>
@@ -93,7 +93,7 @@ const WhoWeAre: React.FC = () => {
 
           {/* Mobile horizontal scroll */}
           <div className="sm:hidden -mx-4 px-4 overflow-x-auto snap-x snap-mandatory no-scrollbar">
-            <CardCarousel items={items} />
+            <CardCarousel items={items} cardPercent={82} />
           </div>
         </div>
       </div>
