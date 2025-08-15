@@ -163,9 +163,10 @@ export default function Privacy() {
               9. Contact Us
             </h2>
             <address className="mt-3 not-italic rounded-lg text-[#1E1E1E] bg-white/5 ring-1 ring-white/10 p-4 leading-relaxed">
-              <div>Baseball Alliance</div>
-              <div>Email: [Insert Email]</div>
-              <div>Phone: [Insert Phone Number]</div>
+              <p>Baseball Alliance LLC</p>
+              <p>2100 Downing Lane, Ste A, Leander, TX 78641</p>
+              <p>Phone: (817) 320-4911</p>
+              <p>Customer Service: keith@baseballalliance.co</p>
             </address>
           </section>
         </div>

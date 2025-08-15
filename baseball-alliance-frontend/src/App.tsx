@@ -8,6 +8,7 @@ import Footer from "./components/Footer";
 import TermsAndConditions from "./components/Terms";
 import Waiver from "./components/Waiver";
 import Privacy from "./components/Privacy";
+import ScrollToTop from "./components/ui/ScrollToTop";
 
 function Home() {
   return (
@@ -31,6 +32,7 @@ export default function App() {
 
       <div className="relative z-10">
         <NavBar />
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/terms" element={<TermsAndConditions />} />
