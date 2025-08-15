@@ -1,0 +1,610 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/* ───────────────── Enums ───────────────── */
+enum RoleName {
+  PARENT
+  PLAYER
+  COACH
+  SCOUT
+  ADMIN
+  FAN
+}
+
+enum EventType {
+  TOURNAMENT
+  COMBINE
+  SHOWCASE
+}
+
+enum RegistrationStatus {
+  PENDING
+  PAID
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  REQUIRES_ACTION
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+enum AgeDivision {
+  U8
+  U9
+  U10
+  U11
+  U12
+  U13
+  U14
+  U15
+  U16
+  U17
+  U18
+  JUCO
+}
+
+enum MediaType {
+  VIDEO
+  HIGHLIGHT
+  PODCAST
+}
+
+enum Visibility {
+  PUBLIC
+  UNLISTED
+  PRIVATE
+}
+
+/* ─────────────── Users & Roles ─────────────── */
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  phone     String?
+  dob       DateTime?
+  fullName  String
+  passwordHash String?
+
+  roles     UserRole[]
+
+  // Optional 1–1 profile tables
+  player    PlayerProfile?
+  parent    ParentProfile?
+  coach     CoachProfile?
+  admin     AdminProfile?
+  fan       FanProfile?
+
+  // Individual registrations
+  combineRegistrations   CombineRegistration[]
+  showcaseRegistrations  ShowcaseRegistration[]
+
+  // As tournament submitter (team-level)
+  tournamentRegistrations TournamentRegistration[] @relation("TournamentSubmittedBy")
+
+  // Media authored by this user (optional)
+  mediaCreated  Media[] @relation("MediaCreatedBy")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserRole {
+  userId String
+  role   RoleName
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, role])
+}
+
+/* ─────────────── Profile Tables ─────────────── */
+model PlayerProfile {
+  userId            String @id
+  user              User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  primaryPosition   String
+  secondaryPosition String?
+  bats              String
+  throws            String
+  height            String
+  weight            String
+
+  gradYear          String
+  schoolGrade       String
+  schoolName        String?
+  schoolLocation    String?
+  clubTeam          String?
+  coachName         String?
+  coachContact      String?
+
+  shirtSize         String
+
+  teamPlayers       TeamPlayer[]
+  mediaTags         MediaPlayer[]
+
+  parents      ParentChild[] 
+}
+
+model ParentProfile {
+  userId String @id
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  children ParentChild[]
+}
+
+model CoachProfile {
+  userId String @id
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // single team link for now
+  teamId String?
+  team   Team?  @relation(fields: [teamId], references: [id])
+}
+
+model AdminProfile {
+  userId  String @id
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio     String?
+  funFact String?
+  socials Json?
+  orgRole String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FanProfile {
+  userId String @id
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+/* ─────────── Parent ↔ Player (M:N) ─────────── */
+model ParentChild {
+  parentUserId String
+  playerUserId String
+
+  parent ParentProfile  @relation(fields: [parentUserId], references: [userId], onDelete: Cascade)
+  player PlayerProfile  @relation(fields: [playerUserId], references: [userId], onDelete: Cascade)
+
+  relationType String?
+
+  @@id([parentUserId, playerUserId])
+}
+
+/* ─────────────── Teams ─────────────── */
+model Team {
+  id          String       @id @default(cuid())
+  name        String
+  city        String
+  state       String
+  ageDivision AgeDivision
+
+  players     TeamPlayer[]
+  coaches     CoachProfile[]
+
+  mediaTags   MediaTeam[]
+
+  tournamentRegistrations TournamentRegistration[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([state, city])
+  @@unique([name, city, state, ageDivision])
+}
+
+model TeamPlayer {
+  teamId       String
+  playerUserId String
+
+  team   Team          @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  player PlayerProfile @relation(fields: [playerUserId], references: [userId], onDelete: Cascade)
+
+  joinedAt DateTime @default(now())
+  leftAt   DateTime?
+
+  @@id([teamId, playerUserId])
+}
+
+/* ─────────────── Events ─────────────── */
+model Event {
+  id          String    @id @default(cuid())
+  title       String
+  type        EventType
+  startDate   DateTime
+  endDate     DateTime
+  city        String
+  state       String
+  venue       String?
+  isPublished Boolean   @default(false)
+
+  // For COMBINEs; validate at app-level when type === COMBINE
+  startTime   String?
+
+  // Registrations per type
+  combineRegistrations     CombineRegistration[]
+  showcaseRegistrations    ShowcaseRegistration[]
+  tournamentRegistrations  TournamentRegistration[]
+
+  mediaTags   MediaEvent[]
+
+  featuredInConfigs        SiteConfig[] @relation("FeaturedEvent")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([type, startDate])
+}
+
+/* ───────────── Registrations (by type) ───────────── */
+
+/// Individual registration for COMBINE
+model CombineRegistration {
+  id          String              @id @default(cuid())
+  eventId     String
+  userId      String
+  status      RegistrationStatus  @default(PENDING)
+
+  event       Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user        User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  payments    CombinePayment[]
+
+  // Snapshot from RegistrationModal (full details)
+  playerFullName       String
+  dob                  DateTime
+  city                 String
+  state                String
+  zip                  String
+  playerPhone          String
+  playerEmail          String?
+
+  parentFullName       String?
+  parentPhone          String?
+  parentEmail          String?
+  parentConsentUnder13 Boolean   @default(false)
+
+  emergencyName        String
+  emergencyPhone       String
+
+  primaryPosition      String
+  secondaryPosition    String?
+  bats                 String
+  throws               String
+  height               String
+  weight               String
+
+  gradYear             String
+  schoolGrade          String
+  schoolName           String?
+  schoolLocation       String?
+  clubTeam             String?
+  coachName            String?
+  coachContact         String?
+
+  shirtSize            String
+  agreeToWaiver        Boolean
+  privacyAck           Boolean
+
+  createdAt DateTime @default(now())
+
+  @@index([eventId, userId])
+  @@unique([eventId, userId]) // one combine reg per user per event
+}
+
+/// Individual registration for SHOWCASE
+model ShowcaseRegistration {
+  id          String              @id @default(cuid())
+  eventId     String
+  userId      String
+  status      RegistrationStatus  @default(PENDING)
+
+  event       Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user        User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  payments    ShowcasePayment[]
+
+  // Start with same snapshot as Combine for maximum reuse; trim later if desired
+  playerFullName       String
+  dob                  DateTime
+  city                 String
+  state                String
+  zip                  String
+  playerPhone          String
+  playerEmail          String?
+
+  parentFullName       String?
+  parentPhone          String?
+  parentEmail          String?
+  parentConsentUnder13 Boolean   @default(false)
+
+  emergencyName        String
+  emergencyPhone       String
+
+  primaryPosition      String
+  secondaryPosition    String?
+  bats                 String
+  throws               String
+  height               String
+  weight               String
+
+  gradYear             String
+  schoolGrade          String
+  schoolName           String?
+  schoolLocation       String?
+  clubTeam             String?
+  coachName            String?
+  coachContact         String?
+
+  shirtSize            String
+  agreeToWaiver        Boolean
+  privacyAck           Boolean
+
+  createdAt DateTime @default(now())
+
+  @@index([eventId, userId])
+  @@unique([eventId, userId]) // one showcase reg per user per event
+}
+
+/// Team registration for TOURNAMENT
+model TournamentRegistration {
+  id          String              @id @default(cuid())
+  eventId     String
+  // Who submitted (coach/admin/manager user)
+  submittedByUserId String?
+
+  // Optional link to an existing Team in your DB
+  teamId      String?
+
+  status      RegistrationStatus  @default(PENDING)
+
+  event       Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  submittedBy User? @relation("TournamentSubmittedBy", fields: [submittedByUserId], references: [id])
+  team        Team?  @relation(fields: [teamId], references: [id])
+
+  payments    TournamentPayment[]
+
+  // Team snapshot (stored even if teamId is null, for audit)
+  teamName     String
+  orgName      String?
+  ageDivision  AgeDivision
+  teamCity     String
+  teamState    String
+
+  // Staff / contacts
+  managerName   String
+  managerEmail  String
+  managerPhone  String
+
+  coachName     String?
+  coachEmail    String?
+  coachPhone    String?
+
+  // Roster info as freeform (you can later normalize to players if needed)
+  rosterJson    Json?
+  notes         String?
+
+  createdAt DateTime @default(now())
+
+  @@index([eventId, teamId])
+}
+
+/* ─────────────── Payments per type ─────────────── */
+model CombinePayment {
+  id                    String    @id @default(cuid())
+  combineRegistrationId String
+  registration          CombineRegistration @relation(fields: [combineRegistrationId], references: [id], onDelete: Cascade)
+
+  provider     String
+  providerRef  String
+  amountCents  Int
+  currency     String @default("USD")
+  status       PaymentStatus @default(REQUIRES_ACTION)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([provider, providerRef])
+}
+
+model ShowcasePayment {
+  id                    String    @id @default(cuid())
+  showcaseRegistrationId String
+  registration          ShowcaseRegistration @relation(fields: [showcaseRegistrationId], references: [id], onDelete: Cascade)
+
+  provider     String
+  providerRef  String
+  amountCents  Int
+  currency     String @default("USD")
+  status       PaymentStatus @default(REQUIRES_ACTION)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([provider, providerRef])
+}
+
+model TournamentPayment {
+  id                      String    @id @default(cuid())
+  tournamentRegistrationId String
+  registration            TournamentRegistration @relation(fields: [tournamentRegistrationId], references: [id], onDelete: Cascade)
+
+  provider     String
+  providerRef  String
+  amountCents  Int
+  currency     String @default("USD")
+  status       PaymentStatus @default(REQUIRES_ACTION)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([provider, providerRef])
+}
+
+/* ─────────────── Media & Tags ─────────────── */
+model Media {
+  id            String      @id @default(cuid())
+  type          MediaType
+  title         String
+  url           String
+  thumbnailUrl  String?
+  description   String?
+  publishedAt   DateTime?
+  visibility    Visibility   @default(PUBLIC)
+
+  createdByUserId String?
+  createdBy       User?      @relation("MediaCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  playerTags    MediaPlayer[]
+  teamTags      MediaTeam[]
+  eventTags     MediaEvent[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([type, publishedAt])
+}
+
+model MediaPlayer {
+  mediaId       String
+  playerUserId  String
+
+  media   Media          @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  player  PlayerProfile  @relation(fields: [playerUserId], references: [userId], onDelete: Cascade)
+
+  @@id([mediaId, playerUserId])
+}
+
+model MediaTeam {
+  mediaId String
+  teamId  String
+
+  media   Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  team    Team  @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@id([mediaId, teamId])
+}
+
+model MediaEvent {
+  mediaId String
+  eventId String
+
+  media   Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  event   Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@id([mediaId, eventId])
+}
+
+/* ─────────────── CMS / Website ─────────────── */
+model SiteConfig {
+  id              String   @id @default(cuid())
+  whoWeAre        String
+  featuredEventId String?
+  featuredEvent   Event?   @relation("FeaturedEvent", fields: [featuredEventId], references: [id])
+
+  solutions       SolutionCategory[]
+  whoWeAreImages  SiteImage[]
+  ctas            CallToAction[]
+  structure       OrgStructureItem[]
+  memberships     MembershipTier[]
+  headers         PageHeader[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SolutionCategory {
+  id           String     @id @default(cuid())
+  siteConfigId String
+  siteConfig   SiteConfig @relation(fields: [siteConfigId], references: [id], onDelete: Cascade)
+
+  name         String
+  order        Int        @default(0)
+
+  items        SolutionItem[]
+}
+
+model SolutionItem {
+  id         String     @id @default(cuid())
+  categoryId String
+  category   SolutionCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  title      String
+  body       String
+  icon       String?
+  order      Int        @default(0)
+}
+
+model SiteImage {
+  id           String     @id @default(cuid())
+  siteConfigId String
+  siteConfig   SiteConfig @relation(fields: [siteConfigId], references: [id], onDelete: Cascade)
+
+  url          String
+  alt          String?
+  order        Int        @default(0)
+}
+
+model CallToAction {
+  id           String     @id @default(cuid())
+  siteConfigId String
+  siteConfig   SiteConfig @relation(fields: [siteConfigId], references: [id], onDelete: Cascade)
+
+  label        String
+  href         String
+  style        String?
+  order        Int        @default(0)
+}
+
+model OrgStructureItem {
+  id           String     @id @default(cuid())
+  siteConfigId String
+  siteConfig   SiteConfig @relation(fields: [siteConfigId], references: [id], onDelete: Cascade)
+
+  title        String
+  body         String
+  order        Int        @default(0)
+}
+
+model MembershipTier {
+  id           String     @id @default(cuid())
+  siteConfigId String
+  siteConfig   SiteConfig @relation(fields: [siteConfigId], references: [id], onDelete: Cascade)
+
+  name         String
+  blurb        String?
+  perks        Json?
+  priceCents   Int?
+  order        Int        @default(0)
+}
+
+model PageHeader {
+  id           String     @id @default(cuid())
+  siteConfigId String
+  siteConfig   SiteConfig @relation(fields: [siteConfigId], references: [id], onDelete: Cascade)
+
+  pageKey      String     @unique
+  title        String
+  subtitle     String?
+  imageUrl     String?
+}
+
+/* ─────────────── Standalone Scout ─────────────── */
+model Scout {
+  id        String   @id @default(cuid())
+  fullName  String
+  org       String?
+  email     String?
+  phone     String?
+  notes     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

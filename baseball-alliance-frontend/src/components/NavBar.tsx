@@ -67,12 +67,12 @@ const NavBar: React.FC = () => {
 
         {/* Actions */}
         <div className="flex items-center gap-3">
-          <a
-            href="mailto:keith@baseballalliance.co"
+          <Link
+            to="/login"
             className="hidden lg:inline-flex px-5 py-2 rounded-full text-sm font-bold uppercase tracking-wide border border-[#163968] bg-white/5 hover:bg-white/10 text-[#163968] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] transition"
           >
-            Contact Us
-          </a>
+            Login
+          </Link>
 
           {/* Mobile menu button */}
           <button
@@ -126,12 +126,12 @@ const NavBar: React.FC = () => {
               </button>
             ))}
             <div className="pt-2">
-              <a
-                href="mailto:keith@baseballalliance.co"
+              <Link
+                to="/login"
                 className="block w-full px-4 py-3 rounded-xl text-sm uppercase tracking-wide border border-white/20 bg-white/5 hover:bg-white/10 text-[#163968] font-semibold transition text-center"
               >
-                Contact Us
-              </a>
+                Login
+              </Link>
             </div>
           </div>
         </div>
