@@ -45,7 +45,7 @@ const Footer: React.FC = () => {
                 to="/terms"
                 className="hover:text-black transition-colors underline-offset-4 hover:underline"
               >
-                Terms
+                Terms & Conditions
               </Link>
             </li>
             <li>

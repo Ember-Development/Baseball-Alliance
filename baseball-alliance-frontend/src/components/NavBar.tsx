@@ -15,11 +15,11 @@ const NavBar: React.FC = () => {
 
   const links = [
     "Home",
-    "Members",
+    // "Members",
     "Events",
-    "Resources",
-    "Alumni",
-    "About Us",
+    // "Resources",
+    // "Alumni",
+    // "About Us",
   ];
 
   return (

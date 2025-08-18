@@ -58,7 +58,7 @@ const ImageCard: React.FC<ImageCardProps> = ({ title, imageUrl }) => {
 const WhoWeAre: React.FC = () => {
   const items = [
     { id: 1, title: "Invite-Only Alliance Top Select Teams", image: BA1 },
-    { id: 2, title: "Elite Tournaments & Player Development", image: BA2 },
+    { id: 2, title: "Elite Tournaments & Individual Showcases", image: BA2 },
     { id: 3, title: "Athlete Education Workshops & Guides", image: BA3 },
   ];
   return (
@@ -84,7 +84,10 @@ const WhoWeAre: React.FC = () => {
               title="Invite-Only Alliance Top Select Teams"
               imageUrl={BA1}
             />
-            <ImageCard title="Elite Tournaments & Development" imageUrl={BA2} />
+            <ImageCard
+              title="Elite Tournaments & Individual Showcases"
+              imageUrl={BA2}
+            />
             <ImageCard
               title="Athlete Education Workshops & Guides"
               imageUrl={BA3}

@@ -17,7 +17,6 @@ const EventSection: React.FC = () => {
           Upcoming Event
         </h2>
 
-        {/* Compact, centered on mobile */}
         <div className="text-center sm:text-right">
           <div className="text-red-500 font-bold tabular-nums text-base sm:text-xl tracking-widest">
             {String(days).padStart(2, "0")} : {String(hours).padStart(2, "0")} :{" "}
@@ -33,7 +32,7 @@ const EventSection: React.FC = () => {
       {/* Ticket */}
       <div className="mt-5">
         <div
-          className="relative mx-auto max-w-5xl md:min-h-[170px] mt-6 rounded-2xl border border-black/15 bg-white/8 shadow-[0_8px_24px_rgba(0,0,0,.20)] overflow-hidden"
+          className="relative mx-auto max-w-6xl md:min-h-[210px] lg:min-h-[230px] mt-6 rounded-2xl border border-black/15 bg-white/8 shadow-[0_8px_24px_rgba(0,0,0,.20)] overflow-hidden"
           style={{
             backgroundImage: `url(${ticketBg})`,
             backgroundSize: "cover",
@@ -44,11 +43,10 @@ const EventSection: React.FC = () => {
           {/* soft inner highlight */}
           <div className="pointer-events-none absolute inset-0 rounded-2xl shadow-[inset_0_1px_0_rgba(255,255,255,.15)]" />
 
-          {/* Layout: mobile stacks, desktop 3 columns */}
-          <div className="relative grid grid-cols-1 md:grid-cols-[1fr_auto_220px]">
-            {/* LEFT: content */}
+          {/* Long, horizontal rail with a narrow stub on the right */}
+          <div className="relative grid grid-cols-1 md:grid-cols-[1.15fr_auto_260px]">
+            {/* LEFT: content + (desktop) register link */}
             <div className="relative p-4 sm:p-6">
-              {/* faint baseball watermark (softer on mobile) */}
               <img
                 src={ballWatermark}
                 alt=""
@@ -69,7 +67,6 @@ const EventSection: React.FC = () => {
                   shared to help athletes earn opportunities at the next level.
                 </p>
 
-                {/* Details: left-aligned on mobile, right-aligned on md+ */}
                 <div className="mt-1 sm:mt-2 flex flex-col sm:items-end gap-1 text-sm sm:text-[20px]">
                   <p className="flex items-baseline gap-2 leading-tight">
                     <span className="text-red-600 font-semibold">When</span>
@@ -84,45 +81,52 @@ const EventSection: React.FC = () => {
                     </span>
                   </p>
                 </div>
+
+                {/* Desktop-only register button on the LEFT */}
+                <div className="hidden md:block mt-3">
+                  <a
+                    href="/register"
+                    className="inline-flex items-center justify-center rounded-lg bg-[#163968] text-white font-semibold py-2 px-4 shadow hover:brightness-110 active:brightness-95 transition"
+                  >
+                    Register Now
+                  </a>
+                </div>
               </div>
             </div>
 
-            {/* MIDDLE: perforation (desktop only) */}
-            <div className="hidden md:flex items-stretch justify-center">
+            {/* MIDDLE: perforation with ticket "notches" */}
+            <div className="hidden md:flex relative items-stretch justify-center">
+              {/* dashed line */}
               <div className="relative w-[1px] bg-transparent mx-2">
                 <div className="absolute inset-y-3 left-0 border-l-2 border-dashed border-black/40" />
               </div>
+              {/* top/bottom notches (cutout illusion) */}
+              <div className="pointer-events-none z-20 absolute -top-3 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-black/30 backdrop-blur-sm border border-white/20 shadow-inner" />
+              <div className="pointer-events-none absolute -bottom-3 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-black/30 backdrop-blur-sm border border-white/20 shadow-inner" />
             </div>
 
-            {/* RIGHT: register + barcode (becomes bottom row on mobile) */}
-            <div className="relative flex flex-col md:flex-row items-center md:items-center justify-center gap-3 px-4 sm:px-6 py-4">
-              {/* Mobile: full-width CTA button; Desktop: subtle link */}
+            {/* RIGHT STUB: tall rotated barcode, centered */}
+            <div className="relative flex flex-col items-center justify-center px-4 sm:px-6 py-4">
+              {/* Mobile register CTA (kept) */}
               <a
                 href="/register"
-                className="md:hidden w-full inline-flex items-center justify-center rounded-lg bg-[#163968] text-white font-semibold py-2.5 px-4 shadow hover:brightness-110 active:brightness-95 transition"
+                className="md:hidden w-full inline-flex items-center justify-center rounded-lg bg-[#163968] text-white font-semibold py-2.5 px-4 shadow hover:brightness-110 active:brightness-95 transition mb-3"
               >
                 Register Now
               </a>
 
-              <a
-                href="/register"
-                className="hidden md:inline-block text-[#163968] items-center justify-center text-center ml-[2rem] text-lg font-bold leading-tight tracking-wide hover:text-white transition"
-              >
-                Register
-                <br />
-                Here
-              </a>
+              {/* Centered, rotated barcode sized to the stub height */}
+              <div className="w-full flex items-center justify-center">
+                <img
+                  src={barcodeImg}
+                  alt="Event Ticket Barcode"
+                  className="object-contain w-44 h-16 sm:w-56 sm:h-20 md:w-auto md:h-[180px] lg:h-[200px] md:rotate-90"
+                  loading="lazy"
+                />
+              </div>
 
-              {/* Barcode: readable on mobile (no rotation), rotated on desktop */}
-              <img
-                src={barcodeImg}
-                alt=" Event Ticket Barcode"
-                className="hidden md:flex w-40 h-16 sm:w-56 sm:h-20 md:w-80 md:h-32 object-contain md:rotate-90"
-                loading="lazy"
-              />
-
-              {/* stub edge highlight */}
-              <div className="pointer-events-none absolute inset-y-0 right-0 w-px bg-white/30" />
+              {/* subtle stub edge highlight */}
+              <div className="pointer-events-none absolute z-10 inset-y-0 right-0 w-px bg-black/40" />
             </div>
           </div>
         </div>
