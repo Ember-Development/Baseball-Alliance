@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { api, setToken } from "../../lib/api";
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 
 export default function Login() {
   const [email, setEmail] = useState("admin@example.com");
   const [password, setPassword] = useState("Password123!");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -14,9 +16,7 @@ export default function Login() {
     try {
       const { token, user } = await api.login(email, password);
       setToken(token);
-      // optionally stash user too:
       localStorage.setItem("user", JSON.stringify(user));
-      // navigate to dashboard:
       window.location.href = "/";
     } catch (err: any) {
       setError(err.message ?? "Login failed");
@@ -53,14 +53,28 @@ export default function Login() {
 
         <label className="block text-sm font-semibold text-[#163968]">
           Password
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-black/15 px-3 py-2 outline-none focus:ring-2 focus:ring-[#163968]"
-            placeholder="••••••••"
-            required
-          />
+          <div className="relative mt-1">
+            <input
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full rounded-lg border border-black/15 px-3 py-2 pr-10 outline-none focus:ring-2 focus:ring-[#163968]"
+              placeholder="••••••••"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute inset-y-0 right-0 flex items-center pr-3 text-black/50 hover:text-black"
+              tabIndex={-1}
+            >
+              {showPassword ? (
+                <AiOutlineEyeInvisible className="h-5 w-5" />
+              ) : (
+                <AiOutlineEye className="h-5 w-5" />
+              )}
+            </button>
+          </div>
         </label>
 
         <button
