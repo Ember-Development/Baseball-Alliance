@@ -23,7 +23,7 @@ const Footer: React.FC = () => {
           </div>
 
           {/* Center: links */}
-          <ul className="flex items-center justify-center gap-10 text-sm text-black/80">
+          <ul className="flex items-center justify-center gap-10 text-xs text-black/80">
             <li>
               <Link
                 to="/waiver"

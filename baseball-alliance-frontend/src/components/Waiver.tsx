@@ -1,329 +1,231 @@
-import { useState } from "react";
-
 export default function Waiver() {
-  const [showFull, setShowFull] = useState(false);
-
   return (
     <main className="min-h-screen bg-gradient-to-tr from-white/40 via-transparent to-white/30 text-slate-100">
       <section className="mx-auto w-full max-w-3xl px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
         <header className="mb-8 sm:mb-10 mt-[3rem]">
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#163968]">
-            {showFull
-              ? "Baseball Alliance LLC – Formal Waiver"
-              : "Baseball Alliance LLC – Quick Summary Waiver"}
+            Baseball Alliance LLC – Assumption of Risk, Release &
+            Indemnification
           </h1>
-          {!showFull && (
-            <p className="mt-2 text-sm text-slate-400">
-              (This is a plain‑language summary. The full legal waiver which you
-              will sign shall apply.)
-            </p>
-          )}
         </header>
 
         {/* Card */}
         <div className="rounded-2xl bg-white/15 backdrop-blur-sm ring-1 ring-black/30 p-5 sm:p-8 space-y-8">
-          {showFull ? (
-            <>
-              {/* Intro */}
-              <section>
-                <p className="leading-relaxed text-[#1E1E1E] font-semibold">
-                  Event Release, Waiver of Liability &amp; Indemnity Agreement
-                </p>
-                <p className="mt-2 leading-relaxed text-[#1E1E1E]">
-                  <span className="font-semibold">Media Consent Agreement</span>{" "}
-                  — Please read carefully.
-                </p>
-                <p className="mt-2 leading-relaxed text-[#1E1E1E]">
-                  In consideration for, and as a condition of, my participation
-                  in all tournaments, games, showcases, practices, and related
-                  activities (“Events”) organized by Baseball Alliance LLC
-                  (“BA”), I knowingly and voluntarily agree to the following:
-                </p>
-              </section>
-
-              {/* 1. Release & Indemnification */}
-              <section>
-                <h2 className="text-xl sm:text-2xl font-semibold text-[#163968]">
-                  1. Release &amp; Indemnification
-                </h2>
-                <p className="mt-2 leading-relaxed text-[#1E1E1E]">
-                  I release and agree to indemnify BA, along with its owners,
-                  employees, volunteers, sponsors, advertisers, parent
-                  companies, subsidiaries, affiliates, DBAs, agents, insurers,
-                  facility owners, promoters, vendors, service providers, and
-                  independent contractors (“Releasees”) from all responsibility
-                  or liability for anything that occurs during the Event(s).
-                </p>
-                <p className="mt-2 leading-relaxed text-[#1E1E1E]">
-                  This release covers my participation in the Event(s), my use
-                  of any related facilities and services, including pre‑event
-                  practices and warm‑ups, and post‑event activities.
-                </p>
-                <p className="mt-2 leading-relaxed text-[#1E1E1E]">
-                  By signing, I acknowledge that I am assuming risk, agreeing
-                  not to sue, and foregoing legal rights. This agreement applies
-                  to all games, showcases, practices, and related activities,
-                  whether specifically listed.
-                </p>
-              </section>
-
-              {/* 2. Assumption of Risk */}
-              <section>
-                <h2 className="text-xl sm:text-2xl font-semibold text-[#163968]">
-                  2. Assumption of Risk
-                </h2>
-                <p className="mt-2 leading-relaxed text-[#1E1E1E]">
-                  I understand that baseball and any related Event(s) involve(s)
-                  inherent risks and dangers, including serious injury or death
-                  and damage to property. These risks may result from my own
-                  actions, the actions of others, the rules of play, or
-                  facility/equipment conditions and may also include
-                  unforeseeable risks. I knowingly and voluntarily accept all
-                  such risks.
-                </p>
-              </section>
-
-              {/* 3. Medical Consent */}
-              <section>
-                <h2 className="text-xl sm:text-2xl font-semibold text-[#163968]">
-                  3. Medical Consent
-                </h2>
-                <p className="mt-2 leading-relaxed text-[#1E1E1E]">
-                  If I require medical care during the Event(s), I consent to
-                  treatment deemed reasonably necessary by on‑site personnel.
-                </p>
-              </section>
-
-              {/* 4. Waiver of Claims */}
-              <section>
-                <h2 className="text-xl sm:text-2xl font-semibold text-[#163968]">
-                  4. Waiver of Claims
-                </h2>
-                <p className="mt-2 leading-relaxed text-[#1E1E1E]">
-                  I waive, release, discharge, hold harmless, and promise not to
-                  sue the Releasees for any claim arising from my participation,
-                  including claims based on the Releasees’ own negligence. I
-                  also agree to indemnify and reimburse the Releasees for any
-                  related costs, including attorney fees.
-                </p>
-                <p className="mt-2 leading-relaxed text-[#1E1E1E]">
-                  This waiver covers any claim for injury, death, property
-                  damage, reputational harm, or business loss, whether caused by
-                  negligence or otherwise, except for intentional acts
-                  specifically directed to harm me or my property.
-                </p>
-              </section>
-
-              {/* 5. Representations */}
-              <section>
-                <h2 className="text-xl sm:text-2xl font-semibold text-[#163968]">
-                  5. Representations
-                </h2>
-                <ul className="mt-2 space-y-2 list-disc list-inside text-[#1E1E1E]">
-                  <li>
-                    I am physically fit and competent to participate in the
-                    Event(s).
-                  </li>
-                  <li>My equipment is safe and suitable.</li>
-                  <li>I will follow all BA rules.</li>
-                  <li>
-                    I accept that BA’s interpretations of rules, penalties,
-                    event timing, winners, and rankings are final and cannot be
-                    challenged through litigation.
-                  </li>
-                  <li>
-                    I will comply with any supplemental or amended rules posted
-                    in Event(s) bulletins or on the BA website.
-                  </li>
-                </ul>
-                <p className="mt-2 leading-relaxed text-[#1E1E1E]">
-                  I understand that questioning the integrity of BA’s game,
-                  showcase, or player metrics results can cause irreparable harm
-                  to its reputation and may subject me to legal damages.
-                </p>
-              </section>
-
-              {/* 6. Event Changes */}
-              <section>
-                <h2 className="text-xl sm:text-2xl font-semibold text-[#163968]">
-                  6. Event Changes
-                </h2>
-                <p className="mt-2 leading-relaxed text-[#1E1E1E]">
-                  I understand that weather or other events outside of BA’s
-                  control may cause delays, postponements, or cancellations. BA
-                  may cancel or reschedule at its sole discretion.
-                </p>
-              </section>
-
-              {/* 7. Media Release */}
-              <section>
-                <h2 className="text-xl sm:text-2xl font-semibold text-[#163968]">
-                  7. Media Release
-                </h2>
-                <p className="mt-2 leading-relaxed text-[#1E1E1E]">
-                  I understand that the Event(s) may be photographed,
-                  videotaped, or otherwise recorded. I grant BA full rights to
-                  use my name, likeness, voice, and/or image in any form,
-                  without further payment to me, for lawful purposes limited to
-                  BA‑specific advertising and promotion. Beyond this limited use
-                  by BA, I retain ownership of my name, likeness, voice, image
-                  in any form and data captured by BA at Event(s) with respect
-                  to any use beyond the limited advertising and promotion of BA
-                  Event(s).
-                </p>
-                <p className="mt-2 leading-relaxed text-[#1E1E1E]">
-                  I waive all claims for invasion of privacy, right of
-                  publicity, or defamation related to such use.
-                </p>
-              </section>
-
-              {/* 8. Governing Law */}
-              <section>
-                <h2 className="text-xl sm:text-2xl font-semibold text-[#163968]">
-                  8. Governing Law
-                </h2>
-                <p className="mt-2 leading-relaxed text-[#1E1E1E]">
-                  This agreement is governed by the laws of the State of Texas.
-                  It is the complete and final agreement between me and BA and
-                  may be modified only in writing signed by all parties.
-                </p>
-              </section>
-            </>
-          ) : (
-            <>
-              {/* Summary */}
-              <section>
-                <p className="leading-relaxed text-[#1E1E1E]">
-                  By signing up for any Baseball Alliance LLC (“BA”) tournament,
-                  game, showcase, practice, or related activity (“Event(s)”),
-                  you are agreeing to:
-                </p>
-              </section>
-
-              {/* 1. Accept the Risks */}
-              <section>
-                <h2 className="text-xl sm:text-2xl font-semibold text-[#163968]">
-                  1. You Accept the Risks
-                </h2>
-                <ul className="mt-2 space-y-2 list-disc list-inside text-[#1E1E1E]">
-                  <li>
-                    Baseball has real risks — including injury, property damage,
-                    or even death.
-                  </li>
-                  <li>
-                    Risks can come from you, other players, the field, the
-                    equipment, or unexpected situations.
-                  </li>
-                  <li>
-                    You understand and accept all these risks before
-                    participating.
-                  </li>
-                </ul>
-              </section>
-
-              {/* 2. Release BA */}
-              <section>
-                <h2 className="text-xl sm:text-2xl font-semibold text-[#163968]">
-                  2. You Release BA from Responsibility
-                </h2>
-                <ul className="mt-2 space-y-2 list-disc list-inside text-[#1E1E1E]">
-                  <li>
-                    You agree not to sue BA (or its staff, volunteers, sponsors,
-                    facility owners, etc.) for injuries, damages, or losses
-                    related to the Event.
-                  </li>
-                  <li>
-                    This includes injuries or damages caused by accidents or
-                    negligence.
-                  </li>
-                </ul>
-              </section>
-
-              {/* 3. Follow the Rules */}
-              <section>
-                <h2 className="text-xl sm:text-2xl font-semibold text-[#163968]">
-                  3. You Promise to Follow the Rules
-                </h2>
-                <ul className="mt-2 space-y-2 list-disc list-inside text-[#1E1E1E]">
-                  <li>You will follow all BA rules and event guidelines.</li>
-                  <li>
-                    BA’s decisions on rules, scoring, and results are final.
-                  </li>
-                  <li>
-                    Questioning BA’s integrity about scores or player stats can
-                    harm BA’s reputation and may result in legal consequences.
-                  </li>
-                </ul>
-              </section>
-
-              {/* 4. Medical Care */}
-              <section>
-                <h2 className="text-xl sm:text-2xl font-semibold text-[#163968]">
-                  4. Medical Care
-                </h2>
-                <p className="mt-2 leading-relaxed text-[#1E1E1E]">
-                  If you’re hurt or need medical help during the Event, BA can
-                  arrange emergency treatment.
-                </p>
-              </section>
-
-              {/* 5. Event Changes */}
-              <section>
-                <h2 className="text-xl sm:text-2xl font-semibold text-[#163968]">
-                  5. Event Changes
-                </h2>
-                <p className="mt-2 leading-relaxed text-[#1E1E1E]">
-                  BA can delay, reschedule, or cancel Events at its discretion
-                  due to weather or other causes.
-                </p>
-              </section>
-
-              {/* 6. Photos & Videos */}
-              <section>
-                <h2 className="text-xl sm:text-2xl font-semibold text-[#163968]">
-                  6. Photos &amp; Videos
-                </h2>
-                <p className="mt-2 leading-relaxed text-[#1E1E1E]">
-                  BA can use photos, videos, or recordings of you for BA
-                  promotional use only without paying you. Beyond this, you will
-                  retain ownership of all your Event(s) images and data.
-                </p>
-              </section>
-
-              {/* 7. Texas Law */}
-              <section>
-                <h2 className="text-xl sm:text-2xl font-semibold text-[#163968]">
-                  7. Texas Law
-                </h2>
-                <p className="mt-2 leading-relaxed text-[#1E1E1E]">
-                  This agreement is governed by the laws of the State of Texas.
-                </p>
-              </section>
-            </>
-          )}
-        </div>
-
-        {/* Summary footnote + Toggle Button */}
-        {!showFull && (
-          <div className="mt-8 rounded-xl bg-white/5 ring-1 ring-black/30 p-4 sm:p-5">
-            <p className="text-sm text-[#1E1E1E]">
-              This is a summary only. The full legal waiver will be provided for
-              signature during registration.
+          {/* Title / Preamble */}
+          <section className="space-y-3">
+            <p className="leading-relaxed text-[#1E1E1E] font-semibold">
+              ASSUMPTION OF RISK, RELEASE OF LIABILITY, AND INDEMNIFICATION
+              AGREEMENT
             </p>
-          </div>
-        )}
+            <p className="leading-relaxed text-[#1E1E1E]">
+              In consideration of being permitted to enter the premises
+              (“Premises”) occupied by Baseball Alliance, LLC (“Promoter”) for
+              any purpose, including without limitation any business or
+              recreational purpose (collectively, “Activities”), I, for and on
+              behalf of myself, any minor(s) with me, and my spouse or partner,
+              heirs, assigns, personal representatives, next of kin, and any
+              other person or entity having any right or interest relating
+              hereto at law or equity or by operation of any statute, rule, or
+              regulation (collectively, “Releasors”), hereby make the following
+              contractual representations pursuant to this Assumption of Risk,
+              Release of Liability, and Indemnification Agreement (“Agreement”):
+            </p>
+          </section>
 
-        <div className="mt-8 text-center">
-          <button
-            onClick={() => setShowFull((prev) => !prev)}
-            className="inline-flex items-center justify-center rounded-lg bg-[#163968] text-white font-semibold py-2.5 px-4 shadow hover:brightness-110 active:brightness-95 transition"
-          >
-            {showFull ? "Back to summary" : "Click here for full waiver"}
-          </button>
+          {/* 1 */}
+          <section>
+            <h2 className="text-xl sm:text-2xl font-semibold text-[#163968]">
+              1. Acknowledgement of Hazardous Activities.
+            </h2>
+            <p className="mt-2 leading-relaxed text-[#1E1E1E]">
+              ENTRY ONTO THE PREMISES AND ANY AND ALL ACTIVITIES FOR WHICH THIS
+              AGREEMENT HAS BEEN PRESENTED TO ME (collectively, “Activities”)
+              ARE POTENTIALLY HAZARDOUS and involve certain risks, including
+              serious bodily injury, illness, infection, death, emotional
+              distress, property damage, and other personal or property injury,
+              harm, or damage.
+            </p>
+          </section>
+
+          {/* 2 */}
+          <section>
+            <h2 className="text-xl sm:text-2xl font-semibold text-[#163968]">
+              2. Assumption of Risk.
+            </h2>
+            <p className="mt-2 leading-relaxed text-[#1E1E1E]">
+              I KNOWINGLY AND FREELY ASSUME FULL RESPONSIBILITY FOR ALL RISKS
+              AND LIABILITIES, KNOWN OR UNKNOWN, EVEN IF ARISING FROM OR
+              OTHERWISE RELATING IN ANY WAY TO ANY ALLEGED NEGLIGENCE,
+              RECKLESSNESS, OR OTHER CONDUCT OF RELEASEES (AS DEFINED BELOW) OR
+              OTHERS, ARISING FROM OR OTHERWISE RELATING IN ANY WAY TO: (i)
+              ENTRY ONTO THE PREMISES; AND (ii) ANY AND ALL ACTIVITIES.
+            </p>
+          </section>
+
+          {/* 3 */}
+          <section>
+            <h2 className="text-xl sm:text-2xl font-semibold text-[#163968]">
+              3. Release from Liability; Covenant Not to Sue; Indemnity.
+            </h2>
+            <p className="mt-2 leading-relaxed text-[#1E1E1E]">
+              I hereby release, waive, relinquish, discharge, and covenant not
+              to sue and further agree to indemnify, defend, and hold harmless
+              Promoter and its members, managers, owners, officers, officials,
+              employees, agents, representatives, guests, licensees, invitees,
+              contractors, exhibitors, patrons, vendors, sponsoring agencies,
+              sponsors, advertisers, volunteers, attendees, the owners and/or
+              lessors of the Premises, and any other person or entity on the
+              Premises or otherwise associated in any way with any of the
+              foregoing (collectively, “Releasees”) from any liability, claims,
+              demands, actions, causes of action, loss, cost, or expense
+              (including without limitation attorneys’ fees and other costs)
+              relating in any way to any and all disability, illness, infection,
+              death, or other loss, injury, harm, or damage to any person or
+              property arising from or otherwise relating in any way to entry
+              onto the Premises and/or to the Activities, whether arising or
+              resulting from or otherwise relating in any way to any alleged
+              negligence, recklessness, or other conduct of Releasees or others
+              (collectively, “Claims”), to the fullest extent permitted by law.
+            </p>
+            <p className="mt-2 leading-relaxed text-[#1E1E1E]">
+              I also waive any and all rights under California Civil Code
+              Section 1542 which provides: “A general release does not extend to
+              claims which the creditor does not know or suspect to exist in his
+              favor at the time of executing the release, which if known by him
+              must have materially affected his settlement with the debtor.”
+            </p>
+          </section>
+
+          {/* 4 */}
+          <section>
+            <h2 className="text-xl sm:text-2xl font-semibold text-[#163968]">
+              4. Materials and Likeness.
+            </h2>
+            <p className="mt-2 leading-relaxed text-[#1E1E1E]">
+              I understand, consent, and agree that: (i) Promoter may record
+              (audio and/or visual) and photograph me and any performance(s) by
+              me (collectively, “Materials”); (ii) Materials may include my
+              name, image, voice, biographical information, and other aspects of
+              my likeness and rights of publicity; (iii) Promoter, its
+              affiliates, assignees, licensees, and designees (collectively,
+              “Promoter Parties”) have and shall retain in perpetuity throughout
+              the universe the exclusive right to edit, alter, copyright, and
+              otherwise use and exploit in any way at Promoter Parties’ sole
+              discretion (including without limitation by licensing or otherwise
+              authorizing others to do any or all of the foregoing) any, all, or
+              no portion(s) of the Materials (including without limitation any
+              reproduction(s) thereof) in any manner, medium, and form of
+              distribution or transmission (e.g., radio, television, film,
+              internet, etc.), whether now known or hereafter devised, for any
+              purpose (including without limitation advertising and/or promotion
+              for Activities and/or Promoter Parties) without any further
+              consideration.
+            </p>
+          </section>
+
+          {/* 5 */}
+          <section>
+            <h2 className="text-xl sm:text-2xl font-semibold text-[#163968]">
+              5. Promoter License.
+            </h2>
+            <p className="mt-2 leading-relaxed text-[#1E1E1E]">
+              I hereby grant a fully-paid, non-exclusive, royalty-free,
+              irrevocable license to Promoter and Promoter Parties to reproduce,
+              distribute, display, publish, perform, and otherwise exhibit any
+              and all photographs, recordings (audio and/or visual), social
+              media posts (including without limitation posts on TikTok,
+              Instagram, Facebook, and other social media platforms) and all
+              other materials (collectively “Participant Materials”) taken on,
+              posted of and/or about, and/or otherwise exhibiting Promoter,
+              Promoter Parties, the Premises, and/or the Activities for purposes
+              of Promoter Parties’ marketing, advertising, and other promotion
+              (e.g., website, social media, demo reels, pitch decks, etc.),
+              which shall hereby include my irrevocable consent and grant to
+              Promoter Parties of the right to use any name(s), appearance(s),
+              image(s), voice(s), likeness(es), logo(s), trademark(s) and
+              service mark(s), and any other identifying information relating to
+              me and/or any of my affiliates (including without limitation
+              friends and family members) that appear in the Participant
+              Materials. I shall retain all other right(s), title(s) and
+              interest(s) in the Participant Materials.
+            </p>
+          </section>
+
+          {/* 6 */}
+          <section>
+            <h2 className="text-xl sm:text-2xl font-semibold text-[#163968]">
+              6. Remedies and Limitations.
+            </h2>
+            <p className="mt-2 leading-relaxed text-[#1E1E1E]">
+              I acknowledge and agree that Promoter may be incurring substantial
+              sums in reliance on this Agreement and that I shall not at any
+              time for any reason seek or be entitled to: (i) rescind or
+              terminate this Agreement or any of the rights, terms, or
+              conditions hereunder; (ii) interfere with, restrain, or otherwise
+              impair the Activities, Materials, and/or Promoter; or (iii) obtain
+              equitable relief in any way regarding the Activities, Materials,
+              or Promoter, including without limitation injunctive relief. My
+              sole remedy for any and all claims related to Section 4 of this
+              Agreement shall be an action at law for actual money damages, if
+              any, but Promoter shall not be liable for any special,
+              consequential, incidental, indirect, punitive, or exemplary
+              damages of any kind or any other damages (compensatory or
+              otherwise) beyond the amount, if any, I have actually paid to
+              Promoter for my participation in the Activities. For any violation
+              of Sections 5 or 6 of this Agreement, the non-violating party
+              shall be entitled to: (i) anti-suit injunctive relief in the state
+              and federal courts in Travis County, Texas, enjoining the improper
+              proceeding; (ii) dismissal in the improper proceeding; and (iii)
+              an award of all costs and expenses (including attorneys’ fees)
+              associated in any way with the violation.
+            </p>
+          </section>
+
+          {/* 7 */}
+          <section>
+            <h2 className="text-xl sm:text-2xl font-semibold text-[#163968]">
+              7. Severability; Governing Law; Venue.
+            </h2>
+            <p className="mt-2 leading-relaxed text-[#1E1E1E]">
+              I agree that this Agreement is intended to be as broad and
+              inclusive as is permitted by the law of the State of Texas and
+              that, if any portion hereof is held invalid, the balance shall,
+              notwithstanding, continue in full legal force and effect. All
+              claims or disputes arising hereunder or otherwise between any
+              parties hereto shall first be addressed through confidential
+              mediation with a mediator jointly selected by the parties in
+              dispute and then, if such claim or dispute has not been resolved
+              after a good-faith attempt at mediation, shall be subject to the
+              mandatory and exclusive jurisdiction and venue of the state or
+              federal courts in Travis County, Texas, and each party hereto
+              irrevocably consents to the personal jurisdiction and mandatory
+              venue of such courts.
+            </p>
+          </section>
+
+          {/* Final Representation / Acknowledgement */}
+          <section className="space-y-3">
+            <p className="leading-relaxed text-[#1E1E1E]">
+              I HEREBY REPRESENT AND WARRANT THAT I HAVE READ THIS AGREEMENT AND
+              (i) FULLY UNDERSTAND ITS TERMS, (ii) UNDERSTAND BY SIGNING I GIVE
+              UP SUBSTANTIAL RIGHTS, INCLUDING THE RIGHT TO SUE, (iii) SIGN
+              FREELY AND VOLUNTARILY, (iv) HAVE FULL LEGAL AUTHORITY TO ENTER
+              INTO THIS AGREEMENT, AND (v) INTEND TO COMPLETELY AND
+              UNCONDITIONALLY RELEASE PROMOTER AND RELEASEES FROM ANY AND ALL
+              LIABILITY ASSOCIATED IN ANY WAY WITH MY ENTRY ONTO THE PREMISES
+              AND ANY AND ALL ACTIVITIES.
+            </p>
+            <p className="leading-relaxed text-[#1E1E1E]">
+              I FURTHER REPRESENT THAT I HAVE READ, UNDERSTAND, AND AGREE TO THE
+              POLICIES FOUND AT BASEBALLALLIANCE.CO. I UNDERSTAND AND AGREE
+              THAT, IN PROMOTER’S SOLE DISCRETION, PROMOTER MAY REMOVE ME FROM
+              THE PREMISES FOR ANY OR NO REASON.
+            </p>
+          </section>
         </div>
 
-        {/* Footer helper */}
+        {/* Footer */}
         <div className="mt-8 text-center">
           <p className="text-xs text-slate-500">
             © {new Date().getFullYear()} Baseball Alliance LLC. All rights

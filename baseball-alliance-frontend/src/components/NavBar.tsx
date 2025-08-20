@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import BA from "../assets/baseballalliancelogo.png";
+import BA from "../assets/ba-long-removebg-preview.png";
 import { Link } from "react-router-dom";
 
 const NavBar: React.FC = () => {
@@ -13,14 +13,7 @@ const NavBar: React.FC = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const links = [
-    "Home",
-    // "Members",
-    "Events",
-    // "Resources",
-    // "Alumni",
-    // "About Us",
-  ];
+  const links = ["Home", "Events"];
 
   return (
     <nav
@@ -37,20 +30,20 @@ const NavBar: React.FC = () => {
       {/* gradient hairline accent */}
       <div className="absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-transparent via-red-400/70 to-transparent pointer-events-none" />
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-        {/* Brand */}
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+        {/* Left: Brand */}
         <div className="flex items-center gap-3">
           <Link to="/" aria-label="Go to Home">
             <img
               src={BA}
               alt="Baseball Alliance"
-              className="h-20 w-auto object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.4)] cursor-pointer"
+              className="h-40 w-auto object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.4)] cursor-pointer"
             />
           </Link>
         </div>
 
-        {/* Desktop nav */}
-        <ul className="hidden lg:flex items-center gap-6">
+        {/* Center: Desktop nav (absolute center) */}
+        <ul className="hidden lg:flex items-center gap-6 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
           {links.map((label) => (
             <li key={label}>
               <button
@@ -65,7 +58,7 @@ const NavBar: React.FC = () => {
           ))}
         </ul>
 
-        {/* Actions */}
+        {/* Right: Actions */}
         <div className="flex items-center gap-3">
           <a
             href="mailto:keith@baseballalliance.co"
@@ -80,7 +73,6 @@ const NavBar: React.FC = () => {
             onClick={() => setOpen((v) => !v)}
             aria-label="Toggle menu"
           >
-            {/* hamburger / close */}
             <svg
               className={`h-5 w-5 text-[#163968] transition-transform ${
                 open ? "rotate-90" : ""
