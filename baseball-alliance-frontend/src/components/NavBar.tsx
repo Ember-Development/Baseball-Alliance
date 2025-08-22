@@ -14,11 +14,25 @@ const NavBar: React.FC = () => {
   }, []);
 
   const links = ["Home", "Events"];
+  const NAV_HEIGHT = 80;
+
+  const handleScroll = (id: string) => {
+    if (id === "home") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    const y = el.getBoundingClientRect().top + window.scrollY - NAV_HEIGHT;
+    window.scrollTo({ top: y, behavior: "smooth" });
+  };
 
   return (
     <nav
       className={[
-        "fixed inset-x-0 top-0 z-50",
+        "fixed inset-x-0 top-0 z-90",
         "backdrop-blur-md backdrop-saturate-150",
         "transition-all duration-300",
         scrolled
@@ -47,6 +61,7 @@ const NavBar: React.FC = () => {
           {links.map((label) => (
             <li key={label}>
               <button
+                onClick={() => handleScroll(label.toLowerCase())}
                 className="group relative px-3 py-2 text-base font-semibold uppercase tracking-wide text-[#163968] hover:text-red-500 transition"
                 aria-label={label}
               >
@@ -61,7 +76,7 @@ const NavBar: React.FC = () => {
         {/* Right: Actions */}
         <div className="flex items-center gap-3">
           <a
-            href="mailto:keith@baseballalliance.co"
+            href="mailto:jon@baseballalliance.co"
             className="hidden lg:inline-flex px-5 py-2 rounded-full text-sm font-bold uppercase tracking-wide border border-[#163968] bg-white/5 hover:bg-white/10 text-[#163968] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] transition"
           >
             Contact Us
@@ -111,6 +126,7 @@ const NavBar: React.FC = () => {
           <div className="rounded-2xl border border-white/10 bg-black/5 backdrop-blur-md p-2">
             {links.map((label) => (
               <button
+                onClick={() => handleScroll(label.toLowerCase())}
                 key={label}
                 className="w-full text-left px-3 py-3 rounded-xl text-sm font-semibold uppercase tracking-wide text-[#163968] hover:text-red-500 hover:bg-white/10 transition"
               >
@@ -119,7 +135,7 @@ const NavBar: React.FC = () => {
             ))}
             <div className="pt-2">
               <a
-                href="mailto:keith@baseballalliance.co"
+                href="mailto:jon@baseballalliance.co"
                 className="block w-full px-4 py-3 rounded-xl text-sm uppercase tracking-wide border border-white/20 bg-white/5 hover:bg-white/10 text-[#163968] font-semibold transition text-center"
               >
                 Contact Us
