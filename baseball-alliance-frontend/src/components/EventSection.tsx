@@ -10,7 +10,7 @@ const EventSection: React.FC = () => {
   );
 
   return (
-    <div className="mt-16 mx-auto max-w-7xl">
+    <div id="events" className="mt-16 mx-auto max-w-7xl scroll-mt-24">
       {/* Header + countdown */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <h2 className="text-xl sm:text-2xl font-bold uppercase tracking-widest text-[#163968]">

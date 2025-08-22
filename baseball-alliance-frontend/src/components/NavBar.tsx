@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 const NavBar: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -14,6 +15,22 @@ const NavBar: React.FC = () => {
   }, []);
 
   const links = ["Home", "Events"];
+  const NAV_HEIGHT = 80; 
+
+
+  const handleScroll = (id: string) => {
+  if (id === "home") {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    return;
+  }
+
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  const y = el.getBoundingClientRect().top + window.scrollY - NAV_HEIGHT;
+  window.scrollTo({ top: y, behavior: "smooth" });
+};
+
 
   return (
     <nav
@@ -47,6 +64,7 @@ const NavBar: React.FC = () => {
           {links.map((label) => (
             <li key={label}>
               <button
+                onClick={() => handleScroll(label.toLowerCase())}
                 className="group relative px-3 py-2 text-base font-semibold uppercase tracking-wide text-[#163968] hover:text-red-500 transition"
                 aria-label={label}
               >
@@ -111,6 +129,7 @@ const NavBar: React.FC = () => {
           <div className="rounded-2xl border border-white/10 bg-black/5 backdrop-blur-md p-2">
             {links.map((label) => (
               <button
+                onClick={() => handleScroll(label.toLowerCase())}
                 key={label}
                 className="w-full text-left px-3 py-3 rounded-xl text-sm font-semibold uppercase tracking-wide text-[#163968] hover:text-red-500 hover:bg-white/10 transition"
               >
