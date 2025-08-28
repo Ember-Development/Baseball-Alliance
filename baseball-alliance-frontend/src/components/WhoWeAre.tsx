@@ -144,9 +144,10 @@ const WhoWeAre: React.FC = () => {
       <div className="md:pr-6 md:max-w-6xl">
         <p className="text-[#1E1E1E] text-2xl leading-7 mb-4">
           <strong>
-            Baseball Alliance exists to unite exemplary youth baseball teams,
-            providing member organizations with the tools, exposure and support
-            to take their athletes to the next level – college or professional.
+            Baseball Alliance exists to unite exemplary high school and youth
+            baseball teams, providing member organizations with the tools,
+            exposure and support to take their athletes to the next level –
+            college or professional.
           </strong>
         </p>
         <p className="text-[#1E1E1E]/90 leading-7">
