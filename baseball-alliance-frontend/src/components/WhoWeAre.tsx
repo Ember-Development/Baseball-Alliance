@@ -98,21 +98,21 @@ const WhoWeAre: React.FC = () => {
       id: 1,
       title: "Invite-Only Alliance Top Select Teams",
       description:
-        "Continuously improving the landscape of clinics, tournaments and showcases is essential to our effectiveness, and we will always hold ourselves to the highest level of accountability.",
+        "We facilitate a beneficial, thoughtful and candid understanding of the best information — and present solutions in that context for our members and supporters.",
       image: BA1,
     },
     {
       id: 2,
       title: "Elite Tournaments & Individual Showcases",
       description:
-        "Who provides instruction, what values guide decisions, when to practice, play and learn, where to compete and get seen, and how to navigate development, metrics, recruiting, pro avenues, transfer portal, NIL, media and representation — all matter.",
+        "Continuously improving the landscape of clinics, tournaments and showcases is essential to our effectiveness, and we will always hold ourselves to the highest level of accountability.",
       image: BA2,
     },
     {
       id: 3,
       title: "Athlete Education Workshops & Guides",
       description:
-        "We facilitate a beneficial, thoughtful and candid understanding of the best information — and present solutions in that context for our members and supporters.",
+        "Who provides instruction, what values guide decisions, when to practice, play and learn, where to compete and get seen, and how to navigate development, metrics, recruiting, pro avenues, transfer portal, NIL, media and representation — all matter.",
       image: BA3,
     },
   ];

@@ -9,13 +9,62 @@ const EventSection: React.FC = () => {
     new Date("2025-09-21T10:00:00")
   );
 
+  const SEE_ALL_EVENTS_URL = "https://events.baseballalliance.co/";
+  const REGISTER_URL =
+    "https://events.baseballalliance.co/events/baseball-alliance-showcase-waco-tx-09-21-2025";
+
+  const stubEvents = [
+    {
+      title: "Doubleheader Games",
+      date: "Sept 14, 2025",
+      time: "10:00 AM – 5:00 PM",
+      venue: "Waco, TX · McLennan CC & Waco Midway HS",
+      serial: "DBH-0914-25-001",
+      href: "https://events.baseballalliance.co/events/doubleheader-games-waco-tx-09-14-2025",
+    },
+    {
+      title: "Doubleheader Games",
+      date: "Oct 19, 2025",
+      time: "10:00 AM – 5:00 PM",
+      venue: "Waco, TX · McLennan CC & Waco Midway HS",
+      serial: "DBH-1019-25-002",
+      href: "https://events.baseballalliance.co/events/doubleheader-games-waco-tx-10-19-2025",
+    },
+    {
+      title: "Doubleheader Games",
+      date: "Oct 26, 2025",
+      time: "10:00 AM – 5:00 PM",
+      venue: "Waco, TX · McLennan CC & Waco Midway HS",
+      serial: "DBH-1019-25-003",
+      href: "https://events.baseballalliance.co/events/doubleheader-games-waco-tx-10-26-2025",
+    },
+  ];
+
   return (
     <div id="events" className="mt-16 mx-auto max-w-7xl scroll-mt-24">
       {/* Header + countdown */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-        <h2 className="text-xl sm:text-2xl font-bold uppercase tracking-widest text-[#163968]">
-          Upcoming Event
-        </h2>
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="text-xl sm:text-2xl font-bold uppercase tracking-widest text-[#163968]">
+            Upcoming Event
+          </h2>
+
+          <a
+            href={SEE_ALL_EVENTS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-[13px] sm:text-sm font-semibold text-[#163968] hover:underline"
+            aria-label="See all events (opens in a new tab)"
+          >
+            See all events
+            <svg width="14" height="14" viewBox="0 0 24 24" className="-mr-0.5">
+              <path
+                fill="currentColor"
+                d="M14 3h7v7h-2V6.41l-9.3 9.3-1.4-1.42 9.29-9.29H14V3zM5 5h6v2H7v10h10v-4h2v6H5V5z"
+              />
+            </svg>
+          </a>
+        </div>
 
         <div className="text-center sm:text-right">
           <div className="text-red-500 font-bold tabular-nums text-base sm:text-xl tracking-widest">
@@ -31,7 +80,7 @@ const EventSection: React.FC = () => {
 
       {/* Ticket */}
       <div className="mt-5">
-        <RealTicket hologramLogo={ba} />
+        <RealTicket hologramLogo={ba} registerUrl={REGISTER_URL} />
       </div>
 
       {/* baseline divider */}
@@ -39,33 +88,29 @@ const EventSection: React.FC = () => {
 
       {/* Additional Events as stubs */}
       <div className="mt-8 grid gap-6 sm:grid-cols-3">
-        <StubTicket
-          title="Doubleheader Games"
-          date="Sept 14, 2025"
-          time="10:00 AM – 5:00 PM"
-          venue="Waco, TX · McLennan CC & Waco Midway HS"
-          serial="DBH-0914-25-001"
-        />
-        <StubTicket
-          title="Doubleheader Games"
-          date="Oct 19, 2025"
-          time="10:00 AM – 5:00 PM"
-          venue="Waco, TX · McLennan CC & Waco Midway HS"
-          serial="DBH-1019-25-002"
-        />
-        <StubTicket
-          title="Doubleheader Games"
-          date="Oct 26, 2025"
-          time="10:00 AM – 5:00 PM"
-          venue="Waco, TX · McLennan CC & Waco Midway HS"
-          serial="DBH-1019-25-003"
-        />
+        {stubEvents.map((e) => (
+          <StubTicket
+            key={e.serial}
+            title={e.title}
+            date={e.date}
+            time={e.time}
+            venue={e.venue}
+            serial={e.serial}
+            href={e.href}
+          />
+        ))}
       </div>
     </div>
   );
 };
 
-function RealTicket({ hologramLogo }: { hologramLogo?: string }) {
+function RealTicket({
+  hologramLogo,
+  registerUrl,
+}: {
+  hologramLogo?: string;
+  registerUrl: string;
+}) {
   return (
     <div
       className={[
@@ -137,8 +182,11 @@ function RealTicket({ hologramLogo }: { hologramLogo?: string }) {
             {/* Desktop register */}
             <div className="hidden md:flex mt-3">
               <a
-                href="/register"
+                href={registerUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center justify-center rounded-md bg-[#163968] text-white font-semibold py-2 px-4 shadow hover:brightness-110 active:brightness-95 transition"
+                aria-label="Register now (opens in a new tab)"
               >
                 Register Now
               </a>
@@ -170,8 +218,11 @@ function RealTicket({ hologramLogo }: { hologramLogo?: string }) {
         <div className="relative flex flex-col items-center justify-center px-4 sm:px-6 py-4">
           {/* Mobile register */}
           <a
-            href="/register"
+            href={registerUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             className="md:hidden w-full inline-flex items-center justify-center rounded-md bg-[#163968] text-white font-semibold py-2.5 px-4 shadow hover:brightness-110 active:brightness-95 transition mb-3"
+            aria-label="Register now (opens in a new tab)"
           >
             Register Now
           </a>
@@ -264,41 +315,51 @@ function StubTicket({
   time,
   venue,
   serial,
+  href,
 }: {
   title: string;
   date: string;
   time: string;
   venue: string;
   serial: string;
+  href: string;
 }) {
   return (
-    <div
-      className="relative w-full max-w-md rounded-lg shadow-[0_6px_20px_rgba(0,0,0,0.25)] overflow-hidden transform hover:-rotate-1 transition"
-      style={{ background: "#f7f3ea", border: "2px solid #162a4e" }}
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`${title} on ${date} at ${time}. Opens in a new tab.`}
+      className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#163968] rounded-lg"
     >
-      <div className="grid grid-cols-[50px_1fr_auto]">
-        {/* Left admit strip */}
-        <div className="bg-[#162a4e] flex items-center justify-center px-1">
-          <span className="text-white text-[11px] font-bold tracking-[0.25em] [writing-mode:vertical-rl] rotate-180">
-            ADMIT ONE
-          </span>
-        </div>
+      <div
+        className="relative w-full max-w-md rounded-lg shadow-[0_6px_20px_rgba(0,0,0,0.25)] overflow-hidden transform transition group-hover:-rotate-1"
+        style={{ background: "#f7f3ea", border: "2px solid #162a4e" }}
+      >
+        <div className="grid grid-cols-[50px_1fr_auto]">
+          {/* Left admit strip */}
+          <div className="bg-[#162a4e] flex items-center justify-center px-1">
+            <span className="text-white text-[11px] font-bold tracking-[0.25em] [writing-mode:vertical-rl] rotate-180">
+              ADMIT ONE
+            </span>
+          </div>
 
-        {/* Body */}
-        <div className="p-3 flex flex-col justify-between">
-          <h3 className="text-sm font-extrabold text-[#d24e3b] uppercase">
-            {title}
-          </h3>
-          <p className="text-[13px] text-black/80 mt-1">
-            {date} · {time}
-          </p>
-          <p className="text-[12px] text-black/70">{venue}</p>
-          <span className="font-mono text-[10px] text-black/50 mt-2">
-            {serial}
-          </span>
+          {/* Body */}
+          <div className="p-3 flex flex-col justify-between">
+            <h3 className="text-sm font-extrabold text-[#d24e3b] uppercase">
+              {title}
+            </h3>
+            <p className="text-[13px] text-black/80 mt-1">
+              {date} · {time}
+            </p>
+            <p className="text-[12px] text-black/70">{venue}</p>
+            <span className="font-mono text-[10px] text-black/50 mt-2">
+              {serial}
+            </span>
+          </div>
         </div>
       </div>
-    </div>
+    </a>
   );
 }
 
