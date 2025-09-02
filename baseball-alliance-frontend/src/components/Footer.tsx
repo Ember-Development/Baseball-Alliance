@@ -1,6 +1,6 @@
 import React from "react";
 import logo from "../assets/baseballalliance.png";
-import { FaInstagram, FaYoutube, FaTiktok } from "react-icons/fa";
+import { FaInstagram, FaTiktok } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import { Link } from "react-router-dom";
 
