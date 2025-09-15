@@ -6,7 +6,7 @@ import barcodeImg from "../assets/barcode.png";
 
 const EventSection: React.FC = () => {
   const { days, hours, minutes, seconds } = useCountdown(
-    new Date("2025-09-21T10:00:00")
+    new Date("2025-09-21T09:00:00")
   );
 
   const SEE_ALL_EVENTS_URL = "https://events.baseballalliance.co/";
@@ -170,7 +170,7 @@ function RealTicket({
             </p>
 
             <div className="mt-1 sm:mt-2 grid grid-cols-1 sm:grid-cols-2 gap-y-1 gap-x-4 text-[15px]">
-              <Line label="When" value="Sept 21, 2025 · 10:00 AM" />
+              <Line label="When" value="Sept 21, 2025 · 9:00 AM" />
               <Line
                 label="Where"
                 value="McLennan Community College · Waco, TX"
