@@ -25,7 +25,7 @@ const ContactCTA: React.FC = () => {
           </h3>
 
           <a
-            href="mailto:john@baseballalliance.co"
+            href="mailto:keith@baseballalliance.co"
             className="mt-8 inline-flex items-center justify-center rounded-full px-6 py-3 text-white font-semibold shadow-lg transition hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-400 ring-offset-black/0"
             style={{
               background:

@@ -131,7 +131,7 @@ export default function Privacy() {
             </ul>
             <p className="mt-3 leading-relaxed text-[#1E1E1E]">
               To exercise these rights, contact us at:{" "}
-              <span className="font-medium">john@baseballalliance.co</span>.
+              <span className="font-medium">keith@baseballalliance.co</span>.
             </p>
           </section>
 
@@ -166,7 +166,7 @@ export default function Privacy() {
               <p>Baseball Alliance LLC</p>
               <p>2100 Downing Lane, Ste A, Leander, TX 78641</p>
               <p>Phone: (817) 320-4911</p>
-              <p>Customer Service: john@baseballalliance.co</p>
+              <p>Customer Service: keith@baseballalliance.co</p>
             </address>
           </section>
         </div>

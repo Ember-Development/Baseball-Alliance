@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 const NavBar: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -13,7 +14,13 @@ const NavBar: React.FC = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const links = ["Home", "Events", "About Us"];
+  const links = [
+    "Home",
+    "Events",
+    "Player Profiles",
+    "Leaderboard",
+    "About Us",
+  ];
   const NAV_HEIGHT = 80;
 
   const handleScroll = (id: string) => {
@@ -28,6 +35,31 @@ const NavBar: React.FC = () => {
     const y = el.getBoundingClientRect().top + window.scrollY - NAV_HEIGHT;
     window.scrollTo({ top: y, behavior: "smooth" });
   };
+
+  const handleNavClick = (label: string) => {
+    if (label === "Player Profiles") {
+      window.open(
+        "https://events.baseballalliance.co/public/players",
+        "_blank"
+      );
+      return;
+    }
+
+    if (label === "Leaderboard") {
+      setDropdownOpen(!dropdownOpen);
+      return;
+    }
+
+    handleScroll(label.toLowerCase());
+  };
+
+  useEffect(() => {
+    const handleClickOutside = () => setDropdownOpen(false);
+    if (dropdownOpen) {
+      document.addEventListener("click", handleClickOutside);
+      return () => document.removeEventListener("click", handleClickOutside);
+    }
+  }, [dropdownOpen]);
 
   return (
     <nav
@@ -44,7 +76,7 @@ const NavBar: React.FC = () => {
       {/* gradient hairline accent */}
       <div className="absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-transparent via-red-400/70 to-transparent pointer-events-none" />
 
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <div className="relative mx-auto max-w-8xl px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         {/* Left: Brand */}
         <div className="flex items-center gap-3">
           <Link to="/" aria-label="Go to Home">
@@ -59,16 +91,57 @@ const NavBar: React.FC = () => {
         {/* Center: Desktop nav (absolute center) */}
         <ul className="hidden lg:flex items-center gap-6 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
           {links.map((label) => (
-            <li key={label}>
+            <li key={label} className="relative">
               <button
-                onClick={() => handleScroll(label.toLowerCase())}
-                className="group relative px-3 py-2 text-base font-semibold uppercase tracking-wide text-[#163968] hover:text-red-500 transition"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleNavClick(label);
+                }}
+                className={`group relative px-3 py-2 text-base font-semibold uppercase tracking-wide text-[#163968] hover:text-red-500 transition flex items-center gap-1 ${
+                  label === "Leaderboard" && dropdownOpen ? "text-red-500" : ""
+                }`}
                 aria-label={label}
               >
                 {label}
+                {label === "Leaderboard" && (
+                  <svg
+                    className={`h-4 w-4 transition-transform ${
+                      dropdownOpen ? "rotate-180" : ""
+                    }`}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                )}
                 {/* animated underline */}
                 <span className="pointer-events-none absolute left-3 right-3 -bottom-0.5 h-px scale-x-0 origin-left bg-gradient-to-r from-red-400 via-rose-400 to-red-400 transition-transform duration-300 group-hover:scale-x-100" />
               </button>
+
+              {/* Leaderboard Dropdown */}
+              {label === "Leaderboard" && (
+                <div
+                  className={[
+                    "absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48",
+                    "transition-all duration-200 origin-top",
+                    dropdownOpen
+                      ? "opacity-100 scale-100 pointer-events-auto"
+                      : "opacity-0 scale-95 pointer-events-none",
+                  ].join(" ")}
+                >
+                  <div className="rounded-xl border border-white/10 bg-white/95 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.25)] p-2">
+                    <div className="px-3 py-2 text-sm text-gray-500 text-center">
+                      Coming Soon
+                    </div>
+                  </div>
+                </div>
+              )}
             </li>
           ))}
         </ul>
@@ -76,7 +149,7 @@ const NavBar: React.FC = () => {
         {/* Right: Actions */}
         <div className="flex items-center gap-3">
           <a
-            href="mailto:john@baseballalliance.co"
+            href="mailto:keith@baseballalliance.co"
             className="hidden lg:inline-flex px-5 py-2 rounded-full text-sm font-bold uppercase tracking-wide border border-[#163968] bg-white/5 hover:bg-white/10 text-[#163968] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] transition"
           >
             Contact Us
@@ -125,17 +198,21 @@ const NavBar: React.FC = () => {
         <div className="mx-auto max-w-7xl px-4 pb-4">
           <div className="rounded-2xl border border-white/10 bg-black/5 backdrop-blur-md p-2">
             {links.map((label) => (
-              <button
-                onClick={() => handleScroll(label.toLowerCase())}
-                key={label}
-                className="w-full text-left px-3 py-3 rounded-xl text-sm font-semibold uppercase tracking-wide text-[#163968] hover:text-red-500 hover:bg-white/10 transition"
-              >
-                {label}
-              </button>
+              <div key={label}>
+                <button
+                  onClick={() => handleNavClick(label)}
+                  className="w-full text-left px-3 py-3 rounded-xl text-sm font-semibold uppercase tracking-wide text-[#163968] hover:text-red-500 hover:bg-white/10 transition flex items-center justify-between"
+                >
+                  {label}
+                  {label === "Leaderboard" && (
+                    <span className="text-xs text-gray-500">Coming Soon</span>
+                  )}
+                </button>
+              </div>
             ))}
             <div className="pt-2">
               <a
-                href="mailto:john@baseballalliance.co"
+                href="mailto:keith@baseballalliance.co"
                 className="block w-full px-4 py-3 rounded-xl text-sm uppercase tracking-wide border border-white/20 bg-white/5 hover:bg-white/10 text-[#163968] font-semibold transition text-center"
               >
                 Contact Us

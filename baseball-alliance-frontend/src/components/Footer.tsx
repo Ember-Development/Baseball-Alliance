@@ -50,7 +50,7 @@ const Footer: React.FC = () => {
             </li>
             <li>
               <a
-                href="mailto:john@baseballalliance.co"
+                href="mailto:keith@baseballalliance.co"
                 className="hover:text-black transition-colors underline-offset-4 hover:underline"
               >
                 Support
@@ -108,7 +108,7 @@ const Footer: React.FC = () => {
           <p>Baseball Alliance LLC</p>
           <p>2100 Downing Lane, Ste A, Leander, TX 78641</p>
           <p>Phone: (817) 320-4911</p>
-          <p>Customer Service: john@baseballalliance.co</p>
+          <p>Customer Service: keith@baseballalliance.co</p>
         </div>
       </div>
     </footer>
