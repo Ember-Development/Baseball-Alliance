@@ -23,7 +23,7 @@ const NavBar: React.FC = () => {
   ];
   const NAV_HEIGHT = 80;
 
-  const LeaderboardItems = [
+  const leaderboardItems = [
     {
       label: "Baseball Alliance Showcase - Waco",
       href: "https://events.baseballalliance.co/events/baseball-alliance-showcase-waco-tx-09-21-2025/leaderboard",
@@ -35,10 +35,8 @@ const NavBar: React.FC = () => {
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
-
     const el = document.getElementById(id);
     if (!el) return;
-
     const y = el.getBoundingClientRect().top + window.scrollY - NAV_HEIGHT;
     window.scrollTo({ top: y, behavior: "smooth" });
   };
@@ -47,13 +45,14 @@ const NavBar: React.FC = () => {
     if (label === "Player Profiles") {
       window.open(
         "https://events.baseballalliance.co/public/players",
-        "_blank"
+        "_blank",
+        "noopener,noreferrer"
       );
       return;
     }
 
     if (label === "Leaderboard") {
-      setDropdownOpen(!dropdownOpen);
+      setDropdownOpen((v) => !v);
       return;
     }
 
@@ -108,6 +107,10 @@ const NavBar: React.FC = () => {
                   label === "Leaderboard" && dropdownOpen ? "text-red-500" : ""
                 }`}
                 aria-label={label}
+                aria-haspopup={label === "Leaderboard" ? "menu" : undefined}
+                aria-expanded={
+                  label === "Leaderboard" ? dropdownOpen : undefined
+                }
               >
                 {label}
                 {label === "Leaderboard" && (
@@ -144,7 +147,7 @@ const NavBar: React.FC = () => {
                   role="menu"
                 >
                   <div className="rounded-xl border border-white/10 bg-white/95 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.25)] p-2">
-                    {LeaderboardItems.map((item) => (
+                    {leaderboardItems.map((item) => (
                       <a
                         key={item.href}
                         href={item.href}
@@ -215,16 +218,78 @@ const NavBar: React.FC = () => {
         <div className="mx-auto max-w-7xl px-4 pb-4">
           <div className="rounded-2xl border border-white/10 bg-black/5 backdrop-blur-md p-2">
             {links.map((label) => (
-              <div key={label}>
-                <button
-                  onClick={() => handleNavClick(label)}
-                  className="w-full text-left px-3 py-3 rounded-xl text-sm font-semibold uppercase tracking-wide text-[#163968] hover:text-red-500 hover:bg-white/10 transition flex items-center justify-between"
-                >
-                  {label}
-                  {label === "Leaderboard" && (
-                    <span className="text-xs text-gray-500">Coming Soon</span>
-                  )}
-                </button>
+              <div key={label} className="w-full">
+                {label !== "Leaderboard" ? (
+                  <button
+                    onClick={() => {
+                      if (label === "Player Profiles") {
+                        window.open(
+                          "https://events.baseballalliance.co/public/players",
+                          "_blank",
+                          "noopener,noreferrer"
+                        );
+                      } else {
+                        handleNavClick(label);
+                        setOpen(false);
+                      }
+                    }}
+                    className="w-full text-left px-3 py-3 rounded-xl text-sm font-semibold uppercase tracking-wide text-[#163968] hover:text-red-500 hover:bg-white/10 transition flex items-center justify-between"
+                  >
+                    {label}
+                  </button>
+                ) : (
+                  <div className="px-1 py-1">
+                    <button
+                      onClick={() => setDropdownOpen((v) => !v)}
+                      className="w-full text-left px-3 py-3 rounded-xl text-sm font-semibold uppercase tracking-wide text-[#163968] hover:text-red-500 hover:bg-white/10 transition flex items-center justify-between"
+                      aria-haspopup="menu"
+                      aria-expanded={dropdownOpen}
+                    >
+                      {label}
+                      <svg
+                        className={`h-4 w-4 transition-transform ${
+                          dropdownOpen ? "rotate-180" : ""
+                        }`}
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </button>
+                    {/* Mobile submenu */}
+                    <div
+                      className={`overflow-hidden transition-[max-height,opacity] duration-200 ${
+                        dropdownOpen
+                          ? "max-h-40 opacity-100"
+                          : "max-h-0 opacity-0"
+                      }`}
+                    >
+                      <div className="mt-1 rounded-xl border border-white/10 bg-white/90 backdrop-blur p-1">
+                        {leaderboardItems.map((item) => (
+                          <a
+                            key={item.href}
+                            href={item.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => {
+                              setDropdownOpen(false);
+                              setOpen(false);
+                            }}
+                            className="block w-full px-3 py-2 rounded-lg text-sm font-medium text-[#163968] hover:bg-white/60 hover:text-red-600 transition"
+                          >
+                            {item.label}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
             <div className="pt-2">
