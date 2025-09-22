@@ -61,11 +61,12 @@ const NavBar: React.FC = () => {
 
   useEffect(() => {
     const handleClickOutside = () => setDropdownOpen(false);
-    if (dropdownOpen) {
+    if (dropdownOpen && !open) {
+      // <— gate to desktop
       document.addEventListener("click", handleClickOutside);
       return () => document.removeEventListener("click", handleClickOutside);
     }
-  }, [dropdownOpen]);
+  }, [dropdownOpen, open]);
 
   return (
     <nav
@@ -240,7 +241,10 @@ const NavBar: React.FC = () => {
                 ) : (
                   <div className="px-1 py-1">
                     <button
-                      onClick={() => setDropdownOpen((v) => !v)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDropdownOpen((v) => !v);
+                      }}
                       className="w-full text-left px-3 py-3 rounded-xl text-sm font-semibold uppercase tracking-wide text-[#163968] hover:text-red-500 hover:bg-white/10 transition flex items-center justify-between"
                       aria-haspopup="menu"
                       aria-expanded={dropdownOpen}
@@ -266,9 +270,9 @@ const NavBar: React.FC = () => {
                     <div
                       className={`overflow-hidden transition-[max-height,opacity] duration-200 ${
                         dropdownOpen
-                          ? "max-h-40 opacity-100"
+                          ? "max-h-64 opacity-100"
                           : "max-h-0 opacity-0"
-                      }`}
+                      } z-50`}
                     >
                       <div className="mt-1 rounded-xl border border-white/10 bg-white/90 backdrop-blur p-1">
                         {leaderboardItems.map((item) => (
