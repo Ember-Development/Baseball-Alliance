@@ -23,6 +23,13 @@ const NavBar: React.FC = () => {
   ];
   const NAV_HEIGHT = 80;
 
+  const LeaderboardItems = [
+    {
+      label: "Baseball Alliance Showcase - Waco",
+      href: "https://events.baseballalliance.co/events/baseball-alliance-showcase-waco-tx-09-21-2025/leaderboard",
+    },
+  ];
+
   const handleScroll = (id: string) => {
     if (id === "home") {
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -128,17 +135,27 @@ const NavBar: React.FC = () => {
               {label === "Leaderboard" && (
                 <div
                   className={[
-                    "absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48",
+                    "absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64",
                     "transition-all duration-200 origin-top",
                     dropdownOpen
                       ? "opacity-100 scale-100 pointer-events-auto"
                       : "opacity-0 scale-95 pointer-events-none",
                   ].join(" ")}
+                  role="menu"
                 >
                   <div className="rounded-xl border border-white/10 bg-white/95 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.25)] p-2">
-                    <div className="px-3 py-2 text-sm text-gray-500 text-center">
-                      Coming Soon
-                    </div>
+                    {LeaderboardItems.map((item) => (
+                      <a
+                        key={item.href}
+                        href={item.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => setDropdownOpen(false)}
+                        className="block w-full px-3 py-2 rounded-lg text-sm font-medium text-[#163968] hover:bg-white/60 hover:text-red-600 transition"
+                      >
+                        {item.label}
+                      </a>
+                    ))}
                   </div>
                 </div>
               )}
