@@ -96,22 +96,17 @@ const NavBar: React.FC = () => {
         </div>
 
         {/* Center: Desktop nav (absolute center) */}
-        <ul className="hidden lg:flex items-center gap-6 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+        <ul className="hidden lg:flex items-center xl:gap-6 lg:gap-4 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
           {links.map((label) => (
             <li key={label} className="relative">
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleNavClick(label);
-                }}
-                className={`group relative px-3 py-2 text-base font-semibold uppercase tracking-wide text-[#163968] hover:text-red-500 transition flex items-center gap-1 ${
+                onClick={(e) => { e.stopPropagation(); handleNavClick(label); }}
+                className={`group relative xl:px-3 xl:py-2 lg:px-2 lg:py-1.5 xl:text-base lg:text-sm font-semibold uppercase xl:tracking-wide lg:tracking-normal text-[#163968] hover:text-red-500 transition flex items-center gap-1 ${
                   label === "Leaderboard" && dropdownOpen ? "text-red-500" : ""
                 }`}
                 aria-label={label}
                 aria-haspopup={label === "Leaderboard" ? "menu" : undefined}
-                aria-expanded={
-                  label === "Leaderboard" ? dropdownOpen : undefined
-                }
+                aria-expanded={label === "Leaderboard" ? dropdownOpen : undefined}
               >
                 {label}
                 {label === "Leaderboard" && (
@@ -139,11 +134,10 @@ const NavBar: React.FC = () => {
               {label === "Leaderboard" && (
                 <div
                   className={[
-                    "absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64",
+                    "absolute top-full left-1/2 -translate-x-1/2 mt-2",
+                    "xl:w-72 lg:w-56",
                     "transition-all duration-200 origin-top",
-                    dropdownOpen
-                      ? "opacity-100 scale-100 pointer-events-auto"
-                      : "opacity-0 scale-95 pointer-events-none",
+                    dropdownOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none",
                   ].join(" ")}
                   role="menu"
                 >
@@ -171,7 +165,7 @@ const NavBar: React.FC = () => {
         <div className="flex items-center gap-3">
           <a
             href="mailto:keith@baseballalliance.co"
-            className="hidden lg:inline-flex px-5 py-2 rounded-full text-sm font-bold uppercase tracking-wide border border-[#163968] bg-white/5 hover:bg-white/10 text-[#163968] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] transition"
+            className="hidden xl:inline-flex px-5 py-2 rounded-full text-sm font-bold uppercase tracking-wide border border-[#163968] bg-white/5 hover:bg-white/10 text-[#163968] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] transition"
           >
             Contact Us
           </a>

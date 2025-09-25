@@ -6,22 +6,14 @@ import barcodeImg from "../assets/barcode.png";
 
 const EventSection: React.FC = () => {
   const { days, hours, minutes, seconds } = useCountdown(
-    new Date("2025-09-21T09:00:00")
+    new Date("2025-11-23T09:00:00")
   );
 
   const SEE_ALL_EVENTS_URL = "https://events.baseballalliance.co/";
   const REGISTER_URL =
-    "https://events.baseballalliance.co/events/baseball-alliance-showcase-waco-tx-09-21-2025";
+    "https://events.baseballalliance.co/";
 
   const stubEvents = [
-    {
-      title: "Doubleheader Games",
-      date: "Sept 14, 2025",
-      time: "10:00 AM – 5:00 PM",
-      venue: "Waco, TX · McLennan CC & Waco Midway HS",
-      serial: "DBH-0914-25-001",
-      href: "https://events.baseballalliance.co/events/doubleheader-games-waco-tx-09-14-2025",
-    },
     {
       title: "Doubleheader Games",
       date: "Oct 19, 2025",
@@ -87,7 +79,7 @@ const EventSection: React.FC = () => {
       <div className="mt-6 h-px bg-black/10" />
 
       {/* Additional Events as stubs */}
-      <div className="mt-8 grid gap-6 sm:grid-cols-3">
+      <div className="mt-8 grid gap-6 sm:grid-cols-2">
         {stubEvents.map((e) => (
           <StubTicket
             key={e.serial}
@@ -170,10 +162,10 @@ function RealTicket({
             </p>
 
             <div className="mt-1 sm:mt-2 grid grid-cols-1 sm:grid-cols-2 gap-y-1 gap-x-4 text-[15px]">
-              <Line label="When" value="Sept 21, 2025 · 9:00 AM" />
+              <Line label="When" value="November 22-23, 2025 · 9:00 AM" />
               <Line
                 label="Where"
-                value="McLennan Community College · Waco, TX"
+                value="El Paso Community College · El Paso, TX"
               />
             </div>
 
