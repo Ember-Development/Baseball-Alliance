@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import BA1 from "../assets/ba-teams.jpg";
 import BA2 from "../assets/ba-showcase.jpg";
-import BA3 from "../assets/ba3.png";
+import BA3 from "../assets/ba-education.png";
 import CardCarousel from "./ui/carousel";
 
 type ImageCardProps = {
