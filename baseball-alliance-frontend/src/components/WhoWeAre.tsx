@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import BA1 from "../assets/ba1.png";
-import BA2 from "../assets/ba2.png";
+import BA1 from "../assets/ba-teams.jpg";
+import BA2 from "../assets/ba-showcase.jpg";
 import BA3 from "../assets/ba3.png";
 import CardCarousel from "./ui/carousel";
 
