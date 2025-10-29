@@ -19,7 +19,7 @@ const NavBar: React.FC = () => {
     "Events",
     "Player Profiles",
     "Leaderboard",
-    "About Us",
+    // "Leadership",
   ];
   const NAV_HEIGHT = 80;
 
@@ -30,15 +30,30 @@ const NavBar: React.FC = () => {
     },
   ];
 
+
   const handleScroll = (id: string) => {
+    // Check if we're on the home page
+    const isHomePage = window.location.pathname === '/';
+    
     if (id === "home") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      if (isHomePage) {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        window.location.href = '/';
+      }
       return;
     }
-    const el = document.getElementById(id);
-    if (!el) return;
-    const y = el.getBoundingClientRect().top + window.scrollY - NAV_HEIGHT;
-    window.scrollTo({ top: y, behavior: "smooth" });
+    
+    // If on home page, scroll to section
+    if (isHomePage) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const y = el.getBoundingClientRect().top + window.scrollY - NAV_HEIGHT;
+      window.scrollTo({ top: y, behavior: "smooth" });
+    } else {
+      // If on other pages, navigate to home with hash
+      window.location.href = `/#${id}`;
+    }
   };
 
   const handleNavClick = (label: string) => {
@@ -56,11 +71,18 @@ const NavBar: React.FC = () => {
       return;
     }
 
+    if (label === "Leadership") {
+      window.location.href = "/leadership";
+      return;
+    }
+
     handleScroll(label.toLowerCase());
   };
 
   useEffect(() => {
-    const handleClickOutside = () => setDropdownOpen(false);
+    const handleClickOutside = () => {
+      setDropdownOpen(false);
+    };
     if (dropdownOpen && !open) {
       // <— gate to desktop
       document.addEventListener("click", handleClickOutside);
@@ -232,7 +254,7 @@ const NavBar: React.FC = () => {
                   >
                     {label}
                   </button>
-                ) : (
+                ) : label === "Leaderboard" ? (
                   <div className="px-1 py-1">
                     <button
                       onClick={(e) => {
@@ -287,7 +309,7 @@ const NavBar: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                )}
+                ) : null}
               </div>
             ))}
             <div className="pt-2">

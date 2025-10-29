@@ -8,6 +8,7 @@ import Footer from "./components/Footer";
 import TermsAndConditions from "./components/Terms";
 import Waiver from "./components/Waiver";
 import Privacy from "./components/Privacy";
+import Leadership from "./components/Leadership";
 import ScrollToTop from "./components/ui/ScrollToTop";
 
 function Home() {
@@ -38,6 +39,7 @@ export default function App() {
           <Route path="/terms" element={<TermsAndConditions />} />
           <Route path="/waiver" element={<Waiver />} />
           <Route path="/privacy" element={<Privacy />} />
+          <Route path="/leadership" element={<Leadership />} />
         </Routes>
         <Footer />
       </div>
