@@ -19,7 +19,7 @@ const NavBar: React.FC = () => {
     "Events",
     "Player Profiles",
     "Leaderboard",
-    // "Leadership",
+    "Leadership",
   ];
   const NAV_HEIGHT = 80;
 
