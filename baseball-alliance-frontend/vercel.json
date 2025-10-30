@@ -1,6 +1,5 @@
 {
-    "rewrites": [
-      { "source": "/((?!assets/|static/|.*\\..*).*)", "destination": "/" }
-    ]
-  }
-  
+  "rewrites": [
+    { "source": "/((?!assets/|static/|.*\\..*).*)", "destination": "/" }
+  ]
+}

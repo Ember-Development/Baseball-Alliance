@@ -3,8 +3,6 @@ import JohnImage from "../assets/leadership/John.png";
 import BillImage from "../assets/leadership/Bill.png";
 import KeithImage from "../assets/leadership/Keith.png";
 import EddieCornblumImage from "../assets/leadership/Eddie Cornblum.png";
-import JohnLindsleyVideo from "../assets/leadership/John Lindsley BA.mov";
-import EddieVideo from "../assets/leadership/Eddie Video.mov";
 
 type LeaderProfile = {
   id: string;
@@ -107,7 +105,8 @@ const Leadership: React.FC = () => {
       name: "John Lindsley",
       description:
         "Hear from John Lindsley about his vision for Baseball Alliance.",
-      videoUrl: JohnLindsleyVideo,
+      videoUrl:
+        "https://res.cloudinary.com/duwgrvngn/video/upload/v1761860455/John_Lindsley_BA_1_xib4lv.mov", // Replace with your Cloudinary URL
       category: "Leadership Interview",
       posterImage: JohnImage,
     },
@@ -117,7 +116,8 @@ const Leadership: React.FC = () => {
       name: "Eddie Cornblum",
       description:
         "Eddie Cornblum shares insights on player development and coaching excellence.",
-      videoUrl: EddieVideo,
+      videoUrl:
+        "https://res.cloudinary.com/duwgrvngn/video/upload/v1761860477/Eddie_Video_1_xwxnsx.mov", // Replace with your Cloudinary URL
       category: "Coaching Spotlight",
       posterImage: EddieCornblumImage,
     },
