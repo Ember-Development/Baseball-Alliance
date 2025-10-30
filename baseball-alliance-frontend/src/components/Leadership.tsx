@@ -1,4 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import JohnImage from "../assets/leadership/John.png";
+import BillImage from "../assets/leadership/Bill.png";
+import KeithImage from "../assets/leadership/Keith.png";
+import EddieCornblumImage from "../assets/leadership/Eddie Cornblum.png";
+import JohnLindsleyVideo from "../assets/leadership/John Lindsley BA.mov";
+import EddieVideo from "../assets/leadership/Eddie Video.mov";
 
 type LeaderProfile = {
   id: string;
@@ -15,33 +21,105 @@ type StatItem = {
   description: string;
 };
 
+type VideoItem = {
+  id: string;
+  title: string;
+  name: string;
+  description: string;
+  videoUrl: string;
+  category: string;
+  posterImage?: string;
+};
+
 const Leadership: React.FC = () => {
   const [expandedBios, setExpandedBios] = useState<Record<string, boolean>>({});
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
 
   const toggleBio = (id: string) => {
     setExpandedBios((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const openVideoModal = (video: VideoItem) => {
+    setSelectedVideo(video);
+    setIsVideoModalOpen(true);
+  };
+
+  const closeVideoModal = () => {
+    setIsVideoModalOpen(false);
+    setSelectedVideo(null);
+  };
+
+  // Close modal on ESC key press
+  useEffect(() => {
+    const handleEscKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && isVideoModalOpen) {
+        closeVideoModal();
+      }
+    };
+
+    document.addEventListener("keydown", handleEscKey);
+    return () => document.removeEventListener("keydown", handleEscKey);
+  }, [isVideoModalOpen]);
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (isVideoModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isVideoModalOpen]);
+
   const stats: StatItem[] = [
     {
       highlight: "100+ Years",
-      description: "Of Baseball Leadership across MLB, high school, and amateur levels",
+      description:
+        "Of Baseball Leadership across MLB, high school, and amateur levels",
     },
     {
       highlight: "40+ Years",
-      description: "In MLB Front Offices including Angels, Mariners, Dodgers, Reds, and the MLB Commissioner's Office",
+      description:
+        "In MLB Front Offices including Angels, Mariners, Dodgers, Reds, and the MLB Commissioner's Office",
     },
     {
       highlight: "63 MLB Draft Picks",
-      description: "Developed through Action Baseball Club",
+      description: "Developed through Baseball Alliance Leadership",
     },
     {
-      highlight: "636 College",
-      description: "Baseball Commitments under Action Baseball leadership",
+      highlight: "636+ College Commitments",
+      description: "Under Baseball Alliance Leadership",
     },
     {
-      highlight: "400+ Career",
-      description: "Coaching Wins led by Eddie Cornblum, including the 2025 6A State Championship",
+      highlight: "400+ Career Wins",
+      description:
+        "High School Coaching Wins led by Eddie Cornblum, including the 2025 6A State Championship",
+    },
+  ];
+
+  const videos: VideoItem[] = [
+    {
+      id: "john-lindsley-video",
+      title: "John Lindsley - Partner",
+      name: "John Lindsley",
+      description:
+        "Hear from John Lindsley about his vision for Baseball Alliance.",
+      videoUrl: JohnLindsleyVideo,
+      category: "Leadership Interview",
+      posterImage: JohnImage,
+    },
+    {
+      id: "eddie-cornblum-video",
+      title: "Eddie Cornblum - Field Coordinator",
+      name: "Eddie Cornblum",
+      description:
+        "Eddie Cornblum shares insights on player development and coaching excellence.",
+      videoUrl: EddieVideo,
+      category: "Coaching Spotlight",
+      posterImage: EddieCornblumImage,
     },
   ];
 
@@ -57,7 +135,7 @@ const Leadership: React.FC = () => {
 He facilitated the acquisition and development of a first-of-its-kind Major League Soccer training facility while helping create Utah's first Sports Mixed-Use Zone.
 
 John is also an equity partner with the sports marketing firm Goatnet and currently serves as Managing Partner of IV Development Partners, along with several other ventures.`,
-      image: "/leader-john-lindsley.jpg",
+      image: JohnImage,
     },
     {
       id: "bill-bavasi",
@@ -77,7 +155,7 @@ John is also an equity partner with the sports marketing firm Goatnet and curren
 • Seattle Mariners (2004–2008): EVP / General Manager
 • Cincinnati Reds (2008–2014): SVP, Player Development, Scouting & International Ops
 • MLB Commissioner's Office (2015–2020): Senior Director, Scouting & Game Development`,
-      image: "/leader-bill-bavasi.jpg",
+      image: BillImage,
     },
     {
       id: "keith-jackson",
@@ -90,7 +168,7 @@ John is also an equity partner with the sports marketing firm Goatnet and curren
 Under Keith's leadership, Action Baseball Club has helped produce 63 MLB Draft Picks and 636 college baseball commitments. He takes the greatest pride in seeing players excel both on the diamond and in life — with many returning to coach within the program and pass their knowledge to the next generation.
 
 Beyond baseball, Keith is known for the relationships he builds — staying in touch with many former players and even attending their weddings. His commitment to developing talent, character, and community continues to define his work with Baseball Alliance and beyond.`,
-      image: "/leader-keith-jackson.jpg",
+      image: KeithImage,
     },
   ];
 
@@ -110,7 +188,7 @@ In 2016, Eddie became Head Baseball Coach at Midway High School, continuing his 
 Beyond school programs, Eddie has also made an impact statewide as Head Coach of Team Texas through the Texas High School Baseball Coaches Association (THSBCA), leading his squad to three consecutive Sun Belt Championships. He's served as a THSBCA Director, Regional Representative, and on the All-Star and FCA Bowl committees, helping elevate high school baseball across Texas.
 
 Eddie's deep experience, community ties, and championship pedigree make him an invaluable part of the Baseball Alliance team.`,
-      image: "/leader-eddie-cornblum.jpg",
+      image: EddieCornblumImage,
     },
   ];
 
@@ -125,7 +203,7 @@ Eddie's deep experience, community ties, and championship pedigree make him an i
       >
         {/* Animated gradient on hover */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-600/0 via-transparent to-red-500/0 group-hover:from-blue-600/5 group-hover:to-red-500/5 transition-all duration-700 pointer-events-none" />
-        
+
         <div className="relative flex flex-col md:flex-row gap-6 p-6">
           {/* Compact Photo */}
           <div className="relative shrink-0">
@@ -173,7 +251,10 @@ Eddie's deep experience, community ties, and championship pedigree make him an i
                   {bioLines.map((line, idx) => {
                     if (line.startsWith("**") && line.endsWith("**")) {
                       return (
-                        <p key={idx} className="font-bold text-[#163968] text-base mt-4 mb-2 flex items-center gap-2">
+                        <p
+                          key={idx}
+                          className="font-bold text-[#163968] text-base mt-4 mb-2 flex items-center gap-2"
+                        >
                           <span className="w-1 h-5 bg-gradient-to-b from-[#163968] to-blue-500 rounded-full" />
                           {line.replace(/\*\*/g, "")}
                         </p>
@@ -181,14 +262,24 @@ Eddie's deep experience, community ties, and championship pedigree make him an i
                     }
                     if (line.trim().startsWith("•")) {
                       return (
-                        <p key={idx} className="ml-4 flex items-start gap-2 text-sm text-gray-700">
-                          <span className="text-blue-500 text-lg leading-none mt-0.5">•</span>
+                        <p
+                          key={idx}
+                          className="ml-4 flex items-start gap-2 text-sm text-gray-700"
+                        >
+                          <span className="text-blue-500 text-lg leading-none mt-0.5">
+                            •
+                          </span>
                           <span>{line.replace("•", "").trim()}</span>
                         </p>
                       );
                     }
                     return line.trim() ? (
-                      <p key={idx} className="text-sm text-gray-700 leading-relaxed">{line}</p>
+                      <p
+                        key={idx}
+                        className="text-sm text-gray-700 leading-relaxed"
+                      >
+                        {line}
+                      </p>
                     ) : (
                       <div key={idx} className="h-1" />
                     );
@@ -219,7 +310,9 @@ Eddie's deep experience, community ties, and championship pedigree make him an i
             >
               {isExpanded ? "Show Less" : "Read Full Bio"}
               <svg
-                className={`w-3.5 h-3.5 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
+                className={`w-3.5 h-3.5 transition-transform duration-300 ${
+                  isExpanded ? "rotate-180" : ""
+                }`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -245,7 +338,7 @@ Eddie's deep experience, community ties, and championship pedigree make him an i
         <header className="mb-20 mt-16 relative">
           <div className="absolute -top-8 -left-4 w-72 h-72 bg-blue-500/5 rounded-full blur-3xl" />
           <div className="absolute -bottom-8 -right-4 w-96 h-96 bg-red-500/5 rounded-full blur-3xl" />
-          
+
           <div className="relative">
             <div className="inline-flex items-center gap-3 mb-4">
               <span className="h-px w-8 bg-gradient-to-r from-transparent to-[#163968]" />
@@ -257,7 +350,8 @@ Eddie's deep experience, community ties, and championship pedigree make him an i
               LEADERSHIP
             </h1>
             <p className="text-2xl text-gray-600 max-w-3xl leading-relaxed font-light">
-              Meet the visionaries guiding the Baseball Alliance into the future.
+              Meet the visionaries guiding the Baseball Alliance into the
+              future.
             </p>
             <div className="h-1.5 w-32 bg-gradient-to-r from-[#163968] via-blue-500 to-red-500 rounded-full mt-8 shadow-lg shadow-blue-500/30" />
           </div>
@@ -268,10 +362,11 @@ Eddie's deep experience, community ties, and championship pedigree make him an i
           <div className="rounded-3xl bg-gradient-to-br from-white to-blue-50/50 p-8 shadow-lg shadow-black/5 border border-white/60">
             <p className="text-lg text-gray-700 leading-relaxed">
               The Baseball Alliance is led by a group of seasoned executives,
-              coaches, and operators with decades of experience across professional
-              and amateur baseball. Their shared mission is to strengthen the
-              sport's foundation through player development, integrity, and innovation
-              — connecting athletes, coaches, and communities nationwide.
+              coaches, and operators with decades of experience across
+              professional and amateur baseball. Their shared mission is to
+              strengthen the sport's foundation through player development,
+              integrity, and innovation — connecting athletes, coaches, and
+              communities nationwide.
             </p>
           </div>
         </div>
@@ -279,7 +374,9 @@ Eddie's deep experience, community ties, and championship pedigree make him an i
         {/* By the Numbers - Bento Grid Style */}
         <div className="mb-20">
           <div className="flex items-center gap-4 mb-8">
-            <h2 className="text-3xl font-black text-[#163968]">By the Numbers</h2>
+            <h2 className="text-3xl font-black text-[#163968]">
+              By the Numbers
+            </h2>
             <div className="h-px flex-1 bg-gradient-to-r from-[#163968]/20 to-transparent" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -327,30 +424,233 @@ Eddie's deep experience, community ties, and championship pedigree make him an i
           </div>
         </section>
 
-        {/* Gallery Section - Modern Empty State */}
+        {/* Gallery Section */}
         <section className="mb-8">
           <div className="flex items-center gap-4 mb-10">
             <div className="h-12 w-1.5 bg-gradient-to-b from-[#163968] to-blue-500 rounded-full" />
             <h2 className="text-4xl font-black text-[#163968]">Gallery</h2>
           </div>
-          <div className="rounded-3xl bg-gradient-to-br from-white via-blue-50/30 to-white p-16 text-center shadow-lg shadow-black/5 border border-white/60 relative overflow-hidden">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(22,57,104,0.05),transparent_50%)]" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(59,130,246,0.05),transparent_50%)]" />
-            <div className="relative">
-              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-[#163968]/10 to-blue-500/10 mb-6">
-                <svg className="w-10 h-10 text-[#163968]/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
+
+          {/* Video Gallery */}
+          <div className="space-y-6">
+            {videos.map((video, index) => (
+              <div
+                key={video.id}
+                onClick={() => openVideoModal(video)}
+                className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-white via-blue-50/30 to-white shadow-lg shadow-black/5 border border-white/60 hover:shadow-xl hover:shadow-blue-500/20 transition-all duration-300 cursor-pointer"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-600/0 via-transparent to-red-500/0 group-hover:from-blue-600/5 group-hover:to-red-500/5 transition-all duration-700 pointer-events-none" />
+
+                <div className="relative p-6 md:flex md:items-center md:gap-6">
+                  {/* Video Thumbnail */}
+                  <div className="relative md:w-80 shrink-0 mb-4 md:mb-0">
+                    <div className="relative rounded-xl overflow-hidden shadow-lg border-2 border-white/80 bg-gradient-to-br from-gray-900 to-gray-800 aspect-video">
+                      {/* Video First Frame */}
+                      <video
+                        className="w-full h-full object-cover"
+                        preload="metadata"
+                        muted
+                        playsInline
+                      >
+                        <source
+                          src={`${video.videoUrl}#t=2.5`}
+                          type="video/mp4"
+                        />
+                        <source
+                          src={`${video.videoUrl}#t=2.5`}
+                          type="video/quicktime"
+                        />
+                      </video>
+                      {/* Dark overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                      {/* Play button overlay */}
+                      <div className="absolute inset-0 flex items-center justify-center group-hover:bg-black/20 transition-colors">
+                        <div className="w-16 h-16 rounded-full bg-white/95 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
+                          <svg
+                            className="w-8 h-8 text-[#163968] ml-1"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                          </svg>
+                        </div>
+                      </div>
+                      {/* Video duration badge */}
+                      <div className="absolute bottom-2 right-2 px-2 py-1 rounded bg-black/80 text-white text-xs font-semibold">
+                        <svg
+                          className="w-3 h-3 inline mr-1"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" />
+                        </svg>
+                        Video
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Video Info */}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      {index === 0 && (
+                        <>
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-[#163968] to-blue-600 text-white text-xs font-bold uppercase tracking-wider shadow-lg">
+                            <svg
+                              className="w-3 h-3"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" />
+                            </svg>
+                            Featured
+                          </span>
+                          <span className="h-1 w-1 rounded-full bg-gray-300" />
+                        </>
+                      )}
+                      <span className="text-xs text-gray-500 font-medium">
+                        {video.category}
+                      </span>
+                    </div>
+                    <h3 className="text-2xl font-black text-[#163968] tracking-tight mb-2">
+                      {video.title}
+                    </h3>
+                    <p className="text-sm text-gray-600 leading-relaxed mb-4">
+                      {video.description}
+                    </p>
+
+                    {/* Action hint */}
+                    <div className="flex items-center gap-2 text-[#163968] text-sm font-semibold group-hover:gap-3 transition-all">
+                      <span>Click to watch</span>
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M14 5l7 7m0 0l-7 7m7-7H3"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <p className="text-gray-500 text-lg font-medium">
-                Leadership moments, team events, and interviews will be featured here.
-              </p>
+            ))}
+
+            {/* Coming Soon Placeholder */}
+            <div className="rounded-3xl bg-gradient-to-br from-white via-blue-50/20 to-white p-12 text-center shadow-lg shadow-black/5 border border-white/60 border-dashed relative overflow-hidden">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(22,57,104,0.03),transparent_70%)]" />
+              <div className="relative">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-[#163968]/10 to-blue-500/10 mb-4">
+                  <svg
+                    className="w-8 h-8 text-[#163968]/30"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                </div>
+                <p className="text-gray-500 text-base font-medium">
+                  More leadership moments, team events, and interviews coming
+                  soon.
+                </p>
+              </div>
             </div>
           </div>
         </section>
 
         <div className="h-16" />
       </section>
+
+      {/* Video Modal */}
+      {isVideoModalOpen && selectedVideo && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm animate-in fade-in duration-300"
+          onClick={closeVideoModal}
+        >
+          <div
+            className="relative w-full max-w-6xl animate-in zoom-in-95 duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <button
+              onClick={closeVideoModal}
+              className="absolute -top-12 right-0 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all hover:scale-110 group"
+              aria-label="Close video"
+            >
+              <svg
+                className="w-6 h-6 group-hover:rotate-90 transition-transform duration-300"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+
+            {/* Video Header */}
+            <div className="mb-4 mt-12">
+              <div className="flex items-center gap-3 mb-2">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-[#163968] to-blue-600 text-white text-xs font-bold uppercase tracking-wider shadow-lg">
+                  <svg
+                    className="w-3 h-3"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" />
+                  </svg>
+                  Video
+                </span>
+                <span className="h-1 w-1 rounded-full bg-white/40" />
+                <span className="text-xs text-white/80 font-medium">
+                  {selectedVideo.category}
+                </span>
+              </div>
+              <h3 className="text-3xl font-black text-white tracking-tight">
+                {selectedVideo.title}
+              </h3>
+            </div>
+
+            {/* Video Player */}
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl border-2 border-white/20 bg-black">
+              <div className="aspect-video">
+                <video
+                  key={selectedVideo.id}
+                  controls
+                  autoPlay
+                  className="w-full h-full"
+                  preload="metadata"
+                >
+                  <source src={selectedVideo.videoUrl} type="video/mp4" />
+                  <source src={selectedVideo.videoUrl} type="video/quicktime" />
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            </div>
+
+            {/* Video Description */}
+            <div className="mt-4 text-center">
+              <p className="text-sm text-white/70">
+                Press ESC or click outside to close
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 };
