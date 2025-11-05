@@ -18,7 +18,13 @@ const NavBar: React.FC = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const links = ["Home", "Events", "Player Profiles", "Leaderboard"];
+  const links = [
+    "Home",
+    "Events",
+    "Player Profiles",
+    "Leaderboard",
+    "Leadership",
+  ];
   const NAV_HEIGHT = 80;
 
   const leaderboardItems = [

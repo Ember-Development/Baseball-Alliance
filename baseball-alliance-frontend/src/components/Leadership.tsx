@@ -129,12 +129,18 @@ const Leadership: React.FC = () => {
       name: "John Lindsley",
       title: "Partner",
       shortBio:
-        "John is a seasoned business leader with 25 years of experience in real estate development, banking, and investment management. He played a key role in creating Utah's first Sports Mixed-Use Zone and developing a Major League Soccer training facility. Today he leads IV Development Partners and is an equity partner in Goatnet.",
-      fullBio: `John is a distinct professional with 25 years of experience as a real estate developer, commercial banker, and business manager. After a 15-year career in banking, he spent 10 years as Executive VP of Development and Partner at Wasatch Properties in Logan, Utah. While there, he managed development and venture investments and originated over $1B in debt guarantees for Wasatch Guaranty Capital.
-      
-He facilitated the acquisition and development of a first-of-its-kind Major League Soccer training facility while helping create Utah's first Sports Mixed-Use Zone.
+        "John is a seasoned professional with over 25 years of experience in real estate development, private equity, and commercial banking. His career spans leadership roles in both corporate finance and private development, marked by innovation, strategic growth, and a proven ability to deliver large-scale projects.",
+      fullBio: `
 
-John is also an equity partner with the sports marketing firm Goatnet and currently serves as Managing Partner of IV Development Partners, along with several other ventures.`,
+John began his career with Wells Fargo Bank, N.A., where he spent 15 years in progressively senior positions, including Senior Business Banker specializing in Commercial Lending and Treasury Management, Business Development Officer, and Vice President & Project Manager for the Wachovia Bank acquisition.
+
+Following his tenure in banking, John served for 10 years as Executive Vice President of Development and Partner at Wasatch Properties, headquartered in Utah. During this time, he led the development and management of investment and venture properties, originated and managed more than $1B in debt guarantees for Wasatch Guaranty Capital, and played a central role in developing and managing a $2B real estate portfolio encompassing residential, commercial, and retail assets.
+
+Among his notable achievements, John spearheaded the acquisition and development of Utah's first Major League Soccer Training Facility, while independently creating the state's first Sports Mixed-Use Zone—a pioneering step in Utah's real estate landscape.
+
+John studied Business Administration at the University of Utah, University of Phoenix, and Western Governors University. Outside of his professional endeavors, he is a devoted husband and father of four (and one son-in-law), an avid outdoorsman, and is passionate about youth sports.
+
+He has served on the Selection Committee for the Utah Innovation Awards and on the Board of Directors for The Kostopulos Dream Foundation. Together with his wife, Jenny, John manages a diverse portfolio of more than 50 private equity holdings, including apartments, medical facilities, hotel franchises, commercial developments, land positions, and investments across sports and entertainment.`,
       image: JohnImage,
     },
     {

@@ -4,33 +4,63 @@ import ba from "../assets/baicon.png";
 import ballWatermark from "../assets/baseballheader.png";
 import barcodeImg from "../assets/barcode.png";
 
+type ShowcaseEvent = {
+  title: string;
+  description: string;
+  date: string;
+  dateForCountdown: Date;
+  time: string;
+  venue: string;
+  serial: string;
+  registerUrl: string;
+};
+
 const EventSection: React.FC = () => {
+  const SEE_ALL_EVENTS_URL = "https://events.baseballalliance.co/";
+
+  // Array of showcase events - add more as needed
+  const showcases: ShowcaseEvent[] = [
+    {
+      title: "Baseball Alliance EPCC Showcase: El Paso Community College",
+      description:
+        "An elite evaluation event where players showcase speed, power, arm strength, fielding, and hitting in front of college coaches and pro scouts. Verified results are recorded and shared to help athletes earn opportunities at the next level.",
+      date: "November 22-23, 2025",
+      dateForCountdown: new Date("2025-11-22T09:00:00"),
+      time: "9:00 AM",
+      venue: "El Paso Community College · El Paso, TX",
+      serial: "BASC-0921-2025-TX",
+      registerUrl: "https://events.baseballalliance.co/",
+    },
+    {
+      title: "Baseball Alliance MCC Showcase",
+      description:
+        "An elite evaluation event where players showcase speed, power, arm strength, fielding, and hitting in front of college coaches and pro scouts. Verified results are recorded and shared to help athletes earn opportunities at the next level.",
+      date: "December 20, 2025",
+      dateForCountdown: new Date("2025-12-20T09:00:00"),
+      time: "9:00 AM",
+      venue: "Mcclennan CC · Waco, TX",
+      serial: "BASC-1220-2025-TX",
+      registerUrl:
+        "https://events.baseballalliance.co/events/baseball-alliance-showcase-el-paso-tx-el-paso-tx-11-22-2025",
+    },
+    // Add more showcases here as needed
+  ];
+
+  // Use the first showcase for the countdown
+  const upcomingShowcase = showcases[0];
   const { days, hours, minutes, seconds } = useCountdown(
-    new Date("2025-11-23T09:00:00")
+    upcomingShowcase.dateForCountdown
   );
 
-  const SEE_ALL_EVENTS_URL = "https://events.baseballalliance.co/";
-  const REGISTER_URL =
-    "https://events.baseballalliance.co/";
-
-  const stubEvents = [
-    {
-      title: "Doubleheader Games",
-      date: "Oct 19, 2025",
-      time: "10:00 AM – 5:00 PM",
-      venue: "Waco, TX · McLennan CC & Waco Midway HS",
-      serial: "DBH-1019-25-002",
-      href: "https://events.baseballalliance.co/events/doubleheader-games-waco-tx-10-19-2025",
-    },
-    {
-      title: "Doubleheader Games",
-      date: "Oct 26, 2025",
-      time: "10:00 AM – 5:00 PM",
-      venue: "Waco, TX · McLennan CC & Waco Midway HS",
-      serial: "DBH-1019-25-003",
-      href: "https://events.baseballalliance.co/events/doubleheader-games-waco-tx-10-26-2025",
-    },
-  ];
+  // Stub events array - empty for now, add events as needed
+  const stubEvents: Array<{
+    title: string;
+    date: string;
+    time: string;
+    venue: string;
+    serial: string;
+    href: string;
+  }> = [];
 
   return (
     <div id="events" className="mt-16 mx-auto max-w-7xl scroll-mt-24">
@@ -38,7 +68,7 @@ const EventSection: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div className="flex items-center justify-between gap-4">
           <h2 className="text-xl sm:text-2xl font-bold uppercase tracking-widest text-[#163968]">
-            Upcoming Event
+            {showcases.length > 1 ? "Upcoming Events" : "Upcoming Event"}
           </h2>
 
           <a
@@ -70,37 +100,105 @@ const EventSection: React.FC = () => {
         </div>
       </div>
 
-      {/* Ticket */}
+      {/* Featured Showcase */}
       <div className="mt-5">
-        <RealTicket hologramLogo={ba} registerUrl={REGISTER_URL} />
+        <div className="mb-3">
+          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold uppercase tracking-wider shadow-lg">
+            <svg
+              className="w-3.5 h-3.5"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+            Featured Event
+          </span>
+        </div>
+        <RealTicket
+          hologramLogo={ba}
+          title={upcomingShowcase.title}
+          description={upcomingShowcase.description}
+          date={upcomingShowcase.date}
+          time={upcomingShowcase.time}
+          venue={upcomingShowcase.venue}
+          serial={upcomingShowcase.serial}
+          registerUrl={upcomingShowcase.registerUrl}
+        />
       </div>
 
-      {/* baseline divider */}
-      <div className="mt-6 h-px bg-black/10" />
+      {/* Additional Showcases - Modern Grid */}
+      {showcases.length > 1 && (
+        <div className="mt-12">
+          <div className="flex items-center gap-3 mb-6">
+            <h3 className="text-lg sm:text-xl font-bold uppercase tracking-widest text-[#163968]">
+              More Upcoming Showcases
+            </h3>
+            <div className="flex-1 h-px bg-gradient-to-r from-[#163968]/20 to-transparent" />
+          </div>
 
-      {/* Additional Events as stubs */}
-      <div className="mt-8 grid gap-6 sm:grid-cols-2">
-        {stubEvents.map((e) => (
-          <StubTicket
-            key={e.serial}
-            title={e.title}
-            date={e.date}
-            time={e.time}
-            venue={e.venue}
-            serial={e.serial}
-            href={e.href}
-          />
-        ))}
-      </div>
+          {/* Grid of additional showcases */}
+          <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
+            {showcases.slice(1).map((showcase) => (
+              <div
+                key={showcase.serial}
+                className="transform transition-all duration-300 hover:scale-[1.02]"
+              >
+                <RealTicket
+                  hologramLogo={ba}
+                  title={showcase.title}
+                  description={showcase.description}
+                  date={showcase.date}
+                  time={showcase.time}
+                  venue={showcase.venue}
+                  serial={showcase.serial}
+                  registerUrl={showcase.registerUrl}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Additional Events as stubs - only renders if stubEvents has items */}
+      {stubEvents.length > 0 && (
+        <>
+          <div className="mt-6 h-px bg-black/10" />
+          <div className="mt-8 grid gap-6 sm:grid-cols-2">
+            {stubEvents.map((e) => (
+              <StubTicket
+                key={e.serial}
+                title={e.title}
+                date={e.date}
+                time={e.time}
+                venue={e.venue}
+                serial={e.serial}
+                href={e.href}
+              />
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 };
 
 function RealTicket({
   hologramLogo,
+  title,
+  description,
+  date,
+  time,
+  venue,
+  serial,
   registerUrl,
 }: {
   hologramLogo?: string;
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  venue: string;
+  serial: string;
   registerUrl: string;
 }) {
   return (
@@ -151,22 +249,16 @@ function RealTicket({
           {/* Embossed panel */}
           <div className="relative h-full rounded-xl bg-white/50 backdrop-blur-sm border border-white/40 px-4 py-4 sm:px-5 sm:py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] flex flex-col gap-3">
             <h3 className="text-lg sm:text-2xl font-extrabold tracking-wide text-[#162a4e] drop-shadow-[0_1px_0_rgba(255,255,255,0.6)]">
-              Baseball Alliance Showcase
+              {title}
             </h3>
 
             <p className="text-sm sm:text-base text-black/70 leading-snug">
-              An elite evaluation event where players showcase speed, power, arm
-              strength, fielding, and hitting in front of college coaches and
-              pro scouts. Verified results are recorded and shared to help
-              athletes earn opportunities at the next level.
+              {description}
             </p>
 
             <div className="mt-1 sm:mt-2 grid grid-cols-1 sm:grid-cols-2 gap-y-1 gap-x-4 text-[15px]">
-              <Line label="When" value="November 22-23, 2025 · 9:00 AM" />
-              <Line
-                label="Where"
-                value="El Paso Community College · El Paso, TX"
-              />
+              <Line label="When" value={`${date} · ${time}`} />
+              <Line label="Where" value={venue} />
             </div>
 
             {/* Serial + microtext */}
@@ -228,7 +320,7 @@ function RealTicket({
               loading="lazy"
             />
             <span className="font-mono text-[11px] tracking-wide text-black/70">
-              SN: BASC-0921-2025-WACO
+              SN: {serial}
             </span>
           </div>
 
