@@ -41,7 +41,7 @@ const EventSection: React.FC = () => {
       venue: "Mcclennan CC · Waco, TX",
       serial: "BASC-1220-2025-TX",
       registerUrl:
-        "https://events.baseballalliance.co/events/baseball-alliance-showcase-el-paso-tx-el-paso-tx-11-22-2025",
+        "https://events.baseballalliance.co/public/events/baseball-alliance-mcc-showcase-waco-tx-12-20-2025",
     },
     // Add more showcases here as needed
   ];
