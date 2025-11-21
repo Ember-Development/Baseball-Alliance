@@ -29,7 +29,8 @@ const EventSection: React.FC = () => {
       time: "9:00 AM",
       venue: "El Paso Community College · El Paso, TX",
       serial: "BASC-0921-2025-TX",
-      registerUrl: "https://events.baseballalliance.co/",
+      registerUrl:
+        "https://events.baseballalliance.co/events/baseball-alliance-showcase-el-paso-tx-el-paso-tx-11-22-2025",
     },
     {
       title: "Baseball Alliance MCC Showcase",
