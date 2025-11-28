@@ -18,7 +18,13 @@ const NavBar: React.FC = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const links = ["Home", "Events", "Player Profiles", "Leaderboard", "Leadership"];
+  const links = [
+    "Home",
+    "Events",
+    "Player Profiles",
+    "Leaderboard",
+    "Leadership",
+  ];
   const NAV_HEIGHT = 80;
 
   const leaderboardItems = [
@@ -132,18 +138,26 @@ const NavBar: React.FC = () => {
                 }`}
                 aria-label={label}
                 aria-haspopup={label === "Leaderboard" ? "menu" : undefined}
-                aria-expanded={label === "Leaderboard" ? dropdownOpen : undefined}
+                aria-expanded={
+                  label === "Leaderboard" ? dropdownOpen : undefined
+                }
               >
                 {label}
                 {label === "Leaderboard" && (
                   <svg
-                    className={`h-4 w-4 transition-transform ${dropdownOpen ? "rotate-180" : ""}`}
+                    className={`h-4 w-4 transition-transform ${
+                      dropdownOpen ? "rotate-180" : ""
+                    }`}
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M19 9l-7 7-7-7"
+                    />
                   </svg>
                 )}
                 <span className="pointer-events-none absolute left-3 right-3 -bottom-0.5 h-px scale-x-0 origin-left bg-gradient-to-r from-red-400 via-rose-400 to-red-400 transition-transform duration-300 group-hover:scale-x-100" />
@@ -198,16 +212,26 @@ const NavBar: React.FC = () => {
             aria-label="Toggle menu"
           >
             <svg
-              className={`h-5 w-5 text-[#163968] transition-transform ${open ? "rotate-90" : ""}`}
+              className={`h-5 w-5 text-[#163968] transition-transform ${
+                open ? "rotate-90" : ""
+              }`}
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
             >
               {open ? (
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
               ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.5 6.5h17M3.5 12h17M3.5 17.5h17" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3.5 6.5h17M3.5 12h17M3.5 17.5h17"
+                />
               )}
             </svg>
           </button>
@@ -256,19 +280,27 @@ const NavBar: React.FC = () => {
                     >
                       {label}
                       <svg
-                        className={`h-4 w-4 transition-transform ${dropdownOpen ? "rotate-180" : ""}`}
+                        className={`h-4 w-4 transition-transform ${
+                          dropdownOpen ? "rotate-180" : ""
+                        }`}
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
                         strokeWidth="2"
                       >
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M19 9l-7 7-7-7"
+                        />
                       </svg>
                     </button>
                     {/* Mobile submenu */}
                     <div
                       className={`overflow-hidden transition-[max-height,opacity] duration-200 ${
-                        dropdownOpen ? "max-h-64 opacity-100" : "max-h-0 opacity-0"
+                        dropdownOpen
+                          ? "max-h-64 opacity-100"
+                          : "max-h-0 opacity-0"
                       } z-50`}
                     >
                       <div className="mt-1 rounded-xl border border-white/10 bg-white/90 backdrop-blur p-1">
