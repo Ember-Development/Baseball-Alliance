@@ -21,18 +21,6 @@ const EventSection: React.FC = () => {
   // Array of showcase events - add more as needed
   const showcases: ShowcaseEvent[] = [
     {
-      title: "Baseball Alliance EPCC Showcase: El Paso Community College",
-      description:
-        "An elite evaluation event where players showcase speed, power, arm strength, fielding, and hitting in front of college coaches and pro scouts. Verified results are recorded and shared to help athletes earn opportunities at the next level.",
-      date: "November 22-23, 2025",
-      dateForCountdown: new Date("2025-11-22T09:00:00"),
-      time: "9:00 AM",
-      venue: "El Paso Community College · El Paso, TX",
-      serial: "BASC-0921-2025-TX",
-      registerUrl:
-        "https://events.baseballalliance.co/events/baseball-alliance-showcase-el-paso-tx-el-paso-tx-11-22-2025",
-    },
-    {
       title: "Baseball Alliance MCC Showcase",
       description:
         "An elite evaluation event where players showcase speed, power, arm strength, fielding, and hitting in front of college coaches and pro scouts. Verified results are recorded and shared to help athletes earn opportunities at the next level.",
