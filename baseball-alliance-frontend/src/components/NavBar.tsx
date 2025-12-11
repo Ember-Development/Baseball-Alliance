@@ -29,6 +29,10 @@ const NavBar: React.FC = () => {
 
   const leaderboardItems = [
     {
+      label: "Baseball Alliance Showcase - El Paso - 11/22/25",
+      href: "https://events.baseballalliance.co/public/events/baseball-alliance-showcase-el-paso-tx-el-paso-tx-11-22-2025/leaderboard",
+    },
+    {
       label: "Baseball Alliance Showcase - Waco - 9/21/25",
       href: "https://events.baseballalliance.co/events/baseball-alliance-showcase-waco-tx-09-21-2025/leaderboard",
     },
