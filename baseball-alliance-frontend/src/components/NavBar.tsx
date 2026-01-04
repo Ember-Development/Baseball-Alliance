@@ -36,6 +36,10 @@ const NavBar: React.FC = () => {
       label: "Baseball Alliance Showcase - Waco - 9/21/25",
       href: "https://events.baseballalliance.co/events/baseball-alliance-showcase-waco-tx-09-21-2025/leaderboard",
     },
+    {
+      label: "Baseball Alliance Showcase - Waco - 12/20/25",
+      href: "https://events.baseballalliance.co/public/events/baseball-alliance-mcc-showcase-waco-tx-12-20-2025/leaderboard",
+    },
   ];
 
   const isHomePage = location.pathname === "/";

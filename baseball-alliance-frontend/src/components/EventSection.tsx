@@ -19,26 +19,29 @@ const EventSection: React.FC = () => {
   const SEE_ALL_EVENTS_URL = "https://events.baseballalliance.co/";
 
   // Array of showcase events - add more as needed
-  const showcases: ShowcaseEvent[] = [
-    {
-      title: "Baseball Alliance MCC Showcase",
-      description:
-        "An elite evaluation event where players showcase speed, power, arm strength, fielding, and hitting in front of college coaches and pro scouts. Verified results are recorded and shared to help athletes earn opportunities at the next level.",
-      date: "December 20, 2025",
-      dateForCountdown: new Date("2025-12-20T09:00:00"),
-      time: "9:00 AM",
-      venue: "Mcclennan CC · Waco, TX",
-      serial: "BASC-1220-2025-TX",
-      registerUrl:
-        "https://events.baseballalliance.co/public/events/baseball-alliance-mcc-showcase-waco-tx-12-20-2025",
-    },
-    // Add more showcases here as needed
-  ];
+  // const showcases: ShowcaseEvent[] = [
+  //   {
+  //     title: "Baseball Alliance MCC Showcase",
+  //     description:
+  //       "An elite evaluation event where players showcase speed, power, arm strength, fielding, and hitting in front of college coaches and pro scouts. Verified results are recorded and shared to help athletes earn opportunities at the next level.",
+  //     date: "December 20, 2025",
+  //     dateForCountdown: new Date("2025-12-20T09:00:00"),
+  //     time: "9:00 AM",
+  //     venue: "Mcclennan CC · Waco, TX",
+  //     serial: "BASC-1220-2025-TX",
+  //     registerUrl:
+  //       "https://events.baseballalliance.co/public/events/baseball-alliance-mcc-showcase-waco-tx-12-20-2025",
+  //   },
+  //   // Add more showcases here as needed
+  // ];
 
-  // Use the first showcase for the countdown
+  // Empty array for now - no upcoming events
+  const showcases: ShowcaseEvent[] = [];
+
+  // Use the first showcase for the countdown (only if available)
   const upcomingShowcase = showcases[0];
   const { days, hours, minutes, seconds } = useCountdown(
-    upcomingShowcase.dateForCountdown
+    upcomingShowcase?.dateForCountdown || new Date()
   );
 
   // Stub events array - empty for now, add events as needed
@@ -77,43 +80,59 @@ const EventSection: React.FC = () => {
           </a>
         </div>
 
-        <div className="text-center sm:text-right">
-          <div className="text-red-500 font-bold tabular-nums text-base sm:text-xl tracking-widest">
-            {String(days).padStart(2, "0")} : {String(hours).padStart(2, "0")} :{" "}
-            {String(minutes).padStart(2, "0")} :{" "}
-            {String(seconds).padStart(2, "0")}
+        {showcases.length > 0 && (
+          <div className="text-center sm:text-right">
+            <div className="text-red-500 font-bold tabular-nums text-base sm:text-xl tracking-widest">
+              {String(days).padStart(2, "0")} : {String(hours).padStart(2, "0")}{" "}
+              : {String(minutes).padStart(2, "0")} :{" "}
+              {String(seconds).padStart(2, "0")}
+            </div>
+            <div className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] font-bold text-[#163968] mt-1">
+              Days&nbsp;&nbsp;Hours&nbsp;&nbsp;Minutes&nbsp;&nbsp;Seconds
+            </div>
           </div>
-          <div className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] font-bold text-[#163968] mt-1">
-            Days&nbsp;&nbsp;Hours&nbsp;&nbsp;Minutes&nbsp;&nbsp;Seconds
-          </div>
-        </div>
+        )}
       </div>
 
-      {/* Featured Showcase */}
-      <div className="mt-5">
-        <div className="mb-3">
-          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold uppercase tracking-wider shadow-lg">
-            <svg
-              className="w-3.5 h-3.5"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-            </svg>
-            Featured Event
-          </span>
+      {/* No upcoming events message */}
+      {showcases.length === 0 && (
+        <div className="mt-8 text-center py-12 px-4">
+          <p className="text-lg sm:text-xl text-[#163968]/70 font-medium">
+            No upcoming events at the moment
+          </p>
+          <p className="text-sm sm:text-base text-black/60 mt-2">
+            Check back soon for new showcase events!
+          </p>
         </div>
-        <RealTicket
-          hologramLogo={ba}
-          title={upcomingShowcase.title}
-          description={upcomingShowcase.description}
-          date={upcomingShowcase.date}
-          time={upcomingShowcase.time}
-          venue={upcomingShowcase.venue}
-          serial={upcomingShowcase.serial}
-          registerUrl={upcomingShowcase.registerUrl}
-        />
-      </div>
+      )}
+
+      {/* Featured Showcase */}
+      {showcases.length > 0 && (
+        <div className="mt-5">
+          <div className="mb-3">
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold uppercase tracking-wider shadow-lg">
+              <svg
+                className="w-3.5 h-3.5"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              Featured Event
+            </span>
+          </div>
+          <RealTicket
+            hologramLogo={ba}
+            title={upcomingShowcase.title}
+            description={upcomingShowcase.description}
+            date={upcomingShowcase.date}
+            time={upcomingShowcase.time}
+            venue={upcomingShowcase.venue}
+            serial={upcomingShowcase.serial}
+            registerUrl={upcomingShowcase.registerUrl}
+          />
+        </div>
+      )}
 
       {/* Additional Showcases - Modern Grid */}
       {showcases.length > 1 && (
