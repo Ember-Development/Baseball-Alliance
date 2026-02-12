@@ -9,6 +9,8 @@ import TermsAndConditions from "./components/Terms";
 import Waiver from "./components/Waiver";
 import Privacy from "./components/Privacy";
 import Leadership from "./components/Leadership";
+import Membership from "./components/Membership";
+import InstagramFeed from "./components/InstagramFeed";
 import ScrollToTop from "./components/ui/ScrollToTop";
 
 function Home() {
@@ -19,6 +21,7 @@ function Home() {
         <EventSection />
         <WhoWeAre />
         <ContactCTA />
+        <InstagramFeed />
       </main>
     </>
   );
@@ -40,6 +43,7 @@ export default function App() {
           <Route path="/waiver" element={<Waiver />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/leadership" element={<Leadership />} />
+          <Route path="/membership" element={<Membership />} />
         </Routes>
         <Footer />
       </div>

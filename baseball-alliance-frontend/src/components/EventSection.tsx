@@ -19,24 +19,36 @@ const EventSection: React.FC = () => {
   const SEE_ALL_EVENTS_URL = "https://events.baseballalliance.co/";
 
   // Array of showcase events - add more as needed
-  // const showcases: ShowcaseEvent[] = [
-  //   {
-  //     title: "Baseball Alliance MCC Showcase",
-  //     description:
-  //       "An elite evaluation event where players showcase speed, power, arm strength, fielding, and hitting in front of college coaches and pro scouts. Verified results are recorded and shared to help athletes earn opportunities at the next level.",
-  //     date: "December 20, 2025",
-  //     dateForCountdown: new Date("2025-12-20T09:00:00"),
-  //     time: "9:00 AM",
-  //     venue: "Mcclennan CC · Waco, TX",
-  //     serial: "BASC-1220-2025-TX",
-  //     registerUrl:
-  //       "https://events.baseballalliance.co/public/events/baseball-alliance-mcc-showcase-waco-tx-12-20-2025",
-  //   },
-  //   // Add more showcases here as needed
-  // ];
+  const showcases: ShowcaseEvent[] = [
+    {
+      title: "Action Baseball Club Pre Season Summer Showcase",
+      description:
+        "An elite evaluation event where players showcase speed, power, arm strength, fielding, and hitting in front of college coaches and pro scouts. Verified results are recorded and shared to help athletes earn opportunities at the next level.",
+      date: "June 6-7, 2026",
+      dateForCountdown: new Date("2026-06-06T09:30:00"),
+      time: "9:30 AM",
+      venue: "TBD",
+      serial: "BASC-1220-2025-TX",
+      registerUrl:
+        "",
+    },
+    // {
+    //   title: "Baseball Alliance MCC Showcase",
+    //   description:
+    //     "An elite evaluation event where players showcase speed, power, arm strength, fielding, and hitting in front of college coaches and pro scouts. Verified results are recorded and shared to help athletes earn opportunities at the next level.",
+    //   date: "December 20, 2025",
+    //   dateForCountdown: new Date("2025-12-20T09:00:00"),
+    //   time: "9:00 AM",
+    //   venue: "Mcclennan CC · Waco, TX",
+    //   serial: "BASC-1220-2025-TX",
+    //   registerUrl:
+    //     "https://events.baseballalliance.co/public/events/baseball-alliance-mcc-showcase-waco-tx-12-20-2025",
+    // },
+    // Add more showcases here as needed
+  ];
 
   // Empty array for now - no upcoming events
-  const showcases: ShowcaseEvent[] = [];
+  // const showcases: ShowcaseEvent[] = [];
 
   // Use the first showcase for the countdown (only if available)
   const upcomingShowcase = showcases[0];

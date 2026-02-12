@@ -24,6 +24,7 @@ const NavBar: React.FC = () => {
     "Player Profiles",
     "Leaderboard",
     "Leadership",
+    "Membership",
   ];
   const NAV_HEIGHT = 80;
 
@@ -90,6 +91,11 @@ const NavBar: React.FC = () => {
       return;
     }
 
+    if (label === "Membership") {
+      navigate("/membership");
+      return;
+    }
+
     handleScroll(label.toLowerCase());
   };
 
@@ -123,13 +129,13 @@ const NavBar: React.FC = () => {
             <img
               src={BA}
               alt="Baseball Alliance"
-              className="h-40 w-auto object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.4)] cursor-pointer"
+              className="h-40 2xl:h-40 xl:h-32 lg:h-28 w-auto object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.4)] cursor-pointer"
             />
           </Link>
         </div>
 
         {/* Center: Desktop nav */}
-        <ul className="hidden lg:flex items-center xl:gap-6 lg:gap-4 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+        <ul className="hidden lg:flex items-center 2xl:gap-6 xl:gap-3 lg:gap-2.5 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
           {links.map((label) => (
             <li key={label} className="relative">
               <button
@@ -137,7 +143,7 @@ const NavBar: React.FC = () => {
                   e.stopPropagation();
                   handleNavClick(label);
                 }}
-                className={`group relative xl:px-3 xl:py-2 lg:px-2 lg:py-1.5 xl:text-base lg:text-sm font-semibold uppercase xl:tracking-wide lg:tracking-normal text-[#163968] hover:text-red-500 transition flex items-center gap-1 ${
+                className={`group relative 2xl:px-3 xl:px-2 lg:px-1.5 2xl:py-2 xl:py-1.5 lg:py-1.5 2xl:text-base xl:text-sm lg:text-xs font-semibold uppercase 2xl:tracking-wide xl:tracking-normal lg:tracking-tight text-[#163968] hover:text-red-500 transition flex items-center gap-1 ${
                   label === "Leaderboard" && dropdownOpen ? "text-red-500" : ""
                 }`}
                 aria-label={label}
@@ -204,7 +210,7 @@ const NavBar: React.FC = () => {
         <div className="flex items-center gap-3">
           <a
             href="mailto:keith@baseballalliance.co"
-            className="hidden xl:inline-flex px-5 py-2 rounded-full text-sm font-bold uppercase tracking-wide border border-[#163968] bg-white/5 hover:bg_white/10 text-[#163968] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] transition"
+            className="hidden xl:inline-flex px-5 py-2 rounded-full text-sm font-bold uppercase tracking-wide border border-[#163968] bg-white/5 hover:bg-white/10 text-[#163968] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] transition"
           >
             Contact Us
           </a>
