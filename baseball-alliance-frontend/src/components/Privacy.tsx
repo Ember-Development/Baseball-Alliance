@@ -131,7 +131,7 @@ export default function Privacy() {
             </ul>
             <p className="mt-3 leading-relaxed text-[#1E1E1E]">
               To exercise these rights, contact us at:{" "}
-              <span className="font-medium">[Insert Email Address]</span>.
+              <span className="font-medium">keith@baseballalliance.co</span>.
             </p>
           </section>
 

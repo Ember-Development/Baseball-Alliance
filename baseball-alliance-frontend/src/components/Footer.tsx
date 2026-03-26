@@ -1,6 +1,6 @@
 import React from "react";
 import logo from "../assets/baseballalliance.png";
-import { FaInstagram, FaYoutube, FaTiktok } from "react-icons/fa";
+import { FaInstagram, FaTiktok } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import { Link } from "react-router-dom";
 
@@ -23,7 +23,7 @@ const Footer: React.FC = () => {
           </div>
 
           {/* Center: links */}
-          <ul className="flex items-center justify-center gap-10 text-sm text-black/80">
+          <ul className="flex items-center justify-center gap-10 text-xs text-black/80">
             <li>
               <Link
                 to="/waiver"
@@ -45,7 +45,7 @@ const Footer: React.FC = () => {
                 to="/terms"
                 className="hover:text-black transition-colors underline-offset-4 hover:underline"
               >
-                Terms
+                Terms & Conditions
               </Link>
             </li>
             <li>
@@ -61,7 +61,7 @@ const Footer: React.FC = () => {
           {/* Right: socials */}
           <div className="flex sm:justify-end justify-center gap-3">
             <a
-              href="https://instagram.com"
+              href="https://www.instagram.com/baseball_alliance/"
               aria-label="Instagram"
               className="inline-flex h-10 w-10 items-center justify-center text-white rounded-md border border-black/15 bg-[#163968] hover:bg-black hover:text-white transition"
               target="_blank"
@@ -71,16 +71,16 @@ const Footer: React.FC = () => {
               <FaInstagram size={20} />
             </a>
             <a
-              href="https://twitter.com"
-              aria-label="Twitter"
+              href="https://x.com/bball_alliance"
+              aria-label="X"
               className="inline-flex h-10 w-10 items-center justify-center rounded-md border text-white border-black/15 bg-[#163968] hover:bg-black hover:text-white transition"
               target="_blank"
               rel="noreferrer"
-              title="Twitter"
+              title="X"
             >
               <FaXTwitter size={20} />
             </a>
-            <a
+            {/* <a
               href="https://youtube.com"
               aria-label="YouTube"
               className="inline-flex h-10 w-10 items-center justify-center rounded-md border text-white border-black/15 bg-[#163968] hover:bg-black hover:text-white transition"
@@ -89,9 +89,9 @@ const Footer: React.FC = () => {
               title="YouTube"
             >
               <FaYoutube size={20} />
-            </a>
+            </a> */}
             <a
-              href="https://tiktok.com"
+              href="https://www.tiktok.com/@baseballalliance?lang=en"
               aria-label="TikTok"
               className="inline-flex h-10 w-10 items-center justify-center rounded-md border text-white border-black/15 bg-[#163968] hover:bg-black hover:text-white transition"
               target="_blank"
