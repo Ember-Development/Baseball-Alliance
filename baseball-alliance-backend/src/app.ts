@@ -5,6 +5,8 @@ import healthRouter from "./routes/health";
 import eventsRouter from "./routes/events";
 import teamsRouter from "./routes/teams";
 import authRoutes from "./routes/auth";
+import programsRouter from "./routes/programs";
+import matchRouter from "./routes/match";
 
 const app = express();
 
@@ -12,7 +14,12 @@ app.use(cors());
 app.use(express.json());
 
 // routes
+app.get("/api/health", (_req, res) =>
+  res.json({ ok: true, scope: "api", at: new Date().toISOString() })
+);
 app.use("/health", healthRouter);
+app.use("/api/programs", programsRouter);
+app.use("/api/match", matchRouter);
 app.use("/api/events", eventsRouter);
 app.use("/api/teams", teamsRouter);
 app.use("/api/auth", authRoutes);

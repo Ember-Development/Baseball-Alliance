@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { ENV } from "../env";
 
 export type JwtUser = { id: string; email: string; roles: string[] };
 
@@ -18,7 +19,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
   }
   const token = header.substring("Bearer ".length);
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET!) as JwtUser;
+    const payload = jwt.verify(token, ENV.JWT_SECRET) as JwtUser;
     req.user = payload;
     return next();
   } catch {

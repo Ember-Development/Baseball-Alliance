@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { prisma } from "../db";
+import { ENV } from "../env";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -16,13 +17,9 @@ const LoginSchema = z.object({
 
 /** Strongly-typed signer */
 function signToken(payload: JwtUser) {
-  return jwt.sign(
-    payload,
-    process.env.JWT_SECRET as jwt.Secret,
-    {
-      expiresIn: process.env.JWT_EXPIRES_IN ?? "7d",
-    } as jwt.SignOptions
-  );
+  return jwt.sign(payload, ENV.JWT_SECRET as jwt.Secret, {
+    expiresIn: ENV.JWT_EXPIRES_IN,
+  } as jwt.SignOptions);
 }
 
 /** Map DB user → public user shape */
@@ -42,38 +39,48 @@ function toUserPublic(u: {
 
 /** POST /auth/login */
 r.post("/login", async (req, res) => {
-  const parsed = LoginSchema.safeParse(req.body);
-  if (!parsed.success) {
-    return res.status(400).json({ errors: parsed.error.flatten() });
+  try {
+    if (!ENV.JWT_SECRET) {
+      console.error("JWT_SECRET is not set — add it to .env for login to work");
+      return res.status(500).json({ error: "Server configuration error" });
+    }
+
+    const parsed = LoginSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ errors: parsed.error.flatten() });
+    }
+    const { email, password } = parsed.data;
+
+    const user = await prisma.user.findUnique({
+      where: { email },
+      include: { roles: true },
+    });
+    if (!user?.passwordHash) {
+      return res.status(401).json({ error: "Invalid email or password" });
+    }
+
+    const ok = await bcrypt.compare(password, user.passwordHash);
+    if (!ok) {
+      return res.status(401).json({ error: "Invalid email or password" });
+    }
+
+    const payload: JwtUser = {
+      id: user.id,
+      email: user.email,
+      roles: user.roles.map(
+        (r: { role: any }) => r.role as UserPublic["roles"][number]
+      ),
+    };
+
+    const token = signToken(payload);
+    return res.json({
+      token,
+      user: toUserPublic(user),
+    });
+  } catch (e) {
+    console.error("POST /auth/login:", e);
+    return res.status(500).json({ error: "Internal Server Error" });
   }
-  const { email, password } = parsed.data;
-
-  const user = await prisma.user.findUnique({
-    where: { email },
-    include: { roles: true },
-  });
-  if (!user?.passwordHash) {
-    return res.status(401).json({ error: "Invalid email or password" });
-  }
-
-  const ok = await bcrypt.compare(password, user.passwordHash);
-  if (!ok) {
-    return res.status(401).json({ error: "Invalid email or password" });
-  }
-
-  const payload: JwtUser = {
-    id: user.id,
-    email: user.email,
-    roles: user.roles.map(
-      (r: { role: any }) => r.role as UserPublic["roles"][number]
-    ),
-  };
-
-  const token = signToken(payload);
-  return res.json({
-    token,
-    user: toUserPublic(user),
-  });
 });
 
 /** GET /auth/me */

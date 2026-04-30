@@ -1,10 +1,27 @@
 // prisma/seed.ts
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import dotenv from "dotenv";
+import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.resolve(__dirname, "..", ".env") });
 
 const prisma = new PrismaClient();
 
 async function main() {
+  if (!process.env.DATABASE_URL) {
+    throw new Error(
+      'DATABASE_URL is missing. Set it in baseball-alliance-backend/.env (PostgreSQL connection string, e.g. postgresql://USER:PASSWORD@localhost:5432/DATABASE)',
+    );
+  }
+
   console.log("🌱 Seeding Baseball Alliance…");
+
+  // Local/dev admin login — change in production and rotate via signup or set-password
+  const devAdminPassword = "Password123!";
+  const adminPasswordHash = await bcrypt.hash(devAdminPassword, 10);
 
   /* ───────────────── Users & Roles ───────────────── */
   const playerUser = await prisma.user.create({
@@ -49,6 +66,7 @@ async function main() {
       email: "admin@example.com",
       fullName: "Site Admin",
       phone: "(555) 000-0000",
+      passwordHash: adminPasswordHash,
       roles: { create: [{ role: "ADMIN" }] },
       admin: {
         create: {
@@ -413,6 +431,72 @@ async function main() {
       phone: "(555) 777-8888",
       notes: "Covers Central Texas HS/JUCO.",
     },
+  });
+
+  /* ───────────────── College programs (match V1 dev data) ───────────────── */
+  await prisma.collegeProgram.createMany({
+    data: [
+      {
+        schoolName: "Lone Star State University",
+        division: "NCAA D1",
+        conference: "SEC",
+        state: "TX",
+        schoolType: "Public",
+        schoolSize: "large",
+        tuitionBand: "moderate",
+        city: "Austin",
+      },
+      {
+        schoolName: "Rice Athletic College",
+        division: "NCAA D1",
+        conference: "AAC",
+        state: "TX",
+        schoolType: "Private",
+        schoolSize: "medium",
+        tuitionBand: "high",
+        city: "Houston",
+      },
+      {
+        schoolName: "Panhandle JUCO",
+        division: "NJCAA",
+        conference: "Western",
+        state: "TX",
+        schoolType: "Public",
+        schoolSize: "small",
+        tuitionBand: "low",
+        city: "Amarillo",
+      },
+      {
+        schoolName: "Southern Tech Institute",
+        division: "NCAA D2",
+        conference: "Gulf South",
+        state: "FL",
+        schoolType: "Public",
+        schoolSize: "medium",
+        tuitionBand: "moderate",
+        city: "Tampa",
+      },
+      {
+        schoolName: "Pacific Northwest University",
+        division: "NCAA D1",
+        conference: "Pac-12",
+        state: "WA",
+        schoolType: "Public",
+        schoolSize: "large",
+        tuitionBand: "high",
+        city: "Seattle",
+      },
+      {
+        schoolName: "Heartland Christian College",
+        division: "NCAA D3",
+        conference: "Heartland",
+        state: "IA",
+        schoolType: "Private",
+        schoolSize: "small",
+        tuitionBand: "high",
+        city: "Des Moines",
+      },
+    ],
   });
 
   console.log("✅ Seed complete:", {

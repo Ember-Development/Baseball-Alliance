@@ -13,6 +13,7 @@ import Membership from "./components/Membership";
 import InstagramFeed from "./components/InstagramFeed";
 import ScrollToTop from "./components/ui/ScrollToTop";
 import Login from "./components/pages/login";
+import ApiDevTest from "./components/dev/ApiDevTest";
 
 function Home() {
   return (
@@ -44,6 +45,7 @@ export default function App() {
           <Route path="/waiver" element={<Waiver />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/dev/api" element={<ApiDevTest />} />
           <Route path="/leadership" element={<Leadership />} />
           <Route path="/membership" element={<Membership />} />
         </Routes>

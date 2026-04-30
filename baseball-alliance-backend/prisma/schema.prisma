@@ -596,6 +596,57 @@ model PageHeader {
   imageUrl     String?
 }
 
+/* ─────────────── College programs (matching V1) ─────────────── */
+model CollegeProgram {
+  id                              String   @id @default(cuid())
+  schoolName                      String
+  normalizedSchoolName            String?
+  sport                           String?
+  division                        String
+  conference                      String
+  city                            String?
+  state                           String
+  region                          String?
+  sizeOfCity                      String?
+  schoolType                      String
+  schoolSize                      String   @default("medium")
+  enrollment                      Int?
+  religiousAffiliation            String?
+  hbcuCommunityCollegeWomenOnly   String?
+  averageGpa                      String?
+  satReadingLow                   Int?
+  satReadingHigh                  Int?
+  satMathLow                      Int?
+  satMathHigh                     Int?
+  actCompositeLow                 Int?
+  actCompositeHigh                Int?
+  acceptanceRate                  String?
+  majorsOfferedUrl                String?
+  tuitionInState                  String?
+  tuitionOutOfState               String?
+  tuitionBand                     String?
+  schoolWebsite                   String?
+  athleticsUrl                    String?
+  recruitingUrl                   String?
+  rosterUrl                       String?
+  admissionsUrl                   String?
+  campUrl                         String?
+  nickname                        String?
+  stadium                         String?
+  sourceSheet                     String?
+  sourceFile                      String?
+  isActive                        Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([division])
+  @@index([conference])
+  @@index([state])
+  @@index([schoolType])
+  @@index([schoolName])
+}
+
 /* ─────────────── Standalone Scout ─────────────── */
 model Scout {
   id        String   @id @default(cuid())
