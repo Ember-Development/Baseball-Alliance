@@ -1,9 +1,40 @@
-import React, { useState } from "react";
+// src/components/EventSection.tsx
+import React, { useEffect, useMemo, useState } from "react";
 import { useCountdown } from "../hooks/useCountdown";
 import ba from "../assets/baicon.png";
 import ballWatermark from "../assets/baseballheader.png";
 import barcodeImg from "../assets/barcode.png";
 import RegistrationModal from "./ui/RegistrationModal";
+import { useAuth } from "../context/AuthContext";
+import EventCreateModal from "./ui/EventCreateModal";
+import { api } from "../lib/api";
+import { AiOutlinePlus } from "react-icons/ai";
+import type { EventPublic } from "src/lib/event";
+
+// front-end flags
+const ACCEPT_HOSTED_ENABLED =
+  (import.meta.env.VITE_ACCEPT_HOSTED_ENABLED ?? "false").toString() === "true";
+const COMBINE_PRICE_CENTS = Number(
+  import.meta.env.VITE_COMBINE_PRICE_CENTS ?? 15000
+);
+
+// helper: merge startDate + "10:00 AM" -> Date
+function buildStartDateTime(e: EventPublic): Date {
+  const base = new Date(e.startDate);
+  if (e.startTime) {
+    // parse "10:00 AM" / "1:30 pm"
+    const m = e.startTime.trim().match(/^(\d{1,2}):?(\d{2})?\s*(AM|PM)$/i);
+    if (m) {
+      let h = parseInt(m[1], 10);
+      const mins = m[2] ? parseInt(m[2], 10) : 0;
+      const ampm = m[3].toUpperCase();
+      if (ampm === "PM" && h < 12) h += 12;
+      if (ampm === "AM" && h === 12) h = 0;
+      base.setHours(h, mins, 0, 0);
+    }
+  }
+  return base;
+}
 
 type ShowcaseEvent = {
   title: string;
@@ -57,6 +88,83 @@ const EventSection: React.FC = () => {
     upcomingShowcase?.dateForCountdown || new Date()
   );
   const [openReg, setOpenReg] = useState(false);
+  const [openCreate, setOpenCreate] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // fetch most recently created published event (any type; or pass "COMBINE" if you prefer)
+  useEffect(() => {
+    let mounted = true;
+    setLoading(true);
+    api
+      .getLatestEvent() // or getLatestEvent("COMBINE")
+      .then((e) => mounted && setLatest(e))
+      .catch((e) => mounted && setError(e?.message ?? "Failed to load event"))
+      .finally(() => mounted && setLoading(false));
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // countdown target
+  const targetDate = useMemo(
+    () => (latest ? buildStartDateTime(latest) : new Date()),
+    [latest]
+  );
+
+  const { days, hours, minutes, seconds } = useCountdown(targetDate);
+
+  async function handleRegistrationSubmit(form: any) {
+    try {
+      if (!user) {
+        alert("Please log in to register.");
+        return;
+      }
+      if (!latest) {
+        alert("No event available yet.");
+        return;
+      }
+
+      // create registration against the latest event
+      const reg = await api.createCombineRegistration(latest.id, {
+        ...form,
+        agreeToWaiver: !!form.agreeToWaiver,
+        privacyAck: !!form.privacyAck,
+      });
+
+      if (ACCEPT_HOSTED_ENABLED) {
+        const { token, url } = await api.createAcceptHostedSession(
+          reg.id,
+          COMBINE_PRICE_CENTS
+        );
+        window.location.href = `${url}?token=${encodeURIComponent(token)}`;
+        return;
+      }
+
+      alert(
+        "Registration saved! Payments are not enabled yet—we’ll contact you with payment instructions."
+      );
+    } catch (e: any) {
+      alert(e?.message ?? "Failed to start registration/payment.");
+    }
+  }
+
+  // format “When” and “Where”
+  const whenText = useMemo(() => {
+    if (!latest) return "";
+    const d = buildStartDateTime(latest);
+    const date = d.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+    const time = latest.startTime ? ` · ${latest.startTime}` : "";
+    return `| ${date}${time} · ${latest.city}, ${latest.state}`;
+  }, [latest]);
+
+  const whereText = useMemo(() => {
+    if (!latest) return "";
+    return latest.venue ? `| ${latest.venue}` : "| Venue TBA";
+  }, [latest]);
 
   // Stub events array - empty for now, add events as needed
   const stubEvents: Array<{

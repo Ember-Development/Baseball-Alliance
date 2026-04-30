@@ -7,6 +7,8 @@ import teamsRouter from "./routes/teams";
 import authRoutes from "./routes/auth";
 import programsRouter from "./routes/programs";
 import matchRouter from "./routes/match";
+import registrationRoutes from "./routes/registration";
+import paymentRoutes from "./routes/payment";
 
 const app = express();
 
@@ -23,6 +25,8 @@ app.use("/api/match", matchRouter);
 app.use("/api/events", eventsRouter);
 app.use("/api/teams", teamsRouter);
 app.use("/api/auth", authRoutes);
+app.use("/api/registrations", registrationRoutes);
+app.use("/api/payments", paymentRoutes);
 
 // basic error handler
 app.use(
