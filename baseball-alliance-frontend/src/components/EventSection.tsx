@@ -111,20 +111,65 @@ const EventSection: React.FC = () => {
     return FALLBACK_SHOWCASES;
   }, [fromApi]);
 
+  // Array of showcase events - ordered by date ascending
+  const SHOWCASE_DESCRIPTION =
+    "An elite evaluation event where players showcase speed, power, arm strength, fielding, and hitting in front of college coaches and pro scouts. Verified results are recorded and shared to help athletes earn opportunities at the next level.";
+
+  const showcases: ShowcaseEvent[] = [
+    {
+      title: "Apex Baseball Showcase",
+      description: SHOWCASE_DESCRIPTION,
+      date: "June 6, 2026",
+      dateForCountdown: new Date("2026-06-06T09:00:00"),
+      time: "9:00 AM - 3:00 PM",
+      venue: "Houston, TX",
+      serial: "BASC-0606-2026-TX-APX",
+      registerUrl:
+        "https://events.baseballalliance.co/events/apex-baseball-showcase-houston-tx-06-06-2026",
+    },
+    {
+      title: "Action Baseball Showcase",
+      description: SHOWCASE_DESCRIPTION,
+      date: "June 7, 2026",
+      dateForCountdown: new Date("2026-06-07T09:00:00"),
+      time: "9:00 AM - 3:00 PM",
+      venue: "Austin, TX",
+      serial: "BASC-0607-2026-TX-ACT",
+      registerUrl:
+        "https://events.baseballalliance.co/events/action-baseball-showcase-austin-tx-06-07-2026",
+    },
+    {
+      title: "July College Showcase",
+      description: SHOWCASE_DESCRIPTION,
+      date: "July 20, 2026",
+      dateForCountdown: new Date("2026-07-20T09:00:00"),
+      time: "9:00 AM - 3:00 PM",
+      venue: "Waco, TX",
+      serial: "BASC-0720-2026-TX-JUL",
+      registerUrl:
+        "https://events.baseballalliance.co/events/july-college-showcase-waco-tx-07-20-2026",
+    },
+    {
+      title: "August College Showcase",
+      description: SHOWCASE_DESCRIPTION,
+      date: "August 8, 2026",
+      dateForCountdown: new Date("2026-08-08T09:00:00"),
+      time: "9:00 AM - 3:00 PM",
+      venue: "Waco, TX",
+      serial: "BASC-0808-2026-TX-AUG",
+      registerUrl:
+        "https://events.baseballalliance.co/events/august-college-showcase-waco-tx-08-08-2026",
+    },
+  ];
+
+  // Empty array for now - no upcoming events
+  // const showcases: ShowcaseEvent[] = [];
+
+  // Use the first showcase for the countdown (only if available)
   const upcomingShowcase = showcases[0];
   const { days, hours, minutes, seconds } = useCountdown(
     upcomingShowcase?.dateForCountdown || new Date()
   );
-
-  // Stub events array - empty for now, add events as needed
-  const stubEvents: Array<{
-    title: string;
-    date: string;
-    time: string;
-    venue: string;
-    serial: string;
-    href: string;
-  }> = [];
 
   return (
     <div id="events" className="mt-16 mx-auto max-w-7xl scroll-mt-24">
@@ -224,7 +269,7 @@ const EventSection: React.FC = () => {
         </div>
       )}
 
-      {/* Additional Showcases - Modern Grid */}
+      {/* Additional Showcases - compact stubs (non-featured) */}
       {showcases.length > 1 && (
         <div className="mt-12">
           <div className="flex items-center gap-3 mb-6">
@@ -234,47 +279,20 @@ const EventSection: React.FC = () => {
             <div className="flex-1 h-px bg-gradient-to-r from-[#163968]/20 to-transparent" />
           </div>
 
-          {/* Grid of additional showcases */}
-          <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {showcases.slice(1).map((showcase) => (
-              <div
-                key={showcase.serial}
-                className="transform transition-all duration-300 hover:scale-[1.02]"
-              >
-                <RealTicket
-                  hologramLogo={ba}
-                  title={showcase.title}
-                  description={showcase.description}
-                  date={showcase.date}
-                  time={showcase.time}
-                  venue={showcase.venue}
-                  serial={showcase.serial}
-                  registerUrl={showcase.registerUrl}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Additional Events as stubs - only renders if stubEvents has items */}
-      {stubEvents.length > 0 && (
-        <>
-          <div className="mt-6 h-px bg-black/10" />
-          <div className="mt-8 grid gap-6 sm:grid-cols-2">
-            {stubEvents.map((e) => (
               <StubTicket
-                key={e.serial}
-                title={e.title}
-                date={e.date}
-                time={e.time}
-                venue={e.venue}
-                serial={e.serial}
-                href={e.href}
+                key={showcase.serial}
+                title={showcase.title}
+                date={showcase.date}
+                time={showcase.time}
+                venue={showcase.venue}
+                serial={showcase.serial}
+                href={showcase.registerUrl}
               />
             ))}
           </div>
-        </>
+        </div>
       )}
     </div>
   );

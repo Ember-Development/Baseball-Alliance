@@ -8,6 +8,7 @@ import { z } from "zod";
 
 const AdminUserInputSchema = z.object({
   email: z.string().email(),
+
   /** Plain password (required key). Use empty string on existing users to leave the hash unchanged. */
   password: z.string(),
   firstName: z.string().optional(),
