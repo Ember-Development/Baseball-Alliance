@@ -71,18 +71,54 @@ function eventPublicToShowcase(e: EventPublic): ShowcaseEvent {
   };
 }
 
+const SHOWCASE_DESCRIPTION =
+  "An elite evaluation event where players showcase speed, power, arm strength, fielding, and hitting in front of college coaches and pro scouts. Verified results are recorded and shared to help athletes earn opportunities at the next level.";
+
 /** Shown only when there are no published SHOWCASE rows from the API */
 const FALLBACK_SHOWCASES: ShowcaseEvent[] = [
   {
-    title: "Action Baseball Club Pre Season Summer Showcase",
-    description:
-      "An elite evaluation event where players showcase speed, power, arm strength, fielding, and hitting in front of college coaches and pro scouts. Verified results are recorded and shared to help athletes earn opportunities at the next level.",
-    date: "June 6-7, 2026",
-    dateForCountdown: new Date("2026-06-06T09:30:00"),
-    time: "9:30 AM",
-    venue: "TBD",
-    serial: "BASC-1220-2025-TX",
-    registerUrl: "",
+    title: "Apex Baseball Showcase",
+    description: SHOWCASE_DESCRIPTION,
+    date: "June 6, 2026",
+    dateForCountdown: new Date("2026-06-06T09:00:00"),
+    time: "9:00 AM - 3:00 PM",
+    venue: "Houston, TX",
+    serial: "BASC-0606-2026-TX-APX",
+    registerUrl:
+      "https://events.baseballalliance.co/events/apex-baseball-showcase-houston-tx-06-06-2026",
+  },
+  {
+    title: "Action Baseball Showcase",
+    description: SHOWCASE_DESCRIPTION,
+    date: "June 7, 2026",
+    dateForCountdown: new Date("2026-06-07T09:00:00"),
+    time: "9:00 AM - 3:00 PM",
+    venue: "Austin, TX",
+    serial: "BASC-0607-2026-TX-ACT",
+    registerUrl:
+      "https://events.baseballalliance.co/events/action-baseball-showcase-austin-tx-06-07-2026",
+  },
+  {
+    title: "July College Showcase",
+    description: SHOWCASE_DESCRIPTION,
+    date: "July 20, 2026",
+    dateForCountdown: new Date("2026-07-20T09:00:00"),
+    time: "9:00 AM - 3:00 PM",
+    venue: "Waco, TX",
+    serial: "BASC-0720-2026-TX-JUL",
+    registerUrl:
+      "https://events.baseballalliance.co/events/july-college-showcase-waco-tx-07-20-2026",
+  },
+  {
+    title: "August College Showcase",
+    description: SHOWCASE_DESCRIPTION,
+    date: "August 8, 2026",
+    dateForCountdown: new Date("2026-08-08T09:00:00"),
+    time: "9:00 AM - 3:00 PM",
+    venue: "Waco, TX",
+    serial: "BASC-0808-2026-TX-AUG",
+    registerUrl:
+      "https://events.baseballalliance.co/events/august-college-showcase-waco-tx-08-08-2026",
   },
 ];
 
@@ -110,60 +146,6 @@ const EventSection: React.FC = () => {
     if (fromApi.length > 0) return fromApi.map(eventPublicToShowcase);
     return FALLBACK_SHOWCASES;
   }, [fromApi]);
-
-  // Array of showcase events - ordered by date ascending
-  const SHOWCASE_DESCRIPTION =
-    "An elite evaluation event where players showcase speed, power, arm strength, fielding, and hitting in front of college coaches and pro scouts. Verified results are recorded and shared to help athletes earn opportunities at the next level.";
-
-  const showcases: ShowcaseEvent[] = [
-    {
-      title: "Apex Baseball Showcase",
-      description: SHOWCASE_DESCRIPTION,
-      date: "June 6, 2026",
-      dateForCountdown: new Date("2026-06-06T09:00:00"),
-      time: "9:00 AM - 3:00 PM",
-      venue: "Houston, TX",
-      serial: "BASC-0606-2026-TX-APX",
-      registerUrl:
-        "https://events.baseballalliance.co/events/apex-baseball-showcase-houston-tx-06-06-2026",
-    },
-    {
-      title: "Action Baseball Showcase",
-      description: SHOWCASE_DESCRIPTION,
-      date: "June 7, 2026",
-      dateForCountdown: new Date("2026-06-07T09:00:00"),
-      time: "9:00 AM - 3:00 PM",
-      venue: "Austin, TX",
-      serial: "BASC-0607-2026-TX-ACT",
-      registerUrl:
-        "https://events.baseballalliance.co/events/action-baseball-showcase-austin-tx-06-07-2026",
-    },
-    {
-      title: "July College Showcase",
-      description: SHOWCASE_DESCRIPTION,
-      date: "July 20, 2026",
-      dateForCountdown: new Date("2026-07-20T09:00:00"),
-      time: "9:00 AM - 3:00 PM",
-      venue: "Waco, TX",
-      serial: "BASC-0720-2026-TX-JUL",
-      registerUrl:
-        "https://events.baseballalliance.co/events/july-college-showcase-waco-tx-07-20-2026",
-    },
-    {
-      title: "August College Showcase",
-      description: SHOWCASE_DESCRIPTION,
-      date: "August 8, 2026",
-      dateForCountdown: new Date("2026-08-08T09:00:00"),
-      time: "9:00 AM - 3:00 PM",
-      venue: "Waco, TX",
-      serial: "BASC-0808-2026-TX-AUG",
-      registerUrl:
-        "https://events.baseballalliance.co/events/august-college-showcase-waco-tx-08-08-2026",
-    },
-  ];
-
-  // Empty array for now - no upcoming events
-  // const showcases: ShowcaseEvent[] = [];
 
   // Use the first showcase for the countdown (only if available)
   const upcomingShowcase = showcases[0];
