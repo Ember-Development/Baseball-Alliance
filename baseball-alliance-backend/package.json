@@ -12,6 +12,7 @@
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "create:admins": "node dist/scripts/createAdmins.js",
+    "seed:site": "node dist/scripts/seedSiteConfig.js",
     "test": "vitest run",
     "test:watch": "vitest"
   },
