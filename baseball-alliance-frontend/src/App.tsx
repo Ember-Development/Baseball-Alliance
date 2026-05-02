@@ -12,6 +12,15 @@ import Leadership from "./components/Leadership";
 import Membership from "./components/Membership";
 import InstagramFeed from "./components/InstagramFeed";
 import ScrollToTop from "./components/ui/ScrollToTop";
+import Login from "./components/pages/login";
+import AdminSiteEditor from "./components/admin/AdminSiteEditor";
+/* Page builder + public CMS page routes — paused; expand later.
+import AdminPagesIndex from "./components/admin/AdminPagesIndex";
+import AdminPageEditor from "./components/admin/AdminPageEditor";
+import CmsPageView from "./components/cms/CmsPageView";
+*/
+import ApiDevTest from "./components/dev/ApiDevTest";
+import ContentEditBanner from "./components/site-inline/ContentEditBanner";
 
 function Home() {
   return (
@@ -36,12 +45,20 @@ export default function App() {
 
       <div className="relative z-10">
         <NavBar />
+        <ContentEditBanner />
         <ScrollToTop />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/terms" element={<TermsAndConditions />} />
           <Route path="/waiver" element={<Waiver />} />
           <Route path="/privacy" element={<Privacy />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/bams" element={<ApiDevTest />} />
+          {/* Page builder paused — re-import CmsPageView + AdminPages* and restore routes */}
+          {/* <Route path="/pages/:slug" element={<CmsPageView />} /> */}
+          <Route path="/admin/site" element={<AdminSiteEditor />} />
+          {/* <Route path="/admin/pages" element={<AdminPagesIndex />} /> */}
+          {/* <Route path="/admin/pages/:slug" element={<AdminPageEditor />} /> */}
           <Route path="/leadership" element={<Leadership />} />
           <Route path="/membership" element={<Membership />} />
         </Routes>

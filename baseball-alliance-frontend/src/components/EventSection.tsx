@@ -1,5 +1,10 @@
-import React from "react";
+// src/components/EventSection.tsx
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useCountdown } from "../hooks/useCountdown";
+import { useAuth } from "../context/AuthContext";
+import { api } from "../lib/api";
+import type { EventPublic } from "../lib/event";
+import EventCreateModal from "./ui/EventCreateModal";
 import ba from "../assets/baicon.png";
 import ballWatermark from "../assets/baseballheader.png";
 import barcodeImg from "../assets/barcode.png";
@@ -15,62 +20,132 @@ type ShowcaseEvent = {
   registerUrl: string;
 };
 
+function buildStartDateTime(e: EventPublic): Date {
+  const base = new Date(e.startDate);
+  if (e.startTime) {
+    const m = e.startTime.trim().match(/^(\d{1,2}):?(\d{2})?\s*(AM|PM)$/i);
+    if (m) {
+      let h = parseInt(m[1], 10);
+      const mins = m[2] ? parseInt(m[2], 10) : 0;
+      const ampm = m[3].toUpperCase();
+      if (ampm === "PM" && h < 12) h += 12;
+      if (ampm === "AM" && h === 12) h = 0;
+      base.setHours(h, mins, 0, 0);
+    }
+  }
+  return base;
+}
+
+function formatEventDate(e: EventPublic): string {
+  const a = new Date(e.startDate);
+  const b = new Date(e.endDate);
+  const sameDay = a.toDateString() === b.toDateString();
+  const opts: Intl.DateTimeFormatOptions = {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  };
+  if (sameDay) return a.toLocaleDateString(undefined, opts);
+  return `${a.toLocaleDateString(undefined, opts)} – ${b.toLocaleDateString(undefined, opts)}`;
+}
+
+function formatEventTime(e: EventPublic): string {
+  if (e.startTime) return e.startTime;
+  return new Date(e.startDate).toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+function eventPublicToShowcase(e: EventPublic): ShowcaseEvent {
+  return {
+    title: e.title,
+    description:
+      "Register and view details for this Baseball Alliance showcase event.",
+    date: formatEventDate(e),
+    dateForCountdown: buildStartDateTime(e),
+    time: formatEventTime(e),
+    venue: e.venue ? `${e.venue} · ${e.city}, ${e.state}` : `${e.city}, ${e.state}`,
+    serial: `BA-${e.id.replace(/[^a-zA-Z0-9]/g, "").slice(0, 12).toUpperCase()}`,
+    registerUrl: e.registerUrl ?? "",
+  };
+}
+
+const SHOWCASE_DESCRIPTION =
+  "An elite evaluation event where players showcase speed, power, arm strength, fielding, and hitting in front of college coaches and pro scouts. Verified results are recorded and shared to help athletes earn opportunities at the next level.";
+
+/** Shown only when there are no published SHOWCASE rows from the API */
+const FALLBACK_SHOWCASES: ShowcaseEvent[] = [
+  {
+    title: "Apex Baseball Showcase",
+    description: SHOWCASE_DESCRIPTION,
+    date: "June 6, 2026",
+    dateForCountdown: new Date("2026-06-06T09:00:00"),
+    time: "9:00 AM - 3:00 PM",
+    venue: "Houston, TX",
+    serial: "BASC-0606-2026-TX-APX",
+    registerUrl:
+      "https://events.baseballalliance.co/events/apex-baseball-showcase-houston-tx-06-06-2026",
+  },
+  {
+    title: "Action Baseball Showcase",
+    description: SHOWCASE_DESCRIPTION,
+    date: "June 7, 2026",
+    dateForCountdown: new Date("2026-06-07T09:00:00"),
+    time: "9:00 AM - 3:00 PM",
+    venue: "Austin, TX",
+    serial: "BASC-0607-2026-TX-ACT",
+    registerUrl:
+      "https://events.baseballalliance.co/events/action-baseball-showcase-austin-tx-06-07-2026",
+  },
+  {
+    title: "July College Showcase",
+    description: SHOWCASE_DESCRIPTION,
+    date: "July 20, 2026",
+    dateForCountdown: new Date("2026-07-20T09:00:00"),
+    time: "9:00 AM - 3:00 PM",
+    venue: "Waco, TX",
+    serial: "BASC-0720-2026-TX-JUL",
+    registerUrl:
+      "https://events.baseballalliance.co/events/july-college-showcase-waco-tx-07-20-2026",
+  },
+  {
+    title: "August College Showcase",
+    description: SHOWCASE_DESCRIPTION,
+    date: "August 8, 2026",
+    dateForCountdown: new Date("2026-08-08T09:00:00"),
+    time: "9:00 AM - 3:00 PM",
+    venue: "Waco, TX",
+    serial: "BASC-0808-2026-TX-AUG",
+    registerUrl:
+      "https://events.baseballalliance.co/events/august-college-showcase-waco-tx-08-08-2026",
+  },
+];
+
 const EventSection: React.FC = () => {
   const SEE_ALL_EVENTS_URL = "https://events.baseballalliance.co/";
+  const { user } = useAuth();
+  const isAdmin = Boolean(user?.roles?.includes("ADMIN"));
+  const [openCreate, setOpenCreate] = useState(false);
+  const [fromApi, setFromApi] = useState<EventPublic[]>([]);
 
-  // Array of showcase events - ordered by date ascending
-  const SHOWCASE_DESCRIPTION =
-    "An elite evaluation event where players showcase speed, power, arm strength, fielding, and hitting in front of college coaches and pro scouts. Verified results are recorded and shared to help athletes earn opportunities at the next level.";
+  const loadShowcases = useCallback(async () => {
+    try {
+      const list = await api.listEvents("SHOWCASE");
+      setFromApi(list);
+    } catch {
+      setFromApi([]);
+    }
+  }, []);
 
-  const showcases: ShowcaseEvent[] = [
-    {
-      title: "Apex Baseball Showcase",
-      description: SHOWCASE_DESCRIPTION,
-      date: "June 6, 2026",
-      dateForCountdown: new Date("2026-06-06T09:00:00"),
-      time: "9:00 AM - 3:00 PM",
-      venue: "Houston, TX",
-      serial: "BASC-0606-2026-TX-APX",
-      registerUrl:
-        "https://events.baseballalliance.co/events/apex-baseball-showcase-houston-tx-06-06-2026",
-    },
-    {
-      title: "Action Baseball Showcase",
-      description: SHOWCASE_DESCRIPTION,
-      date: "June 7, 2026",
-      dateForCountdown: new Date("2026-06-07T09:00:00"),
-      time: "9:00 AM - 3:00 PM",
-      venue: "Austin, TX",
-      serial: "BASC-0607-2026-TX-ACT",
-      registerUrl:
-        "https://events.baseballalliance.co/events/action-baseball-showcase-austin-tx-06-07-2026",
-    },
-    {
-      title: "July College Showcase",
-      description: SHOWCASE_DESCRIPTION,
-      date: "July 20, 2026",
-      dateForCountdown: new Date("2026-07-20T09:00:00"),
-      time: "9:00 AM - 3:00 PM",
-      venue: "Waco, TX",
-      serial: "BASC-0720-2026-TX-JUL",
-      registerUrl:
-        "https://events.baseballalliance.co/events/july-college-showcase-waco-tx-07-20-2026",
-    },
-    {
-      title: "August College Showcase",
-      description: SHOWCASE_DESCRIPTION,
-      date: "August 8, 2026",
-      dateForCountdown: new Date("2026-08-08T09:00:00"),
-      time: "9:00 AM - 3:00 PM",
-      venue: "Waco, TX",
-      serial: "BASC-0808-2026-TX-AUG",
-      registerUrl:
-        "https://events.baseballalliance.co/events/august-college-showcase-waco-tx-08-08-2026",
-    },
-  ];
+  useEffect(() => {
+    loadShowcases();
+  }, [loadShowcases]);
 
-  // Empty array for now - no upcoming events
-  // const showcases: ShowcaseEvent[] = [];
+  const showcases = useMemo(() => {
+    if (fromApi.length > 0) return fromApi.map(eventPublicToShowcase);
+    return FALLBACK_SHOWCASES;
+  }, [fromApi]);
 
   // Use the first showcase for the countdown (only if available)
   const upcomingShowcase = showcases[0];
@@ -80,28 +155,46 @@ const EventSection: React.FC = () => {
 
   return (
     <div id="events" className="mt-16 mx-auto max-w-7xl scroll-mt-24">
+      <EventCreateModal
+        open={openCreate}
+        onClose={() => setOpenCreate(false)}
+        onCreated={() => {
+          void loadShowcases();
+        }}
+      />
       {/* Header + countdown */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
           <h2 className="text-xl sm:text-2xl font-bold uppercase tracking-widest text-[#163968]">
             {showcases.length > 1 ? "Upcoming Events" : "Upcoming Event"}
           </h2>
 
-          <a
-            href={SEE_ALL_EVENTS_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-[13px] sm:text-sm font-semibold text-[#163968] hover:underline"
-            aria-label="See all events (opens in a new tab)"
-          >
-            See all events
-            <svg width="14" height="14" viewBox="0 0 24 24" className="-mr-0.5">
-              <path
-                fill="currentColor"
-                d="M14 3h7v7h-2V6.41l-9.3 9.3-1.4-1.42 9.29-9.29H14V3zM5 5h6v2H7v10h10v-4h2v6H5V5z"
-              />
-            </svg>
-          </a>
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() => setOpenCreate(true)}
+                className="inline-flex items-center rounded-lg bg-[#163968] px-3 py-1.5 text-xs sm:text-[13px] font-semibold text-white shadow hover:brightness-110 active:brightness-95 transition"
+              >
+                New event
+              </button>
+            )}
+            <a
+              href={SEE_ALL_EVENTS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-[13px] sm:text-sm font-semibold text-[#163968] hover:underline"
+              aria-label="See all events (opens in a new tab)"
+            >
+              See all events
+              <svg width="14" height="14" viewBox="0 0 24 24" className="-mr-0.5">
+                <path
+                  fill="currentColor"
+                  d="M14 3h7v7h-2V6.41l-9.3 9.3-1.4-1.42 9.29-9.29H14V3zM5 5h6v2H7v10h10v-4h2v6H5V5z"
+                />
+              </svg>
+            </a>
+          </div>
         </div>
 
         {showcases.length > 0 && (
@@ -270,15 +363,10 @@ function RealTicket({
 
             {/* Desktop register */}
             <div className="hidden md:flex mt-3">
-              <a
-                href={registerUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+              <RegisterNowButton
+                registerUrl={registerUrl}
                 className="inline-flex items-center justify-center rounded-md bg-[#163968] text-white font-semibold py-2 px-4 shadow hover:brightness-110 active:brightness-95 transition"
-                aria-label="Register now (opens in a new tab)"
-              >
-                Register Now
-              </a>
+              />
             </div>
           </div>
 
@@ -306,15 +394,10 @@ function RealTicket({
         {/* RIGHT: Stub with rotated barcode */}
         <div className="relative flex flex-col items-center justify-center px-4 sm:px-6 py-4">
           {/* Mobile register */}
-          <a
-            href={registerUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+          <RegisterNowButton
+            registerUrl={registerUrl}
             className="md:hidden w-full inline-flex items-center justify-center rounded-md bg-[#163968] text-white font-semibold py-2.5 px-4 shadow hover:brightness-110 active:brightness-95 transition mb-3"
-            aria-label="Register now (opens in a new tab)"
-          >
-            Register Now
-          </a>
+          />
 
           {/* Rotated barcode */}
           <div className="w-full flex flex-col items-center justify-center gap-2">
@@ -344,6 +427,37 @@ function RealTicket({
         }
       `}</style>
     </div>
+  );
+}
+
+function RegisterNowButton({
+  registerUrl,
+  className,
+}: {
+  registerUrl: string;
+  className: string;
+}) {
+  const href = registerUrl.trim();
+  if (!href) {
+    return (
+      <span
+        className={`${className} !bg-[#163968]/45 !shadow-none hover:!brightness-100`}
+        aria-label="Registration link not available yet"
+      >
+        Link coming soon
+      </span>
+    );
+  }
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={className}
+      aria-label="Register now (opens in a new tab)"
+    >
+      Register Now
+    </a>
   );
 }
 

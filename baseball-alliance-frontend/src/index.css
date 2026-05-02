@@ -118,3 +118,28 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* In-place CMS editing visuals */
+[data-cms-editable="true"] {
+  outline: 1px dashed rgba(251, 191, 36, 0.7);
+  outline-offset: 3px;
+  border-radius: 4px;
+  cursor: text;
+  transition: outline-color 120ms ease, background-color 120ms ease;
+  /* Fixed nav (80px) + edit banner row — keep focus scroll clear of chrome */
+  scroll-margin-top: 10rem;
+}
+[data-cms-editable="true"]:hover {
+  outline-color: rgba(251, 191, 36, 1);
+  background-color: rgba(251, 191, 36, 0.08);
+}
+[data-cms-editable="true"]:focus {
+  outline: 2px solid rgba(251, 191, 36, 1);
+  outline-offset: 3px;
+  background-color: rgba(251, 191, 36, 0.12);
+}
+[data-cms-editable="true"][data-empty="true"]::before {
+  content: attr(data-placeholder);
+  opacity: 0.45;
+  font-style: italic;
+}

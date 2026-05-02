@@ -1,12 +1,17 @@
-// components/NavBar.tsx
-import React, { useState, useEffect } from "react";
-import BA from "../assets/ba-long-removebg-preview.png";
+import React, { useState, useEffect, useRef } from "react";
+import BA from "../assets/baseballalliancelogo.png";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { useSiteEditMode } from "../context/SiteEditModeContext";
 
 const NavBar: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [avatarOpen, setAvatarOpen] = useState(false);
+  const avatarRef = useRef<HTMLDivElement>(null);
+  const { user, logout } = useAuth();
+  const { contentEditMode, toggleContentEditMode } = useSiteEditMode();
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -16,6 +21,16 @@ const NavBar: React.FC = () => {
     onScroll();
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // close avatar menu on outside click
+  useEffect(() => {
+    function onDocClick(e: MouseEvent) {
+      if (!avatarRef.current) return;
+      if (!avatarRef.current.contains(e.target as Node)) setAvatarOpen(false);
+    }
+    document.addEventListener("click", onDocClick);
+    return () => document.removeEventListener("click", onDocClick);
   }, []);
 
   const links = [
@@ -106,6 +121,14 @@ const NavBar: React.FC = () => {
       return () => document.removeEventListener("click", handleClickOutside);
     }
   }, [dropdownOpen, open]);
+
+  const initials = (fullName?: string) => {
+    if (!fullName) return "U";
+    const parts = fullName.trim().split(/\s+/);
+    const a = parts[0]?.[0] ?? "";
+    const b = parts.length > 1 ? parts[parts.length - 1][0] : "";
+    return (a + b).toUpperCase() || "U";
+  };
 
   return (
     <nav
@@ -208,12 +231,93 @@ const NavBar: React.FC = () => {
 
         {/* Right: Actions */}
         <div className="flex items-center gap-3">
-          <a
-            href="mailto:keith@baseballalliance.co"
-            className="hidden xl:inline-flex px-5 py-2 rounded-full text-sm font-bold uppercase tracking-wide border border-[#163968] bg-white/5 hover:bg-white/10 text-[#163968] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] transition"
-          >
-            Contact Us
-          </a>
+          {user?.roles?.includes("ADMIN") && (
+            <div className="hidden lg:flex items-center gap-2 pr-1 border-r border-[#163968]/15">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#163968]/70 whitespace-nowrap">
+                {contentEditMode ? "Editing" : "View only"}
+              </span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={contentEditMode}
+                title={
+                  contentEditMode
+                    ? "Switch to view-only (public)"
+                    : "Edit page content in place"
+                }
+                onClick={() => toggleContentEditMode()}
+                className={`relative h-7 w-11 shrink-0 rounded-full transition-colors ${
+                  contentEditMode ? "bg-amber-400" : "bg-slate-300"
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 left-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform ${
+                    contentEditMode ? "translate-x-4" : ""
+                  }`}
+                />
+              </button>
+            </div>
+          )}
+          {!user ? (
+            <Link
+              to="/login"
+              className="hidden lg:inline-flex px-5 py-2 rounded-full text-sm font-bold uppercase tracking-wide border border-[#163968] bg-white/5 hover:bg-white/10 text-[#163968] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] transition"
+            >
+              Login
+            </Link>
+          ) : (
+            <div className="hidden lg:block relative" ref={avatarRef}>
+              <button
+                onClick={() => setAvatarOpen((v) => !v)}
+                aria-haspopup="menu"
+                aria-expanded={avatarOpen}
+                className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#163968] text-white font-bold shadow hover:brightness-110 transition"
+                title={user.fullName}
+              >
+                {initials(user.fullName)}
+              </button>
+
+              {/* Avatar menu */}
+              {avatarOpen && (
+                <div
+                  role="menu"
+                  className="absolute right-0 mt-2 w-48 rounded-xl border border-white/15 bg-white/100 backdrop-blur-xl shadow-xl overflow-hidden"
+                >
+                  <div className="px-3 py-2 text-xs text-black/60">
+                    {user.fullName}
+                  </div>
+                  {user.roles?.includes("ADMIN") && (
+                    <>
+                      <Link
+                        role="menuitem"
+                        to="/admin/site"
+                        onClick={() => setAvatarOpen(false)}
+                        className="block px-4 py-2 text-sm font-semibold text-[#163968] hover:bg-white/70"
+                      >
+                        Site CMS
+                      </Link>
+                      {/* Page builder paused — restore route in App.tsx first */}
+                      {/* <Link
+                        role="menuitem"
+                        to="/admin/pages"
+                        onClick={() => setAvatarOpen(false)}
+                        className="block px-4 py-2 text-sm font-semibold text-[#163968] hover:bg-white/70"
+                      >
+                        Page builder
+                      </Link> */}
+                    </>
+                  )}
+                  <button
+                    role="menuitem"
+                    onClick={logout}
+                    className="w-full text-left px-4 py-3 text-sm font-semibold uppercase tracking-wide text-[#163968] hover:bg-white/70 transition"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Mobile menu button */}
           <button
@@ -256,7 +360,7 @@ const NavBar: React.FC = () => {
         ].join(" ")}
       >
         <div className="mx-auto max-w-7xl px-4 pb-4">
-          <div className="rounded-2xl border border_white/10 bg-black/5 backdrop-blur-md p-2">
+          <div className="rounded-2xl border border-white/10 bg-black/5 backdrop-blur-md p-2">
             {links.map((label) => (
               <div key={label} className="w-full">
                 {label !== "Leaderboard" ? (
@@ -284,7 +388,7 @@ const NavBar: React.FC = () => {
                         e.stopPropagation();
                         setDropdownOpen((v) => !v);
                       }}
-                      className="w-full text-left px-3 py-3 rounded-xl text-sm font-semibold uppercase tracking-wide text-[#163968] hover:text-red-500 hover:bg-white/10 transition flex items-center justify_between"
+                      className="w-full text-left px-3 py-3 rounded-xl text-sm font-semibold uppercase tracking-wide text-[#163968] hover:text-red-500 hover:bg-white/10 transition flex items-center justify-between"
                       aria-haspopup="menu"
                       aria-expanded={dropdownOpen}
                     >
@@ -335,14 +439,53 @@ const NavBar: React.FC = () => {
                 )}
               </div>
             ))}
-            <div className="pt-2">
-              <a
-                href="mailto:keith@baseballalliance.co"
-                className="block w-full px-4 py-3 rounded-xl text-sm uppercase tracking-wide border border-white/20 bg-white/5 hover:bg-white/10 text-[#163968] font-semibold transition text-center"
-              >
-                Contact Us
-              </a>
-            </div>
+            {user?.roles?.includes("ADMIN") && (
+              <div className="mt-2 flex items-center justify-between gap-3 rounded-xl border border-amber-400/40 bg-amber-50/90 px-3 py-2">
+                <span className="text-xs font-bold text-amber-950 uppercase tracking-wide">
+                  {contentEditMode ? "Editing site" : "View only"}
+                </span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={contentEditMode}
+                  onClick={() => toggleContentEditMode()}
+                  className={`relative h-7 w-11 shrink-0 rounded-full transition-colors ${
+                    contentEditMode ? "bg-amber-400" : "bg-slate-300"
+                  }`}
+                >
+                  <span
+                    className={`absolute top-0.5 left-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform ${
+                      contentEditMode ? "translate-x-4" : ""
+                    }`}
+                  />
+                </button>
+              </div>
+            )}
+            {!user && (
+              <div className="pt-2">
+                <Link
+                  to="/login"
+                  className="block w-full px-4 py-3 rounded-xl text-sm uppercase tracking-wide border border-white/20 bg-white/5 hover:bg-white/10 text-[#163968] font-semibold transition text-center"
+                >
+                  Login
+                </Link>
+              </div>
+            )}
+
+            {/* Mobile: Logout when logged in */}
+            {user && (
+              <div className="pt-2">
+                <button
+                  onClick={() => {
+                    setOpen(false);
+                    logout();
+                  }}
+                  className="block w-full px-4 py-3 rounded-xl text-sm uppercase tracking-wide border border-white/20 bg-white/5 hover:bg-white/10 text-[#163968] font-semibold transition text-center"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
