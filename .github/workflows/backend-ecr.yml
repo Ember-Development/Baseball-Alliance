@@ -1,0 +1,60 @@
+# Build backend Docker image and push to Amazon ECR.
+#
+# Setup (recommended): GitHub OIDC → AWS IAM role (no long-lived keys).
+#   1. Create ECR repository (e.g. ba-api) in your account/region.
+#   2. IAM role: trust policy for token.actions.githubusercontent.com, sub repo:ORG/REPO:ref:refs/heads/main
+#   3. Attach policies: ecr:GetAuthorizationToken; ecr:BatchCheckLayerAvailability; ecr:CompleteLayerUpload;
+#      ecr:InitiateLayerUpload; ecr:PutImage; ecr:UploadLayerPart; ecr:BatchGetImage (scoped to your repo ARN).
+#   4. Repository secret: AWS_ROLE_ARN = arn:aws:iam::ACCOUNT:role/your-role-name
+#
+# Alternative: replace the "Configure AWS credentials" step with aws-access-key-id / aws-secret-access-key.
+
+name: Backend — ECR
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "baseball-alliance-backend/**"
+      - ".github/workflows/backend-ecr.yml"
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: ba-api
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push image
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_NAME: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}
+        run: |
+          set -euo pipefail
+          SHORT_SHA=$(echo "${GITHUB_SHA}" | cut -c1-7)
+          docker build \
+            -t "${IMAGE_NAME}:${SHORT_SHA}" \
+            -t "${IMAGE_NAME}:${GITHUB_SHA}" \
+            -t "${IMAGE_NAME}:latest" \
+            baseball-alliance-backend
+          docker push "${IMAGE_NAME}:${SHORT_SHA}"
+          docker push "${IMAGE_NAME}:${GITHUB_SHA}"
+          docker push "${IMAGE_NAME}:latest"

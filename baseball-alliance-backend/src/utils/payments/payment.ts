@@ -1,10 +1,11 @@
-import { prisma } from "../../db";
+import { prisma } from "../../db.js";
+import type { APIContracts as ApiContractsTypes } from "authorizenet";
 import {
   getMerchantAuth,
   APIContracts,
   APIControllers,
   getEndpoint,
-} from "../payments/anetClient";
+} from "../payments/anetClient.js";
 
 const {
   ACCEPT_HOSTED_RETURN_URL,
@@ -60,7 +61,7 @@ export async function createAcceptHostedSessionForCombine(opts: {
   txnReq.setOrder(order);
 
   // Hosted payment settings
-  const settingList: APIContracts.SettingType[] = [];
+  const settingList: ApiContractsTypes.SettingType[] = [];
 
   function addSetting(name: string, value: object | string) {
     const s = new APIContracts.SettingType();

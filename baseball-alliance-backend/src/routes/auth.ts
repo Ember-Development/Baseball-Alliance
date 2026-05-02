@@ -1,11 +1,11 @@
 import { Router } from "express";
-import { prisma } from "../db";
-import { ENV } from "../env";
+import { prisma } from "../db.js";
+import { ENV } from "../env.js";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { JwtUser, requireAuth } from "../middleware/requireAuth";
-import { UserPublic } from "../types";
+import { JwtUser, requireAuth } from "../middleware/requireAuth.js";
+import { UserPublic } from "../types.js";
 
 const r = Router();
 

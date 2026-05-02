@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import BA from "../assets/baseballalliancelogo.png";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useSiteEditMode } from "../context/SiteEditModeContext";
 
 const NavBar: React.FC = () => {
   const [open, setOpen] = useState(false);
@@ -10,6 +11,7 @@ const NavBar: React.FC = () => {
   const [avatarOpen, setAvatarOpen] = useState(false);
   const avatarRef = useRef<HTMLDivElement>(null);
   const { user, logout } = useAuth();
+  const { contentEditMode, toggleContentEditMode } = useSiteEditMode();
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -229,6 +231,33 @@ const NavBar: React.FC = () => {
 
         {/* Right: Actions */}
         <div className="flex items-center gap-3">
+          {user?.roles?.includes("ADMIN") && (
+            <div className="hidden lg:flex items-center gap-2 pr-1 border-r border-[#163968]/15">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#163968]/70 whitespace-nowrap">
+                {contentEditMode ? "Editing" : "View only"}
+              </span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={contentEditMode}
+                title={
+                  contentEditMode
+                    ? "Switch to view-only (public)"
+                    : "Edit page content in place"
+                }
+                onClick={() => toggleContentEditMode()}
+                className={`relative h-7 w-11 shrink-0 rounded-full transition-colors ${
+                  contentEditMode ? "bg-amber-400" : "bg-slate-300"
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 left-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform ${
+                    contentEditMode ? "translate-x-4" : ""
+                  }`}
+                />
+              </button>
+            </div>
+          )}
           {!user ? (
             <Link
               to="/login"
@@ -257,6 +286,27 @@ const NavBar: React.FC = () => {
                   <div className="px-3 py-2 text-xs text-black/60">
                     {user.fullName}
                   </div>
+                  {user.roles?.includes("ADMIN") && (
+                    <>
+                      <Link
+                        role="menuitem"
+                        to="/admin/site"
+                        onClick={() => setAvatarOpen(false)}
+                        className="block px-4 py-2 text-sm font-semibold text-[#163968] hover:bg-white/70"
+                      >
+                        Site CMS
+                      </Link>
+                      {/* Page builder paused — restore route in App.tsx first */}
+                      {/* <Link
+                        role="menuitem"
+                        to="/admin/pages"
+                        onClick={() => setAvatarOpen(false)}
+                        className="block px-4 py-2 text-sm font-semibold text-[#163968] hover:bg-white/70"
+                      >
+                        Page builder
+                      </Link> */}
+                    </>
+                  )}
                   <button
                     role="menuitem"
                     onClick={logout}
@@ -389,6 +439,28 @@ const NavBar: React.FC = () => {
                 )}
               </div>
             ))}
+            {user?.roles?.includes("ADMIN") && (
+              <div className="mt-2 flex items-center justify-between gap-3 rounded-xl border border-amber-400/40 bg-amber-50/90 px-3 py-2">
+                <span className="text-xs font-bold text-amber-950 uppercase tracking-wide">
+                  {contentEditMode ? "Editing site" : "View only"}
+                </span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={contentEditMode}
+                  onClick={() => toggleContentEditMode()}
+                  className={`relative h-7 w-11 shrink-0 rounded-full transition-colors ${
+                    contentEditMode ? "bg-amber-400" : "bg-slate-300"
+                  }`}
+                >
+                  <span
+                    className={`absolute top-0.5 left-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform ${
+                      contentEditMode ? "translate-x-4" : ""
+                    }`}
+                  />
+                </button>
+              </div>
+            )}
             {!user && (
               <div className="pt-2">
                 <Link

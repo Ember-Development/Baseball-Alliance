@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { matchQuerySchema, matchRequestV1Schema } from "../schemas/collegeMatch";
-import { runCollegeMatch } from "../services/collegeMatchEngine";
-import { validationFailed, zodErrorToDetails } from "../utils/zodHttp";
+import { matchQuerySchema, matchRequestV1Schema } from "../schemas/collegeMatch.js";
+import { runCollegeMatch } from "../services/collegeMatchEngine.js";
+import { validationFailed, zodErrorToDetails } from "../utils/zodHttp.js";
 
 const router = Router();
 

@@ -11,6 +11,10 @@ export const CreateEventSchema = z
     city: z.string().min(1),
     state: z.string().length(2),
     venue: z.string().optional(),
+    registerUrl: z
+      .union([z.string().url(), z.literal("")])
+      .optional()
+      .transform((v) => (v === "" ? undefined : v)),
     isPublished: z.boolean().optional().default(false),
     startTime: z.string().trim().optional(), // required if COMBINE
   })

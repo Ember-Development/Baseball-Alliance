@@ -1,4 +1,10 @@
-import { APIContracts, APIControllers, Constants } from "authorizenet";
+import pkg from "authorizenet";
+
+const { APIContracts, APIControllers, Constants } = pkg as {
+  APIContracts: typeof import("authorizenet").APIContracts;
+  APIControllers: typeof import("authorizenet").APIControllers;
+  Constants: typeof import("authorizenet").Constants;
+};
 
 const { AUTHORIZE_ENV, AUTHORIZE_API_LOGIN_ID, AUTHORIZE_TRANSACTION_KEY } =
   process.env;

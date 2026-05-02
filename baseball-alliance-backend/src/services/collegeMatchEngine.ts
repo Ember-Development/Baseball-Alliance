@@ -1,5 +1,5 @@
-import { prisma } from "../db";
-import type { MatchQuery, MatchRequestV1 } from "../schemas/collegeMatch";
+import { prisma } from "../db.js";
+import type { MatchQuery, MatchRequestV1 } from "../schemas/collegeMatch.js";
 
 type ScoreBreakdown = {
   athleticFit: number;

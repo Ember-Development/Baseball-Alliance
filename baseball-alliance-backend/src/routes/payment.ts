@@ -1,10 +1,10 @@
 // src/routes/payments.ts
 import { Router } from "express";
-import { prisma } from "../db";
-import { requireAuth } from "../middleware/requireAuth";
-import { CreateAcceptHostedSessionSchema } from "../types";
-import { createAcceptHostedSessionForCombine } from "../utils/payments/payment";
-import { verifyAnetSignature } from "../utils/payments/anetVerify";
+import { prisma } from "../db.js";
+import { requireAuth } from "../middleware/requireAuth.js";
+import { CreateAcceptHostedSessionSchema } from "../types.js";
+import { createAcceptHostedSessionForCombine } from "../utils/payments/payment.js";
+import { verifyAnetSignature } from "../utils/payments/anetVerify.js";
 
 const r = Router();
 

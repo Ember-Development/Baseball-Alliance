@@ -1,11 +1,11 @@
 import { Router } from "express";
-import { programsQuerySchema } from "../schemas/collegeMatch";
+import { programsQuerySchema } from "../schemas/collegeMatch.js";
 import {
   getProgramById,
   listPrograms,
   programFilters,
-} from "../services/collegeProgramService";
-import { validationFailed, zodErrorToDetails } from "../utils/zodHttp";
+} from "../services/collegeProgramService.js";
+import { validationFailed, zodErrorToDetails } from "../utils/zodHttp.js";
 
 const router = Router();
 

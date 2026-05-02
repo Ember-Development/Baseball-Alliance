@@ -1,6 +1,6 @@
 import type { Prisma } from "@prisma/client";
-import { prisma } from "../db";
-import type { ProgramsQuery } from "../schemas/collegeMatch";
+import { prisma } from "../db.js";
+import type { ProgramsQuery } from "../schemas/collegeMatch.js";
 
 export async function listPrograms(q: ProgramsQuery) {
   const where: Prisma.CollegeProgramWhereInput = {};

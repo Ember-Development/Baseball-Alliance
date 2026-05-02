@@ -7,6 +7,7 @@ export type CreateEventInput = {
   city: string;
   state: string; // "TX" etc
   venue?: string;
+  registerUrl?: string;
   isPublished?: boolean;
   startTime?: string; // required for COMBINE
 };
@@ -20,5 +21,6 @@ export type EventPublic = {
   city: string;
   state: string;
   venue?: string | null;
+  registerUrl?: string | null;
   isPublished: boolean;
 };

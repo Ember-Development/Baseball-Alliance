@@ -1,28 +1,28 @@
 // src/components/EventSection.tsx
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useCountdown } from "../hooks/useCountdown";
+import { useAuth } from "../context/AuthContext";
+import { api } from "../lib/api";
+import type { EventPublic } from "../lib/event";
+import EventCreateModal from "./ui/EventCreateModal";
 import ba from "../assets/baicon.png";
 import ballWatermark from "../assets/baseballheader.png";
 import barcodeImg from "../assets/barcode.png";
-import RegistrationModal from "./ui/RegistrationModal";
-import { useAuth } from "../context/AuthContext";
-import EventCreateModal from "./ui/EventCreateModal";
-import { api } from "../lib/api";
-import { AiOutlinePlus } from "react-icons/ai";
-import type { EventPublic } from "src/lib/event";
 
-// front-end flags
-const ACCEPT_HOSTED_ENABLED =
-  (import.meta.env.VITE_ACCEPT_HOSTED_ENABLED ?? "false").toString() === "true";
-const COMBINE_PRICE_CENTS = Number(
-  import.meta.env.VITE_COMBINE_PRICE_CENTS ?? 15000
-);
+type ShowcaseEvent = {
+  title: string;
+  description: string;
+  date: string;
+  dateForCountdown: Date;
+  time: string;
+  venue: string;
+  serial: string;
+  registerUrl: string;
+};
 
-// helper: merge startDate + "10:00 AM" -> Date
 function buildStartDateTime(e: EventPublic): Date {
   const base = new Date(e.startDate);
   if (e.startTime) {
-    // parse "10:00 AM" / "1:30 pm"
     const m = e.startTime.trim().match(/^(\d{1,2}):?(\d{2})?\s*(AM|PM)$/i);
     if (m) {
       let h = parseInt(m[1], 10);
@@ -36,135 +36,85 @@ function buildStartDateTime(e: EventPublic): Date {
   return base;
 }
 
-type ShowcaseEvent = {
-  title: string;
-  description: string;
-  date: string;
-  dateForCountdown: Date;
-  time: string;
-  venue: string;
-  serial: string;
-  registerUrl: string;
-};
+function formatEventDate(e: EventPublic): string {
+  const a = new Date(e.startDate);
+  const b = new Date(e.endDate);
+  const sameDay = a.toDateString() === b.toDateString();
+  const opts: Intl.DateTimeFormatOptions = {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  };
+  if (sameDay) return a.toLocaleDateString(undefined, opts);
+  return `${a.toLocaleDateString(undefined, opts)} – ${b.toLocaleDateString(undefined, opts)}`;
+}
+
+function formatEventTime(e: EventPublic): string {
+  if (e.startTime) return e.startTime;
+  return new Date(e.startDate).toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+function eventPublicToShowcase(e: EventPublic): ShowcaseEvent {
+  return {
+    title: e.title,
+    description:
+      "Register and view details for this Baseball Alliance showcase event.",
+    date: formatEventDate(e),
+    dateForCountdown: buildStartDateTime(e),
+    time: formatEventTime(e),
+    venue: e.venue ? `${e.venue} · ${e.city}, ${e.state}` : `${e.city}, ${e.state}`,
+    serial: `BA-${e.id.replace(/[^a-zA-Z0-9]/g, "").slice(0, 12).toUpperCase()}`,
+    registerUrl: e.registerUrl ?? "",
+  };
+}
+
+/** Shown only when there are no published SHOWCASE rows from the API */
+const FALLBACK_SHOWCASES: ShowcaseEvent[] = [
+  {
+    title: "Action Baseball Club Pre Season Summer Showcase",
+    description:
+      "An elite evaluation event where players showcase speed, power, arm strength, fielding, and hitting in front of college coaches and pro scouts. Verified results are recorded and shared to help athletes earn opportunities at the next level.",
+    date: "June 6-7, 2026",
+    dateForCountdown: new Date("2026-06-06T09:30:00"),
+    time: "9:30 AM",
+    venue: "TBD",
+    serial: "BASC-1220-2025-TX",
+    registerUrl: "",
+  },
+];
 
 const EventSection: React.FC = () => {
   const SEE_ALL_EVENTS_URL = "https://events.baseballalliance.co/";
+  const { user } = useAuth();
+  const isAdmin = Boolean(user?.roles?.includes("ADMIN"));
+  const [openCreate, setOpenCreate] = useState(false);
+  const [fromApi, setFromApi] = useState<EventPublic[]>([]);
 
-  // Array of showcase events - add more as needed
-  const showcases: ShowcaseEvent[] = [
-    {
-      title: "Action Baseball Club Pre Season Summer Showcase",
-      description:
-        "An elite evaluation event where players showcase speed, power, arm strength, fielding, and hitting in front of college coaches and pro scouts. Verified results are recorded and shared to help athletes earn opportunities at the next level.",
-      date: "June 6-7, 2026",
-      dateForCountdown: new Date("2026-06-06T09:30:00"),
-      time: "9:30 AM",
-      venue: "TBD",
-      serial: "BASC-1220-2025-TX",
-      registerUrl:
-        "",
-    },
-    // {
-    //   title: "Baseball Alliance MCC Showcase",
-    //   description:
-    //     "An elite evaluation event where players showcase speed, power, arm strength, fielding, and hitting in front of college coaches and pro scouts. Verified results are recorded and shared to help athletes earn opportunities at the next level.",
-    //   date: "December 20, 2025",
-    //   dateForCountdown: new Date("2025-12-20T09:00:00"),
-    //   time: "9:00 AM",
-    //   venue: "Mcclennan CC · Waco, TX",
-    //   serial: "BASC-1220-2025-TX",
-    //   registerUrl:
-    //     "https://events.baseballalliance.co/public/events/baseball-alliance-mcc-showcase-waco-tx-12-20-2025",
-    // },
-    // Add more showcases here as needed
-  ];
+  const loadShowcases = useCallback(async () => {
+    try {
+      const list = await api.listEvents("SHOWCASE");
+      setFromApi(list);
+    } catch {
+      setFromApi([]);
+    }
+  }, []);
 
-  // Empty array for now - no upcoming events
-  // const showcases: ShowcaseEvent[] = [];
+  useEffect(() => {
+    loadShowcases();
+  }, [loadShowcases]);
 
-  // Use the first showcase for the countdown (only if available)
+  const showcases = useMemo(() => {
+    if (fromApi.length > 0) return fromApi.map(eventPublicToShowcase);
+    return FALLBACK_SHOWCASES;
+  }, [fromApi]);
+
   const upcomingShowcase = showcases[0];
   const { days, hours, minutes, seconds } = useCountdown(
     upcomingShowcase?.dateForCountdown || new Date()
   );
-  const [openReg, setOpenReg] = useState(false);
-  const [openCreate, setOpenCreate] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // fetch most recently created published event (any type; or pass "COMBINE" if you prefer)
-  useEffect(() => {
-    let mounted = true;
-    setLoading(true);
-    api
-      .getLatestEvent() // or getLatestEvent("COMBINE")
-      .then((e) => mounted && setLatest(e))
-      .catch((e) => mounted && setError(e?.message ?? "Failed to load event"))
-      .finally(() => mounted && setLoading(false));
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  // countdown target
-  const targetDate = useMemo(
-    () => (latest ? buildStartDateTime(latest) : new Date()),
-    [latest]
-  );
-
-  const { days, hours, minutes, seconds } = useCountdown(targetDate);
-
-  async function handleRegistrationSubmit(form: any) {
-    try {
-      if (!user) {
-        alert("Please log in to register.");
-        return;
-      }
-      if (!latest) {
-        alert("No event available yet.");
-        return;
-      }
-
-      // create registration against the latest event
-      const reg = await api.createCombineRegistration(latest.id, {
-        ...form,
-        agreeToWaiver: !!form.agreeToWaiver,
-        privacyAck: !!form.privacyAck,
-      });
-
-      if (ACCEPT_HOSTED_ENABLED) {
-        const { token, url } = await api.createAcceptHostedSession(
-          reg.id,
-          COMBINE_PRICE_CENTS
-        );
-        window.location.href = `${url}?token=${encodeURIComponent(token)}`;
-        return;
-      }
-
-      alert(
-        "Registration saved! Payments are not enabled yet—we’ll contact you with payment instructions."
-      );
-    } catch (e: any) {
-      alert(e?.message ?? "Failed to start registration/payment.");
-    }
-  }
-
-  // format “When” and “Where”
-  const whenText = useMemo(() => {
-    if (!latest) return "";
-    const d = buildStartDateTime(latest);
-    const date = d.toLocaleDateString(undefined, {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-    const time = latest.startTime ? ` · ${latest.startTime}` : "";
-    return `| ${date}${time} · ${latest.city}, ${latest.state}`;
-  }, [latest]);
-
-  const whereText = useMemo(() => {
-    if (!latest) return "";
-    return latest.venue ? `| ${latest.venue}` : "| Venue TBA";
-  }, [latest]);
 
   // Stub events array - empty for now, add events as needed
   const stubEvents: Array<{
@@ -178,28 +128,46 @@ const EventSection: React.FC = () => {
 
   return (
     <div id="events" className="mt-16 mx-auto max-w-7xl scroll-mt-24">
+      <EventCreateModal
+        open={openCreate}
+        onClose={() => setOpenCreate(false)}
+        onCreated={() => {
+          void loadShowcases();
+        }}
+      />
       {/* Header + countdown */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
           <h2 className="text-xl sm:text-2xl font-bold uppercase tracking-widest text-[#163968]">
             {showcases.length > 1 ? "Upcoming Events" : "Upcoming Event"}
           </h2>
 
-          <a
-            href={SEE_ALL_EVENTS_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-[13px] sm:text-sm font-semibold text-[#163968] hover:underline"
-            aria-label="See all events (opens in a new tab)"
-          >
-            See all events
-            <svg width="14" height="14" viewBox="0 0 24 24" className="-mr-0.5">
-              <path
-                fill="currentColor"
-                d="M14 3h7v7h-2V6.41l-9.3 9.3-1.4-1.42 9.29-9.29H14V3zM5 5h6v2H7v10h10v-4h2v6H5V5z"
-              />
-            </svg>
-          </a>
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() => setOpenCreate(true)}
+                className="inline-flex items-center rounded-lg bg-[#163968] px-3 py-1.5 text-xs sm:text-[13px] font-semibold text-white shadow hover:brightness-110 active:brightness-95 transition"
+              >
+                New event
+              </button>
+            )}
+            <a
+              href={SEE_ALL_EVENTS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-[13px] sm:text-sm font-semibold text-[#163968] hover:underline"
+              aria-label="See all events (opens in a new tab)"
+            >
+              See all events
+              <svg width="14" height="14" viewBox="0 0 24 24" className="-mr-0.5">
+                <path
+                  fill="currentColor"
+                  d="M14 3h7v7h-2V6.41l-9.3 9.3-1.4-1.42 9.29-9.29H14V3zM5 5h6v2H7v10h10v-4h2v6H5V5z"
+                />
+              </svg>
+            </a>
+          </div>
         </div>
 
         {showcases.length > 0 && (
@@ -395,15 +363,10 @@ function RealTicket({
 
             {/* Desktop register */}
             <div className="hidden md:flex mt-3">
-              <a
-                href={registerUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+              <RegisterNowButton
+                registerUrl={registerUrl}
                 className="inline-flex items-center justify-center rounded-md bg-[#163968] text-white font-semibold py-2 px-4 shadow hover:brightness-110 active:brightness-95 transition"
-                aria-label="Register now (opens in a new tab)"
-              >
-                Register Now
-              </a>
+              />
             </div>
           </div>
 
@@ -431,15 +394,10 @@ function RealTicket({
         {/* RIGHT: Stub with rotated barcode */}
         <div className="relative flex flex-col items-center justify-center px-4 sm:px-6 py-4">
           {/* Mobile register */}
-          <a
-            href={registerUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+          <RegisterNowButton
+            registerUrl={registerUrl}
             className="md:hidden w-full inline-flex items-center justify-center rounded-md bg-[#163968] text-white font-semibold py-2.5 px-4 shadow hover:brightness-110 active:brightness-95 transition mb-3"
-            aria-label="Register now (opens in a new tab)"
-          >
-            Register Now
-          </a>
+          />
 
           {/* Rotated barcode */}
           <div className="w-full flex flex-col items-center justify-center gap-2">
@@ -469,6 +427,37 @@ function RealTicket({
         }
       `}</style>
     </div>
+  );
+}
+
+function RegisterNowButton({
+  registerUrl,
+  className,
+}: {
+  registerUrl: string;
+  className: string;
+}) {
+  const href = registerUrl.trim();
+  if (!href) {
+    return (
+      <span
+        className={`${className} !bg-[#163968]/45 !shadow-none hover:!brightness-100`}
+        aria-label="Registration link not available yet"
+      >
+        Link coming soon
+      </span>
+    );
+  }
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={className}
+      aria-label="Register now (opens in a new tab)"
+    >
+      Register Now
+    </a>
   );
 }
 

@@ -2,10 +2,18 @@ import React, { useEffect, useState, useRef } from "react";
 import heroVideoDesktop from "../assets/BA-Teaser-v4.mov";
 import heroVideoMobile from "../assets/BAVert.mp4";
 import heroPoster from "../assets/baseballheader.png";
+import { useLiveSiteConfig } from "../context/SiteEditModeContext";
+import EditableText from "./site-inline/EditableText";
+import { EditableMediaOverlayBadge } from "./site-inline/EditableMedia";
+import SectionSettings from "./site-inline/SectionSettings";
+import { Field } from "./site-inline/siteEditorPrimitives";
 
 const NAV_HEIGHT = 80; // matches your h-20 navbar
 
 const Hero: React.FC = () => {
+  const { site, isContentEditUI, setDraftSite } = useLiveSiteConfig();
+  const updateSite = (patch: Partial<NonNullable<typeof site>>) =>
+    setDraftSite((d) => (d ? { ...d, ...patch } : d));
   const [isMobile, setIsMobile] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
   const [startVideo, setStartVideo] = useState(false);
@@ -97,24 +105,39 @@ const Hero: React.FC = () => {
   const nightOverlay =
     "bg-[radial-gradient(80%_120%_at_50%_110%,rgba(50,80,255,0.15),transparent)]";
 
+  const posterSrc = site?.heroPosterUrl || heroPoster;
+  const desktopSrc = site?.heroVideoDesktopUrl || heroVideoDesktop;
+  const mobileSrc = site?.heroVideoMobileUrl || heroVideoMobile;
+  const showHeroCopy =
+    isContentEditUI ||
+    Boolean(
+      site?.heroEyebrow ||
+        site?.heroHeadline ||
+        site?.heroSubcopy ||
+        site?.heroCtaLabel
+    );
+
   return (
     <section
       ref={heroRef}
-      className="relative w-screen h-screen overflow-hidden"
+      className={[
+        "relative w-screen h-screen overflow-hidden",
+        isContentEditUI ? "ring-4 ring-inset ring-amber-400/50" : "",
+      ].join(" ")}
       onMouseMove={onMouseMove}
       onTouchMove={onTouchMove}
     >
       {/* Media layer */}
       {reduceMotion || !startVideo ? (
         <img
-          src={heroPoster}
+          src={posterSrc}
           alt=""
           className="absolute inset-0 z-20 w-full h-full object-cover"
         />
       ) : (
         <video
-          src={isMobile ? heroVideoMobile : heroVideoDesktop}
-          poster={heroPoster}
+          src={isMobile ? mobileSrc : desktopSrc}
+          poster={posterSrc}
           autoPlay
           muted
           loop
@@ -151,9 +174,56 @@ const Hero: React.FC = () => {
           style={{
             transform: `perspective(800px) rotateX(${tilt.y}deg) rotateY(${tilt.x}deg)`,
           }}
-          className="transition-transform duration-150 will-change-transform pointer-events-auto"
+          className="transition-transform duration-150 will-change-transform pointer-events-auto max-w-[min(90vw,720px)] px-6 text-center"
         >
-          {/* place logo/heading/cta here */}
+          {showHeroCopy && (
+            <div className="space-y-4 text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.85)]">
+              {(isContentEditUI || site?.heroEyebrow) && (
+                <EditableText
+                  as="p"
+                  className="text-xs md:text-sm uppercase tracking-[0.25em] font-semibold text-white/90"
+                  value={site?.heroEyebrow ?? ""}
+                  placeholder="Eyebrow text"
+                  onChange={(v) => updateSite({ heroEyebrow: v || null })}
+                />
+              )}
+              {(isContentEditUI || site?.heroHeadline) && (
+                <EditableText
+                  as="h1"
+                  className="text-3xl md:text-5xl lg:text-6xl font-extrabold leading-tight"
+                  value={site?.heroHeadline ?? ""}
+                  placeholder="Headline"
+                  onChange={(v) => updateSite({ heroHeadline: v || null })}
+                />
+              )}
+              {(isContentEditUI || site?.heroSubcopy) && (
+                <EditableText
+                  as="p"
+                  className="text-sm md:text-lg text-white/90 max-w-xl mx-auto"
+                  value={site?.heroSubcopy ?? ""}
+                  placeholder="Subcopy"
+                  multiline
+                  onChange={(v) => updateSite({ heroSubcopy: v || null })}
+                />
+              )}
+              {(isContentEditUI ||
+                (site?.heroCtaLabel && site?.heroCtaHref)) && (
+                <a
+                  href={site?.heroCtaHref || "#"}
+                  onClick={(e) => {
+                    if (isContentEditUI) e.preventDefault();
+                  }}
+                  className="inline-flex mt-2 rounded-full bg-white/15 backdrop-blur-md border border-white/30 px-6 py-3 text-sm font-semibold uppercase tracking-wide hover:bg-white/25 transition"
+                >
+                  <EditableText
+                    value={site?.heroCtaLabel ?? ""}
+                    placeholder="CTA label"
+                    onChange={(v) => updateSite({ heroCtaLabel: v || null })}
+                  />
+                </a>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -207,6 +277,37 @@ const Hero: React.FC = () => {
           .transition-opacity { transition: none !important; }
         }
       `}</style>
+
+      {/* Admin-only: replace background media + edit CTA href */}
+      {isContentEditUI && (
+        <>
+          <div className="absolute top-3 left-3 z-[55] flex flex-col items-start gap-2">
+            <EditableMediaOverlayBadge
+              kind="image"
+              label="Replace poster"
+              onChange={(url) => updateSite({ heroPosterUrl: url })}
+            />
+            <EditableMediaOverlayBadge
+              kind="video"
+              label="Replace desktop video"
+              onChange={(url) => updateSite({ heroVideoDesktopUrl: url })}
+            />
+            <EditableMediaOverlayBadge
+              kind="video"
+              label="Replace mobile video"
+              onChange={(url) => updateSite({ heroVideoMobileUrl: url })}
+            />
+          </div>
+          <SectionSettings label="Hero settings" positionCls="absolute top-3 right-3">
+            <Field
+              label="CTA href"
+              value={site?.heroCtaHref ?? ""}
+              onChange={(v) => updateSite({ heroCtaHref: v || null })}
+              dark
+            />
+          </SectionSettings>
+        </>
+      )}
     </section>
   );
 };

@@ -1,5 +1,10 @@
 import type { CreateEventInput, EventPublic, EventType } from "./event";
 import type { CombineRegistrationCreated } from "./registration";
+import type {
+  CmsPagePublic,
+  PublishedCmsPageResponse,
+  SitePublic,
+} from "./site";
 
 export const API_BASE =
   import.meta.env.VITE_API_URL ?? "http://localhost:4000/api";
@@ -87,6 +92,55 @@ export const api = {
   },
   async deleteEvent(id: string) {
     await request<void>(`/events/${id}`, { method: "DELETE" });
+  },
+  async listEventsAdmin() {
+    return request<EventPublic[]>("/events/admin/all");
+  },
+
+  // site CMS
+  async getSite() {
+    return request<SitePublic>("/site");
+  },
+  async getSiteAdmin() {
+    return request<SitePublic>("/site/admin");
+  },
+  async patchSite(body: Record<string, unknown>) {
+    return request<SitePublic>("/site", {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    });
+  },
+  async presignSiteUpload(payload: {
+    filename: string;
+    contentType: string;
+    kind?: "image" | "video";
+  }) {
+    return request<{ uploadUrl: string; publicUrl: string; key: string }>(
+      "/site/media/upload-url",
+      { method: "POST", body: JSON.stringify(payload) }
+    );
+  },
+  async getPublishedCmsPage(slug: string) {
+    return request<PublishedCmsPageResponse>(
+      `/site/pages/${encodeURIComponent(slug)}`
+    );
+  },
+  async putAdminCmsPage(
+    slug: string,
+    body: {
+      title?: string | null;
+      published?: boolean;
+      blocks?: Array<{
+        blockType: string;
+        sortOrder?: number;
+        props?: Record<string, unknown>;
+      }>;
+    }
+  ) {
+    return request<CmsPagePublic>(
+      `/site/pages/${encodeURIComponent(slug)}`,
+      { method: "PUT", body: JSON.stringify(body) }
+    );
   },
 
   // combine registration

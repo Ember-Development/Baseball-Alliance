@@ -1,6 +1,6 @@
 // src/types/auth.ts
 import { z } from "zod";
-import { RoleName, UserPublic } from "../types";
+import { RoleName, UserPublic } from "../types.js";
 
 export const LoginSchema = z.object({
   email: z.string().email(),

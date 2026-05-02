@@ -1,14 +1,14 @@
 import express from "express";
 import cors from "cors";
-import { ENV } from "./env";
-import healthRouter from "./routes/health";
-import eventsRouter from "./routes/events";
-import teamsRouter from "./routes/teams";
-import authRoutes from "./routes/auth";
-import programsRouter from "./routes/programs";
-import matchRouter from "./routes/match";
-import registrationRoutes from "./routes/registration";
-import paymentRoutes from "./routes/payment";
+import healthRouter from "./routes/health.js";
+import eventsRouter from "./routes/events.js";
+import teamsRouter from "./routes/teams.js";
+import authRoutes from "./routes/auth.js";
+import programsRouter from "./routes/programs.js";
+import matchRouter from "./routes/match.js";
+import registrationRoutes from "./routes/registration.js";
+import paymentRoutes from "./routes/payment.js";
+import siteRouter from "./routes/site.js";
 
 const app = express();
 
@@ -27,6 +27,7 @@ app.use("/api/teams", teamsRouter);
 app.use("/api/auth", authRoutes);
 app.use("/api/registrations", registrationRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/site", siteRouter);
 
 // basic error handler
 app.use(

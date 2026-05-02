@@ -1,6 +1,6 @@
 // src/types/api.ts
 
-import { UserPublic } from "./types";
+import { UserPublic } from "./types.js";
 
 export type ApiError = { error: string } & Record<string, unknown>;
 

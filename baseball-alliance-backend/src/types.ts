@@ -71,6 +71,7 @@ export type EventPublic = {
   city: string;
   state: string;
   venue?: string | null;
+  registerUrl?: string | null;
   isPublished: boolean;
 };
 

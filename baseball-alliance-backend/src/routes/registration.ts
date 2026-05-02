@@ -1,8 +1,8 @@
 // src/routes/registrations.ts
 import { Router } from "express";
-import { prisma } from "../db";
-import { CombineRegistrationInput } from "../types";
-import { requireAuth } from "../middleware/requireAuth";
+import { prisma } from "../db.js";
+import { CombineRegistrationInput } from "../types.js";
+import { requireAuth } from "../middleware/requireAuth.js";
 
 const r = Router();
 

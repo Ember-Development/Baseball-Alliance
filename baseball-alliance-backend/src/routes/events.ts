@@ -1,9 +1,9 @@
 // src/routes/events.ts
 import { Router } from "express";
-import { prisma } from "../db";
-import { type EventPublic } from "../types";
-import { CreateEventSchema } from "../types/event";
-import { requireAuth, requireRole } from "../middleware/requireAuth";
+import { prisma } from "../db.js";
+import { type EventPublic } from "../types.js";
+import { CreateEventSchema } from "../types/event.js";
+import { requireAuth, requireRole } from "../middleware/requireAuth.js";
 
 const r = Router();
 
@@ -17,6 +17,7 @@ const toPublic = (e: any): EventPublic => ({
   city: e.city,
   state: e.state,
   venue: e.venue,
+  registerUrl: e.registerUrl ?? null,
   isPublished: e.isPublished,
 });
 
@@ -28,7 +29,10 @@ r.get("/", async (req, res, next) => {
       | "SHOWCASE"
       | undefined;
     const events = await prisma.event.findMany({
-      where: type ? { type } : undefined,
+      where: {
+        isPublished: true,
+        ...(type ? { type } : {}),
+      },
       orderBy: { startDate: "asc" },
     });
 
@@ -43,6 +47,7 @@ r.get("/", async (req, res, next) => {
         city: any;
         state: any;
         venue: any;
+        registerUrl: any;
         isPublished: any;
       }) => ({
         id: e.id,
@@ -54,6 +59,7 @@ r.get("/", async (req, res, next) => {
         city: e.city,
         state: e.state,
         venue: e.venue,
+        registerUrl: e.registerUrl ?? null,
         isPublished: e.isPublished,
       })
     );
@@ -63,6 +69,23 @@ r.get("/", async (req, res, next) => {
     next(e);
   }
 });
+
+r.get(
+  "/admin/all",
+  requireAuth,
+  requireRole("ADMIN"),
+  async (_req, res, next) => {
+    try {
+      const events = await prisma.event.findMany({
+        orderBy: { startDate: "desc" },
+        take: 200,
+      });
+      res.json(events.map(toPublic));
+    } catch (e) {
+      next(e);
+    }
+  }
+);
 
 r.post("/", requireAuth, requireRole("ADMIN"), async (req, res, next) => {
   try {

@@ -1,8 +1,8 @@
 import "dotenv/config";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import request from "supertest";
-import app from "../app";
-import { prisma } from "../db";
+import app from "../app.js";
+import { prisma } from "../db.js";
 
 const fixtures = [
   {

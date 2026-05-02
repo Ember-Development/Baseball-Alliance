@@ -24,6 +24,7 @@ export default function EventCreateModal({ open, onClose, onCreated }: Props) {
     city: "",
     state: "TX",
     venue: "",
+    registerUrl: "",
     isPublished: false,
     startDate: "",
     endDate: "",
@@ -54,6 +55,7 @@ export default function EventCreateModal({ open, onClose, onCreated }: Props) {
       city: "",
       state: "TX",
       venue: "",
+      registerUrl: "",
       isPublished: false,
       startDate: "",
       endDate: "",
@@ -69,12 +71,14 @@ export default function EventCreateModal({ open, onClose, onCreated }: Props) {
     setError(null);
     setSubmitting(true);
     try {
+      const trimmedUrl = (form.registerUrl ?? "").trim();
       const payload: CreateEventInput = {
         title: form.title!,
         type: chosenType,
         city: form.city!,
         state: form.state!,
         venue: form.venue || undefined,
+        registerUrl: trimmedUrl || undefined,
         isPublished: !!form.isPublished,
         startDate: form.startDate!,
         endDate: form.endDate!,
@@ -246,6 +250,23 @@ export default function EventCreateModal({ open, onClose, onCreated }: Props) {
                       value={form.venue ?? ""}
                       onChange={(e) =>
                         setForm((f: any) => ({ ...f, venue: e.target.value }))
+                      }
+                    />
+                  </label>
+
+                  <label className="text-sm font-semibold text-[#163968]">
+                    Registration / event page URL (optional)
+                    <input
+                      type="url"
+                      inputMode="url"
+                      placeholder="https://events.baseballalliance.co/…"
+                      className="mt-1 w-full rounded-lg border border-black/15 px-3 py-2"
+                      value={form.registerUrl ?? ""}
+                      onChange={(e) =>
+                        setForm((f: any) => ({
+                          ...f,
+                          registerUrl: e.target.value,
+                        }))
                       }
                     />
                   </label>

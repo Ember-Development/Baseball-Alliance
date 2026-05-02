@@ -225,6 +225,9 @@ model Event {
   venue       String?
   isPublished Boolean   @default(false)
 
+  /// Registration or public event page (e.g. events.baseballalliance.co/...)
+  registerUrl String?
+
   // For COMBINEs; validate at app-level when type === COMBINE
   startTime   String?
 
@@ -506,8 +509,31 @@ model MediaEvent {
 model SiteConfig {
   id              String   @id @default(cuid())
   whoWeAre        String
+  /// Repeatable intro blocks for Who We Are (variant lead = prominent, body = supporting)
+  whoWeAreSections Json?
+
   featuredEventId String?
   featuredEvent   Event?   @relation("FeaturedEvent", fields: [featuredEventId], references: [id])
+
+  heroEyebrow       String?
+  heroHeadline      String?
+  heroSubcopy       String?
+  heroCtaLabel      String?
+  heroCtaHref       String?
+  heroPosterUrl     String?
+  heroVideoDesktopUrl String?
+  heroVideoMobileUrl  String?
+
+  /// Contact strip JSON: lines, buttonLabel, mailto, imageUrl
+  contactCta        Json?
+
+  membershipVideoUrl String?
+  membershipCtaUrl   String?
+
+  /// Structured copy/cards for /membership (JSON)
+  membershipPage Json?
+  /// Structured copy/profiles/videos for /leadership (JSON)
+  leadershipPage Json?
 
   solutions       SolutionCategory[]
   whoWeAreImages  SiteImage[]
@@ -515,6 +541,7 @@ model SiteConfig {
   structure       OrgStructureItem[]
   memberships     MembershipTier[]
   headers         PageHeader[]
+  pages           CmsPage[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -549,7 +576,38 @@ model SiteImage {
 
   url          String
   alt          String?
+  title        String?
+  body         String?
   order        Int        @default(0)
+}
+
+model CmsPage {
+  id          String      @id @default(cuid())
+  siteConfigId String
+  siteConfig   SiteConfig  @relation(fields: [siteConfigId], references: [id], onDelete: Cascade)
+
+  slug        String
+  title       String?
+  published   Boolean     @default(false)
+  blocks      CmsPageBlock[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([siteConfigId, slug])
+}
+
+model CmsPageBlock {
+  id        String  @id @default(cuid())
+  pageId    String
+  page      CmsPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  sortOrder Int     @default(0)
+  blockType String
+  props     Json    @default("{}")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model CallToAction {

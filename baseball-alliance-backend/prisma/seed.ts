@@ -350,11 +350,22 @@ async function main() {
             url: "https://example.com/img/ba-1.jpg",
             alt: "Players at combine",
             order: 1,
+            title: "Invite-Only Alliance Top Select Teams",
+            body: "We facilitate a beneficial, thoughtful and candid understanding of the best information — and present solutions in that context for our members and supporters.",
           },
           {
             url: "https://example.com/img/ba-2.jpg",
             alt: "Showcase batting",
             order: 2,
+            title: "Elite Tournaments & Individual Showcases",
+            body: "Continuously improving the landscape of clinics, tournaments and showcases is essential to our effectiveness, and we will always hold ourselves to the highest level of accountability.",
+          },
+          {
+            url: "https://example.com/img/ba-3.jpg",
+            alt: "Education",
+            order: 3,
+            title: "Athlete Education Workshops & Guides",
+            body: "Who provides instruction, what values guide decisions, when to practice, play and learn, where to compete and get seen, and how to navigate development, metrics, recruiting, pro avenues, transfer portal, NIL, media and representation — all matter.",
           },
         ],
       },
@@ -417,6 +428,32 @@ async function main() {
             title: "Membership",
             subtitle: "Perks for players & teams",
             imageUrl: null,
+          },
+          {
+            pageKey: "leadership",
+            title: "Leadership",
+            subtitle: "Experience that shapes the game",
+            imageUrl: null,
+          },
+        ],
+      },
+      pages: {
+        create: [
+          {
+            slug: "demo",
+            title: "Demo CMS page",
+            published: true,
+            blocks: {
+              create: [
+                {
+                  sortOrder: 0,
+                  blockType: "richText",
+                  props: {
+                    html: "<p>This content comes from the CMS. Edit it under <strong>Admin → Page builder</strong>.</p>",
+                  },
+                },
+              ],
+            },
           },
         ],
       },
