@@ -56,5 +56,5 @@ export function resolveWhoWeAreSectionsForSite(site: {
   if (site.whoWeAreSections != null) {
     return mergeWhoWeAreSections(site.whoWeAreSections);
   }
-  return sectionsFromLegacyWhoWeAre(site.whoWeAre);
+  return sectionsFromLegacyWhoWeAre(site.whoWeAre ?? "");
 }

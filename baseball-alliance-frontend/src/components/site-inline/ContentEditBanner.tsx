@@ -11,6 +11,7 @@ const ContentEditBanner: React.FC = () => {
   const {
     contentEditMode,
     setContentEditMode,
+    draftSite,
     saving,
     saveError,
     saveAll,
@@ -34,9 +35,13 @@ const ContentEditBanner: React.FC = () => {
         <div className="flex items-center gap-3">
           <span className="inline-flex h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
           <span className="font-semibold">Editing content</span>
-          <span className="text-amber-900/80 hidden sm:inline">
-            Click any text to edit — hover images to replace.
-          </span>
+          {!draftSite ? (
+            <span className="text-amber-900/80">Loading editor…</span>
+          ) : (
+            <span className="text-amber-900/80 hidden sm:inline">
+              Click any text to edit — hover images to replace.
+            </span>
+          )}
           {dirty && (
             <span className="rounded-full bg-amber-500/90 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-white">
               Unsaved changes
@@ -85,7 +90,7 @@ const ContentEditBanner: React.FC = () => {
             <>
               <button
                 type="button"
-                disabled={!dirty || saving}
+                disabled={!dirty || saving || !draftSite}
                 onClick={() => setConfirmingDiscard(true)}
                 className="rounded-full border border-amber-800/30 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-950 hover:bg-amber-100 disabled:opacity-40"
               >
@@ -93,7 +98,7 @@ const ContentEditBanner: React.FC = () => {
               </button>
               <button
                 type="button"
-                disabled={saving}
+                disabled={saving || !draftSite}
                 onMouseDown={() => {
                   // Commit any focused contentEditable before save handler runs.
                   const ae = document.activeElement as HTMLElement | null;
