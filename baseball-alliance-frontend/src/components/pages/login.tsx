@@ -3,8 +3,8 @@ import { api, setToken } from "../../lib/api";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 
 export default function Login() {
-  const [email, setEmail] = useState("admin@example.com");
-  const [password, setPassword] = useState("Password123!");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -88,8 +88,7 @@ export default function Login() {
         </button>
 
         <p className="text-xs text-black/60 text-center">
-          Tip: use <span className="font-medium">admin@example.com</span> /{" "}
-          <span className="font-medium">Password123!</span> (from seed)
+          For admin use only at the moment.
         </p>
       </form>
     </div>

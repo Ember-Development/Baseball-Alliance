@@ -234,7 +234,10 @@ export function useLiveSiteConfig() {
     ctx.contentEditMode && isAdmin && ctx.draftSite ? ctx.draftSite : site;
   return {
     site: live,
-    isContentEditUI: Boolean(ctx.contentEditMode && isAdmin),
+    /** Inline CMS only once admin draft is loaded; avoids setDraftSite no-ops while draft is null. */
+    isContentEditUI: Boolean(
+      ctx.contentEditMode && isAdmin && ctx.draftSite
+    ),
     draftReady: Boolean(ctx.draftSite),
     setDraftSite: ctx.setDraftSite,
     savePatch: ctx.savePatch,

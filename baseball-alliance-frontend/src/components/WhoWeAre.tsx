@@ -7,7 +7,10 @@ import { useLiveSiteConfig } from "../context/SiteEditModeContext";
 import EditableText from "./site-inline/EditableText";
 import { EditableMedia } from "./site-inline/EditableMedia";
 import type { WhoWeAreSectionPayload } from "../lib/site";
-import { resolveWhoWeAreSectionsForSite } from "../lib/whoWeAreSections";
+import {
+  DEFAULT_WHO_WE_ARE_SECTIONS,
+  resolveWhoWeAreSectionsForSite,
+} from "../lib/whoWeAreSections";
 
 type ImageCardProps = {
   title: string;
@@ -162,7 +165,7 @@ const WhoWeAre: React.FC = () => {
   ) => {
     setDraftSite((d) => {
       if (!d) return d;
-      const whoWeAreImages = [...d.whoWeAreImages];
+      const whoWeAreImages = [...(d.whoWeAreImages ?? [])];
       const current = whoWeAreImages[idx];
       if (!current) return d;
       whoWeAreImages[idx] = { ...current, ...patch };
@@ -173,30 +176,32 @@ const WhoWeAre: React.FC = () => {
   const removeImageAt = (idx: number) => {
     setDraftSite((d) => {
       if (!d) return d;
-      const whoWeAreImages = d.whoWeAreImages.filter((_, i) => i !== idx);
+      const whoWeAreImages = (d.whoWeAreImages ?? []).filter(
+        (_, i) => i !== idx
+      );
       return { ...d, whoWeAreImages };
     });
   };
 
   const addImage = () => {
-    setDraftSite((d) =>
-      d
-        ? {
-            ...d,
-            whoWeAreImages: [
-              ...d.whoWeAreImages,
-              {
-                id: `new-${Date.now()}`,
-                url: "https://via.placeholder.com/800x500?text=New+card",
-                alt: "",
-                title: "New card",
-                body: "",
-                order: d.whoWeAreImages.length,
-              },
-            ],
-          }
-        : d
-    );
+    setDraftSite((d) => {
+      if (!d) return d;
+      const imgs = d.whoWeAreImages ?? [];
+      return {
+        ...d,
+        whoWeAreImages: [
+          ...imgs,
+          {
+            id: `new-${Date.now()}`,
+            url: "https://via.placeholder.com/800x500?text=New+card",
+            alt: "",
+            title: "New card",
+            body: "",
+            order: imgs.length,
+          },
+        ],
+      };
+    });
   };
 
   type CardItem = {
@@ -245,10 +250,15 @@ const WhoWeAre: React.FC = () => {
     ];
   }, [site?.whoWeAreImages]);
 
-  const sections = useMemo(
-    () => (site ? resolveWhoWeAreSectionsForSite(site) : []),
-    [site?.whoWeAre, site?.whoWeAreSections]
-  );
+  const sections = useMemo(() => {
+    if (!site) return [];
+    const resolved = resolveWhoWeAreSectionsForSite(site);
+    if (isContentEditUI) return resolved;
+    if (!resolved.some((s) => s.body?.trim())) {
+      return DEFAULT_WHO_WE_ARE_SECTIONS.map((s) => ({ ...s }));
+    }
+    return resolved;
+  }, [site, isContentEditUI, site?.whoWeAre, site?.whoWeAreSections]);
 
   const patchSections = useCallback(
     (fn: (prev: WhoWeAreSectionPayload[]) => WhoWeAreSectionPayload[]) => {
