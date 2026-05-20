@@ -76,17 +76,17 @@ const SHOWCASE_DESCRIPTION =
 
 /** Shown only when there are no published SHOWCASE rows from the API */
 const FALLBACK_SHOWCASES: ShowcaseEvent[] = [
-  {
-    title: "Apex Baseball Showcase",
-    description: SHOWCASE_DESCRIPTION,
-    date: "June 6, 2026",
-    dateForCountdown: new Date("2026-06-06T09:00:00"),
-    time: "9:00 AM - 3:00 PM",
-    venue: "Houston, TX",
-    serial: "BASC-0606-2026-TX-APX",
-    registerUrl:
-      "https://events.baseballalliance.co/events/apex-baseball-showcase-houston-tx-06-06-2026",
-  },
+  // {
+  //   title: "Apex Baseball Showcase",
+  //   description: SHOWCASE_DESCRIPTION,
+  //   date: "June 6, 2026",
+  //   dateForCountdown: new Date("2026-06-06T09:00:00"),
+  //   time: "9:00 AM - 3:00 PM",
+  //   venue: "Houston, TX",
+  //   serial: "BASC-0606-2026-TX-APX",
+  //   registerUrl:
+  //     "https://events.baseballalliance.co/events/apex-baseball-showcase-houston-tx-06-06-2026",
+  // },
   {
     title: "Action Baseball Showcase",
     description: SHOWCASE_DESCRIPTION,
