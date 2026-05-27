@@ -1,5 +1,6 @@
 // src/components/EventSection.tsx
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { useCountdown } from "../hooks/useCountdown";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../lib/api";
@@ -10,7 +11,7 @@ import ballWatermark from "../assets/baseballheader.png";
 import barcodeImg from "../assets/barcode.png";
 
 type ShowcaseEvent = {
-  id?: string;
+  id: string;
   title: string;
   description: string;
   date: string;
@@ -73,57 +74,6 @@ function eventPublicToShowcase(e: EventPublic): ShowcaseEvent {
   };
 }
 
-const SHOWCASE_DESCRIPTION =
-  "An elite evaluation event where players showcase speed, power, arm strength, fielding, and hitting in front of college coaches and pro scouts. Verified results are recorded and shared to help athletes earn opportunities at the next level.";
-
-/** Shown only when there are no published SHOWCASE rows from the API */
-const FALLBACK_SHOWCASES: ShowcaseEvent[] = [
-  // {
-  //   title: "Apex Baseball Showcase",
-  //   description: SHOWCASE_DESCRIPTION,
-  //   date: "June 6, 2026",
-  //   dateForCountdown: new Date("2026-06-06T09:00:00"),
-  //   time: "9:00 AM - 3:00 PM",
-  //   venue: "Houston, TX",
-  //   serial: "BASC-0606-2026-TX-APX",
-  //   registerUrl:
-  //     "https://events.baseballalliance.co/events/apex-baseball-showcase-houston-tx-06-06-2026",
-  // },
-  {
-    title: "Action Baseball Showcase",
-    description: SHOWCASE_DESCRIPTION,
-    date: "June 7, 2026",
-    dateForCountdown: new Date("2026-06-07T09:00:00"),
-    time: "9:00 AM - 3:00 PM",
-    venue: "Austin, TX",
-    serial: "BASC-0607-2026-TX-ACT",
-    registerUrl:
-      "https://events.baseballalliance.co/events/action-baseball-showcase-austin-tx-06-07-2026",
-  },
-  {
-    title: "July College Showcase",
-    description: SHOWCASE_DESCRIPTION,
-    date: "July 20, 2026",
-    dateForCountdown: new Date("2026-07-20T09:00:00"),
-    time: "9:00 AM - 3:00 PM",
-    venue: "Waco, TX",
-    serial: "BASC-0720-2026-TX-JUL",
-    registerUrl:
-      "https://events.baseballalliance.co/events/july-college-showcase-waco-tx-07-20-2026",
-  },
-  {
-    title: "August College Showcase",
-    description: SHOWCASE_DESCRIPTION,
-    date: "August 8, 2026",
-    dateForCountdown: new Date("2026-08-08T09:00:00"),
-    time: "9:00 AM - 3:00 PM",
-    venue: "Waco, TX",
-    serial: "BASC-0808-2026-TX-AUG",
-    registerUrl:
-      "https://events.baseballalliance.co/events/august-college-showcase-waco-tx-08-08-2026",
-  },
-];
-
 const EventSection: React.FC = () => {
   const SEE_ALL_EVENTS_URL = "https://events.baseballalliance.co/";
   const { user } = useAuth();
@@ -145,10 +95,10 @@ const EventSection: React.FC = () => {
     loadShowcases();
   }, [loadShowcases]);
 
-  const showcases = useMemo(() => {
-    if (fromApi.length > 0) return fromApi.map(eventPublicToShowcase);
-    return FALLBACK_SHOWCASES;
-  }, [fromApi]);
+  const showcases = useMemo(
+    () => fromApi.map(eventPublicToShowcase),
+    [fromApi]
+  );
 
   const apiEventsById = useMemo(
     () => new Map(fromApi.map((e) => [e.id, e])),
@@ -161,7 +111,6 @@ const EventSection: React.FC = () => {
 
   const openEdit = useCallback(
     (showcase: ShowcaseEvent) => {
-      if (!showcase.id) return;
       const event = apiEventsById.get(showcase.id);
       if (event) setEditingEvent(event);
     },
@@ -198,13 +147,21 @@ const EventSection: React.FC = () => {
 
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {isAdmin && (
-              <button
-                type="button"
-                onClick={() => setOpenCreate(true)}
-                className="inline-flex items-center rounded-lg bg-[#163968] px-3 py-1.5 text-xs sm:text-[13px] font-semibold text-white shadow hover:brightness-110 active:brightness-95 transition"
-              >
-                New event
-              </button>
+              <>
+                <Link
+                  to="/admin/events"
+                  className="inline-flex items-center rounded-lg border border-[#163968]/25 bg-white px-3 py-1.5 text-xs sm:text-[13px] font-semibold text-[#163968] shadow-sm hover:bg-[#163968]/5 transition"
+                >
+                  Manage events
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setOpenCreate(true)}
+                  className="inline-flex items-center rounded-lg bg-[#163968] px-3 py-1.5 text-xs sm:text-[13px] font-semibold text-white shadow hover:brightness-110 active:brightness-95 transition"
+                >
+                  New event
+                </button>
+              </>
             )}
             <a
               href={SEE_ALL_EVENTS_URL}
@@ -275,7 +232,7 @@ const EventSection: React.FC = () => {
             serial={upcomingShowcase.serial}
             registerUrl={upcomingShowcase.registerUrl}
             adminActions={
-              isAdmin && upcomingShowcase.id ? (
+              isAdmin ? (
                 <EventAdminActions onEdit={() => openEdit(upcomingShowcase)} />
               ) : undefined
             }
@@ -296,7 +253,7 @@ const EventSection: React.FC = () => {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {showcases.slice(1).map((showcase) => (
               <StubTicket
-                key={showcase.id ?? showcase.serial}
+                key={showcase.id}
                 title={showcase.title}
                 date={showcase.date}
                 time={showcase.time}
@@ -304,7 +261,7 @@ const EventSection: React.FC = () => {
                 serial={showcase.serial}
                 href={showcase.registerUrl}
                 adminActions={
-                  isAdmin && showcase.id ? (
+                  isAdmin ? (
                     <EventAdminActions onEdit={() => openEdit(showcase)} />
                   ) : undefined
                 }

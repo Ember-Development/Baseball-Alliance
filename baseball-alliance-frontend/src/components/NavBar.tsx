@@ -296,6 +296,14 @@ const NavBar: React.FC = () => {
                       >
                         Site CMS
                       </Link>
+                      <Link
+                        role="menuitem"
+                        to="/admin/events"
+                        onClick={() => setAvatarOpen(false)}
+                        className="block px-4 py-2 text-sm font-semibold text-[#163968] hover:bg-white/70"
+                      >
+                        Events
+                      </Link>
                       {/* Page builder paused — restore route in App.tsx first */}
                       {/* <Link
                         role="menuitem"

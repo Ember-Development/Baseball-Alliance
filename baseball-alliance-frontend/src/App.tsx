@@ -14,6 +14,7 @@ import InstagramFeed from "./components/InstagramFeed";
 import ScrollToTop from "./components/ui/ScrollToTop";
 import Login from "./components/pages/login";
 import AdminSiteEditor from "./components/admin/AdminSiteEditor";
+import AdminEventsPage from "./components/admin/AdminEventsPage";
 /* Page builder + public CMS page routes — paused; expand later.
 import AdminPagesIndex from "./components/admin/AdminPagesIndex";
 import AdminPageEditor from "./components/admin/AdminPageEditor";
@@ -57,6 +58,7 @@ export default function App() {
           {/* Page builder paused — re-import CmsPageView + AdminPages* and restore routes */}
           {/* <Route path="/pages/:slug" element={<CmsPageView />} /> */}
           <Route path="/admin/site" element={<AdminSiteEditor />} />
+          <Route path="/admin/events" element={<AdminEventsPage />} />
           {/* <Route path="/admin/pages" element={<AdminPagesIndex />} /> */}
           {/* <Route path="/admin/pages/:slug" element={<AdminPageEditor />} /> */}
           <Route path="/leadership" element={<Leadership />} />
