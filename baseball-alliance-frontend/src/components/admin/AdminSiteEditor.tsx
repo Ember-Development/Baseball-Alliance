@@ -107,6 +107,9 @@ const AdminSiteEditor: React.FC = () => {
             >
               Page builder
             </Link> */}
+            <Link to="/admin/events" className="text-slate-600 underline">
+              Events
+            </Link>
             <Link to="/" className="text-slate-600 underline">
               View site
             </Link>
