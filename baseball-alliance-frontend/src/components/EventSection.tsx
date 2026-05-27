@@ -10,6 +10,7 @@ import ballWatermark from "../assets/baseballheader.png";
 import barcodeImg from "../assets/barcode.png";
 
 type ShowcaseEvent = {
+  id?: string;
   title: string;
   description: string;
   date: string;
@@ -59,6 +60,7 @@ function formatEventTime(e: EventPublic): string {
 
 function eventPublicToShowcase(e: EventPublic): ShowcaseEvent {
   return {
+    id: e.id,
     title: e.title,
     description:
       "Register and view details for this Baseball Alliance showcase event.",
@@ -127,6 +129,7 @@ const EventSection: React.FC = () => {
   const { user } = useAuth();
   const isAdmin = Boolean(user?.roles?.includes("ADMIN"));
   const [openCreate, setOpenCreate] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<EventPublic | null>(null);
   const [fromApi, setFromApi] = useState<EventPublic[]>([]);
 
   const loadShowcases = useCallback(async () => {
@@ -147,6 +150,29 @@ const EventSection: React.FC = () => {
     return FALLBACK_SHOWCASES;
   }, [fromApi]);
 
+  const apiEventsById = useMemo(
+    () => new Map(fromApi.map((e) => [e.id, e])),
+    [fromApi]
+  );
+
+  const handleEventSaved = useCallback(() => {
+    void loadShowcases();
+  }, [loadShowcases]);
+
+  const openEdit = useCallback(
+    (showcase: ShowcaseEvent) => {
+      if (!showcase.id) return;
+      const event = apiEventsById.get(showcase.id);
+      if (event) setEditingEvent(event);
+    },
+    [apiEventsById]
+  );
+
+  const closeModal = useCallback(() => {
+    setOpenCreate(false);
+    setEditingEvent(null);
+  }, []);
+
   // Use the first showcase for the countdown (only if available)
   const upcomingShowcase = showcases[0];
   const { days, hours, minutes, seconds } = useCountdown(
@@ -156,11 +182,12 @@ const EventSection: React.FC = () => {
   return (
     <div id="events" className="mt-16 mx-auto max-w-7xl scroll-mt-24">
       <EventCreateModal
-        open={openCreate}
-        onClose={() => setOpenCreate(false)}
-        onCreated={() => {
-          void loadShowcases();
-        }}
+        open={openCreate || editingEvent !== null}
+        event={editingEvent}
+        onClose={closeModal}
+        onCreated={handleEventSaved}
+        onUpdated={handleEventSaved}
+        onDeleted={handleEventSaved}
       />
       {/* Header + countdown */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
@@ -247,6 +274,11 @@ const EventSection: React.FC = () => {
             venue={upcomingShowcase.venue}
             serial={upcomingShowcase.serial}
             registerUrl={upcomingShowcase.registerUrl}
+            adminActions={
+              isAdmin && upcomingShowcase.id ? (
+                <EventAdminActions onEdit={() => openEdit(upcomingShowcase)} />
+              ) : undefined
+            }
           />
         </div>
       )}
@@ -264,13 +296,18 @@ const EventSection: React.FC = () => {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {showcases.slice(1).map((showcase) => (
               <StubTicket
-                key={showcase.serial}
+                key={showcase.id ?? showcase.serial}
                 title={showcase.title}
                 date={showcase.date}
                 time={showcase.time}
                 venue={showcase.venue}
                 serial={showcase.serial}
                 href={showcase.registerUrl}
+                adminActions={
+                  isAdmin && showcase.id ? (
+                    <EventAdminActions onEdit={() => openEdit(showcase)} />
+                  ) : undefined
+                }
               />
             ))}
           </div>
@@ -279,6 +316,24 @@ const EventSection: React.FC = () => {
     </div>
   );
 };
+
+function EventAdminActions({ onEdit }: { onEdit: () => void }) {
+  return (
+    <div className="flex items-center gap-2">
+      <button
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onEdit();
+        }}
+        className="inline-flex items-center rounded-md border border-[#163968]/25 bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-[#163968] shadow-sm hover:bg-white"
+      >
+        Edit
+      </button>
+    </div>
+  );
+}
 
 function RealTicket({
   hologramLogo,
@@ -289,6 +344,7 @@ function RealTicket({
   venue,
   serial,
   registerUrl,
+  adminActions,
 }: {
   hologramLogo?: string;
   title: string;
@@ -298,6 +354,7 @@ function RealTicket({
   venue: string;
   serial: string;
   registerUrl: string;
+  adminActions?: React.ReactNode;
 }) {
   return (
     <div
@@ -362,11 +419,12 @@ function RealTicket({
             {/* Serial + microtext */}
 
             {/* Desktop register */}
-            <div className="hidden md:flex mt-3">
+            <div className="hidden md:flex mt-3 items-center gap-3">
               <RegisterNowButton
                 registerUrl={registerUrl}
                 className="inline-flex items-center justify-center rounded-md bg-[#163968] text-white font-semibold py-2 px-4 shadow hover:brightness-110 active:brightness-95 transition"
               />
+              {adminActions}
             </div>
           </div>
 
@@ -394,10 +452,15 @@ function RealTicket({
         {/* RIGHT: Stub with rotated barcode */}
         <div className="relative flex flex-col items-center justify-center px-4 sm:px-6 py-4">
           {/* Mobile register */}
-          <RegisterNowButton
-            registerUrl={registerUrl}
-            className="md:hidden w-full inline-flex items-center justify-center rounded-md bg-[#163968] text-white font-semibold py-2.5 px-4 shadow hover:brightness-110 active:brightness-95 transition mb-3"
-          />
+          <div className="md:hidden w-full mb-3 space-y-2">
+            <RegisterNowButton
+              registerUrl={registerUrl}
+              className="w-full inline-flex items-center justify-center rounded-md bg-[#163968] text-white font-semibold py-2.5 px-4 shadow hover:brightness-110 active:brightness-95 transition"
+            />
+            {adminActions && (
+              <div className="flex justify-center">{adminActions}</div>
+            )}
+          </div>
 
           {/* Rotated barcode */}
           <div className="w-full flex flex-col items-center justify-center gap-2">
@@ -519,6 +582,7 @@ function StubTicket({
   venue,
   serial,
   href,
+  adminActions,
 }: {
   title: string;
   date: string;
@@ -526,20 +590,19 @@ function StubTicket({
   venue: string;
   serial: string;
   href: string;
+  adminActions?: React.ReactNode;
 }) {
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label={`${title} on ${date} at ${time}. Opens in a new tab.`}
-      className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#163968] rounded-lg"
+  const hasLink = href.trim().length > 0;
+
+  const card = (
+    <div
+      className="relative w-full max-w-md rounded-lg shadow-[0_6px_20px_rgba(0,0,0,0.25)] overflow-hidden transform transition group-hover:-rotate-1"
+      style={{ background: "#f7f3ea", border: "2px solid #162a4e" }}
     >
-      <div
-        className="relative w-full max-w-md rounded-lg shadow-[0_6px_20px_rgba(0,0,0,0.25)] overflow-hidden transform transition group-hover:-rotate-1"
-        style={{ background: "#f7f3ea", border: "2px solid #162a4e" }}
-      >
-        <div className="grid grid-cols-[50px_1fr_auto]">
+      {adminActions && (
+        <div className="absolute top-2 right-2 z-10">{adminActions}</div>
+      )}
+      <div className="grid grid-cols-[50px_1fr_auto]">
           {/* Left admit strip */}
           <div className="bg-[#162a4e] flex items-center justify-center px-1">
             <span className="text-white text-[11px] font-bold tracking-[0.25em] [writing-mode:vertical-rl] rotate-180">
@@ -560,8 +623,23 @@ function StubTicket({
               {serial}
             </span>
           </div>
-        </div>
       </div>
+    </div>
+  );
+
+  if (!hasLink) {
+    return <div className="group block rounded-lg">{card}</div>;
+  }
+
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`${title} on ${date} at ${time}. Opens in a new tab.`}
+      className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#163968] rounded-lg"
+    >
+      {card}
     </a>
   );
 }
