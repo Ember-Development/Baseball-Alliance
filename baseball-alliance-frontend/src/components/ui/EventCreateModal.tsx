@@ -1,21 +1,41 @@
 // src/components/EventCreateModal.tsx
-import React, { useMemo, useState } from "react";
-import { type CreateEventInput, type EventType } from "../../lib/event";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  type CreateEventInput,
+  type EventPublic,
+  type EventType,
+} from "../../lib/event";
 import { useAuth } from "../../context/AuthContext";
 import { api } from "../../lib/api";
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  onCreated?: (e: any) => void;
+  event?: EventPublic | null;
+  onCreated?: (e: EventPublic) => void;
+  onUpdated?: (e: EventPublic) => void;
+  onDeleted?: (id: string) => void;
 };
 
 const eventTypes: EventType[] = ["TOURNAMENT", "COMBINE", "SHOWCASE"];
 
-export default function EventCreateModal({ open, onClose, onCreated }: Props) {
+function toDateInputValue(iso: string): string {
+  return iso.slice(0, 10);
+}
+
+export default function EventCreateModal({
+  open,
+  onClose,
+  event,
+  onCreated,
+  onUpdated,
+  onDeleted,
+}: Props) {
   const { user } = useAuth();
+  const isEditMode = Boolean(event);
   const [step, setStep] = useState<1 | 2>(1);
   const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [chosenType, setChosenType] = useState<EventType | null>(null);
 
@@ -44,6 +64,41 @@ export default function EventCreateModal({ open, onClose, onCreated }: Props) {
     if (chosenType === "COMBINE" && !form.startTime) return false;
     return true;
   }, [form, chosenType]);
+
+  useEffect(() => {
+    if (!open) return;
+    if (event) {
+      setStep(2);
+      setChosenType(event.type);
+      setForm({
+        title: event.title,
+        city: event.city,
+        state: event.state,
+        venue: event.venue ?? "",
+        registerUrl: event.registerUrl ?? "",
+        isPublished: event.isPublished,
+        startDate: toDateInputValue(event.startDate),
+        endDate: toDateInputValue(event.endDate),
+        startTime: event.startTime ?? "",
+      });
+      setError(null);
+      return;
+    }
+    setStep(1);
+    setChosenType(null);
+    setForm({
+      title: "",
+      city: "",
+      state: "TX",
+      venue: "",
+      registerUrl: "",
+      isPublished: false,
+      startDate: "",
+      endDate: "",
+      startTime: "",
+    });
+    setError(null);
+  }, [open, event]);
 
   if (!open) return null;
 
@@ -84,13 +139,40 @@ export default function EventCreateModal({ open, onClose, onCreated }: Props) {
         endDate: form.endDate!,
         startTime: chosenType === "COMBINE" ? form.startTime! : undefined,
       };
-      const created = await api.createEvent(payload);
-      onCreated?.(created);
+      if (isEditMode && event) {
+        const updated = await api.updateEvent(event.id, payload);
+        onUpdated?.(updated);
+      } else {
+        const created = await api.createEvent(payload);
+        onCreated?.(created);
+      }
       closeAll();
     } catch (err: any) {
-      setError(err.message ?? "Failed to create event");
+      setError(
+        err.message ??
+          (isEditMode ? "Failed to update event" : "Failed to create event")
+      );
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!event) return;
+    const confirmed = window.confirm(
+      `Delete "${event.title}"? This cannot be undone.`
+    );
+    if (!confirmed) return;
+    setError(null);
+    setDeleting(true);
+    try {
+      await api.deleteEvent(event.id);
+      onDeleted?.(event.id);
+      closeAll();
+    } catch (err: any) {
+      setError(err.message ?? "Failed to delete event");
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -102,7 +184,7 @@ export default function EventCreateModal({ open, onClose, onCreated }: Props) {
       <div className="relative w-full max-w-lg rounded-2xl border border-white/15 bg-white/80 backdrop-blur-xl shadow-xl">
         <div className="px-5 py-4 border-b border-white/20 flex items-center justify-between">
           <h3 className="text-lg font-extrabold text-[#163968]">
-            Create Event
+            {isEditMode ? "Edit Event" : "Create Event"}
           </h3>
           <button
             onClick={closeAll}
@@ -150,6 +232,14 @@ export default function EventCreateModal({ open, onClose, onCreated }: Props) {
 
             {step === 2 && (
               <>
+                {isEditMode && chosenType && (
+                  <p className="text-sm text-black/70">
+                    Type:{" "}
+                    <span className="font-semibold text-[#163968]">
+                      {chosenType}
+                    </span>
+                  </p>
+                )}
                 <div className="grid grid-cols-1 gap-3">
                   <label className="text-sm font-semibold text-[#163968]">
                     Title
@@ -288,24 +378,41 @@ export default function EventCreateModal({ open, onClose, onCreated }: Props) {
 
                 {error && <div className="text-sm text-red-600">{error}</div>}
 
-                <div className="flex items-center justify-between">
-                  <button
-                    type="button"
-                    onClick={() => setStep(1)}
-                    className="text-sm underline"
-                  >
-                    Back
-                  </button>
+                <div className="flex items-center justify-between gap-3">
+                  {isEditMode ? (
+                    <button
+                      type="button"
+                      onClick={() => void handleDelete()}
+                      disabled={deleting || submitting}
+                      className="text-sm font-semibold text-red-600 hover:text-red-700 disabled:opacity-50"
+                    >
+                      {deleting ? "Deleting…" : "Delete event"}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setStep(1)}
+                      className="text-sm underline"
+                    >
+                      Back
+                    </button>
+                  )}
                   <button
                     type="submit"
-                    disabled={!canSubmit || submitting}
+                    disabled={!canSubmit || submitting || deleting}
                     className={`px-4 py-2 rounded-lg font-semibold text-white ${
-                      !canSubmit || submitting
+                      !canSubmit || submitting || deleting
                         ? "bg-[#163968]/60"
                         : "bg-[#163968] hover:brightness-110"
                     }`}
                   >
-                    {submitting ? "Creating…" : "Create Event"}
+                    {submitting
+                      ? isEditMode
+                        ? "Saving…"
+                        : "Creating…"
+                      : isEditMode
+                        ? "Save changes"
+                        : "Create Event"}
                   </button>
                 </div>
               </>
