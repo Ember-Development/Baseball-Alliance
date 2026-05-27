@@ -4,6 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import { api } from "../../lib/api";
 import type { EventPublic, EventType } from "../../lib/event";
 import EventCreateModal from "../ui/EventCreateModal";
+import AdminPageShell from "./AdminPageShell";
 
 const EVENT_TYPES: EventType[] = ["TOURNAMENT", "COMBINE", "SHOWCASE"];
 
@@ -117,7 +118,7 @@ const AdminEventsPage: React.FC = () => {
   const publishedCount = events.filter((e) => e.isPublished).length;
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 py-10 px-4">
+    <AdminPageShell>
       <EventCreateModal
         open={openCreate || editingEvent !== null}
         event={editingEvent}
@@ -291,7 +292,7 @@ const AdminEventsPage: React.FC = () => {
           )}
         </section>
       </div>
-    </main>
+    </AdminPageShell>
   );
 };
 

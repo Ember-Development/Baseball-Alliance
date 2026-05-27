@@ -21,6 +21,7 @@ import { useAuth } from "../../context/AuthContext";
 import { api } from "../../lib/api";
 import type { SitePublic } from "../../lib/site";
 import { CMS_BLOCK_TYPES } from "../../cms/blockRegistry";
+import AdminPageShell, { ADMIN_PAGE_SHELL_CLASS } from "./AdminPageShell";
 
 type LocalBlock = {
   clientKey: string;
@@ -260,14 +261,16 @@ const AdminPageEditor: React.FC = () => {
 
   if (err && !site) {
     return (
-      <main className="min-h-screen flex items-center justify-center p-6">
+      <main
+        className={`${ADMIN_PAGE_SHELL_CLASS} flex items-center justify-center`}
+      >
         <p className="text-red-700">{err}</p>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 py-10 px-4 text-slate-900">
+    <AdminPageShell>
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h1 className="text-xl font-bold text-[#163968]">
@@ -360,7 +363,7 @@ const AdminPageEditor: React.FC = () => {
           Save page
         </button>
       </div>
-    </main>
+    </AdminPageShell>
   );
 };
 

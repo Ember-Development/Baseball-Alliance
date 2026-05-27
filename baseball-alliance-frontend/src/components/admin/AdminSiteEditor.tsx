@@ -12,6 +12,7 @@ import {
   ContactCtaForm,
   SITE_EDITOR_INPUT_CLS,
 } from "../site-inline/siteEditorPrimitives";
+import AdminPageShell, { ADMIN_PAGE_SHELL_CLASS } from "./AdminPageShell";
 
 const TABS = [
   "Hero",
@@ -64,14 +65,18 @@ const AdminSiteEditor: React.FC = () => {
 
   if (err && !site) {
     return (
-      <main className="min-h-screen flex items-center justify-center p-6">
+      <main
+        className={`${ADMIN_PAGE_SHELL_CLASS} flex items-center justify-center`}
+      >
         <p className="text-red-700">{err}</p>
       </main>
     );
   }
   if (!site) {
     return (
-      <main className="min-h-screen flex items-center justify-center text-slate-500">
+      <main
+        className={`${ADMIN_PAGE_SHELL_CLASS} flex items-center justify-center text-slate-500`}
+      >
         Loading…
       </main>
     );
@@ -95,7 +100,7 @@ const AdminSiteEditor: React.FC = () => {
   const inputCls = SITE_EDITOR_INPUT_CLS;
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 py-10 px-4">
+    <AdminPageShell>
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <h1 className="text-2xl font-bold text-[#163968]">Site CMS</h1>
@@ -513,7 +518,7 @@ const AdminSiteEditor: React.FC = () => {
           </section>
         )}
       </div>
-    </main>
+    </AdminPageShell>
   );
 };
 
