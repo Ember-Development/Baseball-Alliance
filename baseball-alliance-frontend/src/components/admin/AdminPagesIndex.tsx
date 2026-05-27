@@ -3,6 +3,7 @@ import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { api } from "../../lib/api";
 import type { SitePublic } from "../../lib/site";
+import AdminPageShell, { ADMIN_PAGE_SHELL_CLASS } from "./AdminPageShell";
 
 const AdminPagesIndex: React.FC = () => {
   const { user } = useAuth();
@@ -25,7 +26,9 @@ const AdminPagesIndex: React.FC = () => {
 
   if (err) {
     return (
-      <main className="min-h-screen flex items-center justify-center p-6">
+      <main
+        className={`${ADMIN_PAGE_SHELL_CLASS} flex items-center justify-center`}
+      >
         <p className="text-red-700">{err}</p>
       </main>
     );
@@ -33,14 +36,16 @@ const AdminPagesIndex: React.FC = () => {
 
   if (!site) {
     return (
-      <main className="min-h-screen flex items-center justify-center text-slate-500">
+      <main
+        className={`${ADMIN_PAGE_SHELL_CLASS} flex items-center justify-center text-slate-500`}
+      >
         Loading…
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 py-10 px-4 text-slate-900">
+    <AdminPageShell>
       <div className="max-w-xl mx-auto space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold text-[#163968]">Page builder</h1>
@@ -78,7 +83,7 @@ const AdminPagesIndex: React.FC = () => {
           URL).
         </p>
       </div>
-    </main>
+    </AdminPageShell>
   );
 };
 

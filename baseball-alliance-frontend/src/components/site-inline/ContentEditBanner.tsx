@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useSiteEditMode } from "../../context/SiteEditModeContext";
 
@@ -20,8 +21,10 @@ const ContentEditBanner: React.FC = () => {
   } = useSiteEditMode();
   const isAdmin = Boolean(user?.roles?.includes("ADMIN"));
   const [confirmingDiscard, setConfirmingDiscard] = useState(false);
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith("/admin");
 
-  if (!isAdmin || !contentEditMode) return null;
+  if (!isAdmin || !contentEditMode || isAdminRoute) return null;
 
   return (
     <div
