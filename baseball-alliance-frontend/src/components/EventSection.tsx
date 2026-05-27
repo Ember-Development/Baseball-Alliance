@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { useCountdown } from "../hooks/useCountdown";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../lib/api";
-import type { EventPublic } from "../lib/event";
+import type { EventPublic, EventType } from "../lib/event";
 import EventCreateModal from "./ui/EventCreateModal";
 import ba from "../assets/baicon.png";
 import ballWatermark from "../assets/baseballheader.png";
@@ -59,12 +59,22 @@ function formatEventTime(e: EventPublic): string {
   });
 }
 
+function eventDescription(type: EventType): string {
+  switch (type) {
+    case "TOURNAMENT":
+      return "Register and view details for this Baseball Alliance tournament.";
+    case "COMBINE":
+      return "Register and view details for this Baseball Alliance combine.";
+    case "SHOWCASE":
+      return "Register and view details for this Baseball Alliance showcase event.";
+  }
+}
+
 function eventPublicToShowcase(e: EventPublic): ShowcaseEvent {
   return {
     id: e.id,
     title: e.title,
-    description:
-      "Register and view details for this Baseball Alliance showcase event.",
+    description: eventDescription(e.type),
     date: formatEventDate(e),
     dateForCountdown: buildStartDateTime(e),
     time: formatEventTime(e),
@@ -82,9 +92,9 @@ const EventSection: React.FC = () => {
   const [editingEvent, setEditingEvent] = useState<EventPublic | null>(null);
   const [fromApi, setFromApi] = useState<EventPublic[]>([]);
 
-  const loadShowcases = useCallback(async () => {
+  const loadEvents = useCallback(async () => {
     try {
-      const list = await api.listEvents("SHOWCASE");
+      const list = await api.listEvents();
       setFromApi(list);
     } catch {
       setFromApi([]);
@@ -92,8 +102,8 @@ const EventSection: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    loadShowcases();
-  }, [loadShowcases]);
+    loadEvents();
+  }, [loadEvents]);
 
   const showcases = useMemo(
     () => fromApi.map(eventPublicToShowcase),
@@ -106,8 +116,8 @@ const EventSection: React.FC = () => {
   );
 
   const handleEventSaved = useCallback(() => {
-    void loadShowcases();
-  }, [loadShowcases]);
+    void loadEvents();
+  }, [loadEvents]);
 
   const openEdit = useCallback(
     (showcase: ShowcaseEvent) => {
@@ -202,12 +212,12 @@ const EventSection: React.FC = () => {
             No upcoming events at the moment
           </p>
           <p className="text-sm sm:text-base text-black/60 mt-2">
-            Check back soon for new showcase events!
+            Check back soon for new events!
           </p>
         </div>
       )}
 
-      {/* Featured Showcase */}
+      {/* Featured event */}
       {showcases.length > 0 && (
         <div className="mt-5">
           <div className="mb-3">
@@ -240,12 +250,12 @@ const EventSection: React.FC = () => {
         </div>
       )}
 
-      {/* Additional Showcases - compact stubs (non-featured) */}
+      {/* Additional events - compact stubs (non-featured) */}
       {showcases.length > 1 && (
         <div className="mt-12">
           <div className="flex items-center gap-3 mb-6">
             <h3 className="text-lg sm:text-xl font-bold uppercase tracking-widest text-[#163968]">
-              More Upcoming Showcases
+              More Upcoming Events
             </h3>
             <div className="flex-1 h-px bg-gradient-to-r from-[#163968]/20 to-transparent" />
           </div>
