@@ -27,8 +27,7 @@ export const MATCH_COPY = {
     topReasonsPrefix: "Why we matched this school",
   },
   results: {
-    heading: (count: number, total: number) =>
-      `Top ${count} school matches`,
+    heading: (count: number) => `Top ${count} school matches`,
     subheading: (total: number) =>
       `${total} programs evaluated — ranked by how well each school fits you`,
     filterPlaceholder: "Filter schools…",

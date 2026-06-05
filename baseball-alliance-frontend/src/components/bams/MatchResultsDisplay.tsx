@@ -82,8 +82,7 @@ export default function MatchResultsDisplay({
             <div className="space-y-2">
               <h3 className="text-lg font-semibold text-slate-800">
                 {MATCH_COPY.results.heading(
-                  Math.min(TOP_MATCH_LIMIT, allMatches.length),
-                  matchRes.total
+                  Math.min(TOP_MATCH_LIMIT, allMatches.length)
                 )}
               </h3>
               <p className="text-sm text-slate-600">
