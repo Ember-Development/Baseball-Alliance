@@ -15,6 +15,8 @@ enum RoleName {
   SCOUT
   ADMIN
   FAN
+  /// Playbook membership import — grants BAMS access via magic link
+  MEMBER
 }
 
 enum EventType {
@@ -73,6 +75,10 @@ model User {
   fullName  String
   passwordHash String?
 
+  /// External id from Playbook export (when present)
+  playbookId String? @unique
+  playbookImportedAt DateTime?
+
   roles     UserRole[]
 
   // Optional 1–1 profile tables
@@ -81,6 +87,11 @@ model User {
   coach     CoachProfile?
   admin     AdminProfile?
   fan       FanProfile?
+  bamsMember BamsMemberProfile?
+
+  magicLinkTokens MagicLinkToken[]
+  bamsEventUploads BamsEventUpload[]
+  bamsSavedMatches BamsSavedMatch[]
 
   // Individual registrations
   combineRegistrations   CombineRegistration[]
@@ -163,6 +174,128 @@ model AdminProfile {
 model FanProfile {
   userId String @id
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+/// Lightweight profile for Playbook → BAMS members (filled from CSV import)
+model BamsMemberProfile {
+  userId String @id
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  gradYear          String?
+  primaryPosition   String?
+  secondaryPosition String?
+  bats              String?
+  throws            String?
+  height            String?
+  weight            String?
+  schoolName        String?
+  schoolLocation    String?
+  city              String?
+  state             String?
+  zip               String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MagicLinkToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+enum BamsMatchStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  SKIPPED
+}
+
+/// User-uploaded Baseball Alliance event export (source of truth for showcase metrics)
+model BamsEventUpload {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fileName        String?
+  eventName       String?
+  eventStartDate  String?
+  rowCount        Int      @default(0)
+  warnings        Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  athletes BamsEventAthleteRow[]
+
+  @@index([userId, createdAt])
+}
+
+model BamsEventAthleteRow {
+  id               String          @id @default(cuid())
+  uploadId         String
+  upload           BamsEventUpload   @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+  rowIndex         Int
+  athleteUuid      String
+  eventName        String?
+  eventStartDate   String?
+  eventDivision    String?
+  eventLevel       String?
+  orderDate        String?
+  firstName        String?
+  lastName         String?
+  playerId         String?
+  athleteUrl       String?
+  primaryPosition  String
+  gradYear         Int?
+  rawRow           Json
+  parseErrors      Json?
+  matchRequest     Json?
+  matchStatus      BamsMatchStatus @default(PENDING)
+  matchResponse    Json?
+  matchError       String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@unique([uploadId, athleteUuid])
+  @@index([uploadId])
+  @@index([uploadId, eventName])
+}
+
+/// A college-match result a member chose to save to their profile.
+/// Stores a snapshot of the BAMS match response so it stays stable even if
+/// the underlying event upload or program data later changes.
+model BamsSavedMatch {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Optional link back to the source event upload/athlete row (null if deleted).
+  uploadId        String?
+  athleteUuid     String?
+
+  athleteName     String
+  primaryPosition String?
+  gradYear        Int?
+  eventName       String?
+  eventStartDate  String?
+
+  /// Optional member-supplied label for the saved match.
+  label           String?
+
+  /// Snapshot of the MatchResponseV1 payload and the preferences used.
+  matchResponse   Json
+  preferences     Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, createdAt])
 }
 
 /* ─────────── Parent ↔ Player (M:N) ─────────── */

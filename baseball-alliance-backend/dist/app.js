@@ -9,6 +9,9 @@ import matchRouter from "./routes/match.js";
 import registrationRoutes from "./routes/registration.js";
 import paymentRoutes from "./routes/payment.js";
 import siteRouter from "./routes/site.js";
+import adminUsersRouter from "./routes/adminUsers.js";
+import bamsEventsRouter from "./routes/bamsEvents.js";
+import bamsSavedMatchesRouter from "./routes/bamsSavedMatches.js";
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -23,6 +26,9 @@ app.use("/api/auth", authRoutes);
 app.use("/api/registrations", registrationRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/site", siteRouter);
+app.use("/api/admin/users", adminUsersRouter);
+app.use("/api/bams/events", bamsEventsRouter);
+app.use("/api/bams/saved-matches", bamsSavedMatchesRouter);
 // basic error handler
 app.use((err, _req, res, _next) => {
     console.error(err);

@@ -9,6 +9,7 @@ export const RoleNameValues = [
   "SCOUT",
   "ADMIN",
   "FAN",
+  "MEMBER",
 ] as const;
 export type RoleName = (typeof RoleNameValues)[number];
 

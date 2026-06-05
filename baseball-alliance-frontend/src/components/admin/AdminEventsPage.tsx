@@ -5,21 +5,15 @@ import { api } from "../../lib/api";
 import type { EventPublic, EventType } from "../../lib/event";
 import EventCreateModal from "../ui/EventCreateModal";
 import AdminPageShell from "./AdminPageShell";
+import { formatCalendarDate } from "../../lib/calendarDate";
 
 const EVENT_TYPES: EventType[] = ["TOURNAMENT", "COMBINE", "SHOWCASE"];
 
 function formatDateRange(e: EventPublic): string {
-  const start = new Date(e.startDate);
-  const end = new Date(e.endDate);
-  const opts: Intl.DateTimeFormatOptions = {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  };
-  if (start.toDateString() === end.toDateString()) {
-    return start.toLocaleDateString(undefined, opts);
-  }
-  return `${start.toLocaleDateString(undefined, opts)} – ${end.toLocaleDateString(undefined, opts)}`;
+  const start = formatCalendarDate(e.startDate);
+  const end = formatCalendarDate(e.endDate);
+  if (start === end) return start;
+  return `${start} – ${end}`;
 }
 
 function formatLocation(e: EventPublic): string {

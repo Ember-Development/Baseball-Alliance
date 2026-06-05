@@ -29,8 +29,8 @@ const ContentEditBanner: React.FC = () => {
   return (
     <div
       className={[
-        /* Nav is fixed h-20 z-90 — sit below it and stay above page content */
-        "sticky top-20 z-[95]",
+        /* Nav is fixed h-20 z-[100] — sit below it and stay above page content */
+        "sticky top-20 z-[90]",
         "mt-20 border-b border-amber-400/60 bg-amber-50/95 text-amber-950 px-4 py-2 text-sm backdrop-blur",
       ].join(" ")}
     >

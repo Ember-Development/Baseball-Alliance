@@ -1,17 +1,15 @@
 import { Routes, Route } from "react-router-dom";
-import NavBar from "./components/NavBar";
 import EventSection from "./components/EventSection";
 import WhoWeAre from "./components/WhoWeAre";
 import Hero from "./components/Heros";
 import ContactCTA from "./components/ContactCTA";
-import Footer from "./components/Footer";
 import TermsAndConditions from "./components/Terms";
+import MarketingShell from "./components/layout/MarketingShell";
 import Waiver from "./components/Waiver";
 import Privacy from "./components/Privacy";
 import Leadership from "./components/Leadership";
 import Membership from "./components/Membership";
 import InstagramFeed from "./components/InstagramFeed";
-import ScrollToTop from "./components/ui/ScrollToTop";
 import Login from "./components/pages/login";
 import AdminSiteEditor from "./components/admin/AdminSiteEditor";
 import AdminEventsPage from "./components/admin/AdminEventsPage";
@@ -20,8 +18,11 @@ import AdminPagesIndex from "./components/admin/AdminPagesIndex";
 import AdminPageEditor from "./components/admin/AdminPageEditor";
 import CmsPageView from "./components/cms/CmsPageView";
 */
-import ApiDevTest from "./components/dev/ApiDevTest";
-import ContentEditBanner from "./components/site-inline/ContentEditBanner";
+import BamsApp from "./components/bams/BamsApp";
+import BamsAuthCallback from "./components/bams/BamsAuthCallback";
+import BamsLoginPage from "./components/bams/BamsLoginPage";
+import BamsProtectedRoute from "./components/bams/BamsProtectedRoute";
+import AdminUsersImportPage from "./components/admin/AdminUsersImportPage";
 
 function Home() {
   return (
@@ -39,33 +40,33 @@ function Home() {
 
 export default function App() {
   return (
-    <div className="relative font-sans min-h-screen text-slate-900 overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-radial from-[#163968]/30 via-white to-[#ECEDE5]"></div>
-
-      <div className="absolute inset-0 bg-gradient-to-tr from-white/40 via-transparent to-white/30"></div>
-
-      <div className="relative z-10">
-        <NavBar />
-        <ContentEditBanner />
-        <ScrollToTop />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/terms" element={<TermsAndConditions />} />
-          <Route path="/waiver" element={<Waiver />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/bams" element={<ApiDevTest />} />
-          {/* Page builder paused — re-import CmsPageView + AdminPages* and restore routes */}
-          {/* <Route path="/pages/:slug" element={<CmsPageView />} /> */}
-          <Route path="/admin/site" element={<AdminSiteEditor />} />
-          <Route path="/admin/events" element={<AdminEventsPage />} />
-          {/* <Route path="/admin/pages" element={<AdminPagesIndex />} /> */}
-          {/* <Route path="/admin/pages/:slug" element={<AdminPageEditor />} /> */}
-          <Route path="/leadership" element={<Leadership />} />
-          <Route path="/membership" element={<Membership />} />
-        </Routes>
-        <Footer />
-      </div>
-    </div>
+    <Routes>
+      <Route path="/bams/login" element={<BamsLoginPage />} />
+      <Route path="/bams/auth/callback" element={<BamsAuthCallback />} />
+      <Route element={<MarketingShell />}>
+        <Route path="/" element={<Home />} />
+        <Route path="/terms" element={<TermsAndConditions />} />
+        <Route path="/waiver" element={<Waiver />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/login" element={<Login />} />
+        <Route
+          path="/bams"
+          element={
+            <BamsProtectedRoute>
+              <BamsApp />
+            </BamsProtectedRoute>
+          }
+        />
+        <Route path="/admin/users" element={<AdminUsersImportPage />} />
+        {/* Page builder paused — re-import CmsPageView + AdminPages* and restore routes */}
+        {/* <Route path="/pages/:slug" element={<CmsPageView />} /> */}
+        <Route path="/admin/site" element={<AdminSiteEditor />} />
+        <Route path="/admin/events" element={<AdminEventsPage />} />
+        {/* <Route path="/admin/pages" element={<AdminPagesIndex />} /> */}
+        {/* <Route path="/admin/pages/:slug" element={<AdminPageEditor />} /> */}
+        <Route path="/leadership" element={<Leadership />} />
+        <Route path="/membership" element={<Membership />} />
+      </Route>
+    </Routes>
   );
 }

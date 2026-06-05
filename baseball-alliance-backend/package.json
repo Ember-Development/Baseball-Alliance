@@ -13,6 +13,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "create:admins": "node dist/scripts/createAdmins.js",
     "seed:site": "node dist/scripts/seedSiteConfig.js",
+    "email:test": "tsx src/scripts/testEmail.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -27,13 +28,14 @@
     "@aws-sdk/client-s3": "^3.1040.0",
     "@aws-sdk/s3-request-presigner": "^3.1040.0",
     "@prisma/client": "^6.14.0",
-    "prisma": "^6.14.0",
     "authorizenet": "^1.0.10",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
+    "prisma": "^6.14.0",
+    "resend": "^6.12.4",
     "zod": "^4.0.17"
   },
   "devDependencies": {

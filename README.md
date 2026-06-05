@@ -8,7 +8,13 @@
 ## Features
 
 - **Authentication & Roles**  
-  Secure login with JWT. Role-based access control (`ADMIN`, `COACH`, `PLAYER`, `PARENT`, `FAN`, `SCOUT`).
+  Secure login with JWT. Role-based access control (`ADMIN`, `COACH`, `PLAYER`, `PARENT`, `FAN`, `SCOUT`, `MEMBER`).
+
+- **BAMS (Playbook → site members)**  
+  Members sign up and pay on Playbook; admins export CSV and import at `/admin/users`. Imported users get the `MEMBER` role and sign in at `/bams` via email magic link (no password).
+
+- **BAMS event matching**  
+  Authenticated members upload a Baseball Alliance event export CSV at `/bams`. The BA API parses and stores rows, maps each athlete to `MatchRequestV1`, and proxies `POST` to the external BAMS service (`BAMS_API_URL`). Explore Programs tab is unchanged.
 
 - **Events System**  
   - Create, update, and publish/unpublish events (`TOURNAMENT`, `SHOWCASE`, `COMBINE`).  

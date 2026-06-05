@@ -5,6 +5,7 @@ import {
   type EventPublic,
   type EventType,
 } from "../../lib/event";
+import { isoToCalendarDateInput } from "../../lib/calendarDate";
 import { useAuth } from "../../context/AuthContext";
 import { api } from "../../lib/api";
 
@@ -18,10 +19,6 @@ type Props = {
 };
 
 const eventTypes: EventType[] = ["TOURNAMENT", "COMBINE", "SHOWCASE"];
-
-function toDateInputValue(iso: string): string {
-  return iso.slice(0, 10);
-}
 
 export default function EventCreateModal({
   open,
@@ -61,7 +58,7 @@ export default function EventCreateModal({
       !chosenType
     )
       return false;
-    if (chosenType === "COMBINE" && !form.startTime) return false;
+    if (chosenType === "COMBINE" && !form.startTime?.trim()) return false;
     return true;
   }, [form, chosenType]);
 
@@ -77,8 +74,8 @@ export default function EventCreateModal({
         venue: event.venue ?? "",
         registerUrl: event.registerUrl ?? "",
         isPublished: event.isPublished,
-        startDate: toDateInputValue(event.startDate),
-        endDate: toDateInputValue(event.endDate),
+        startDate: isoToCalendarDateInput(event.startDate),
+        endDate: isoToCalendarDateInput(event.endDate),
         startTime: event.startTime ?? "",
       });
       setError(null);
@@ -137,7 +134,7 @@ export default function EventCreateModal({
         isPublished: !!form.isPublished,
         startDate: form.startDate!,
         endDate: form.endDate!,
-        startTime: chosenType === "COMBINE" ? form.startTime! : undefined,
+        startTime: form.startTime?.trim() || undefined,
       };
       if (isEditMode && event) {
         const updated = await api.updateEvent(event.id, payload);
@@ -286,23 +283,22 @@ export default function EventCreateModal({
                     </label>
                   </div>
 
-                  {chosenType === "COMBINE" && (
-                    <label className="text-sm font-semibold text-[#163968]">
-                      Start Time (e.g., 10:00 AM)
-                      <input
-                        placeholder="10:00 AM"
-                        className="mt-1 w-full rounded-lg border border-black/15 px-3 py-2"
-                        value={form.startTime ?? ""}
-                        onChange={(e) =>
-                          setForm((f: any) => ({
-                            ...f,
-                            startTime: e.target.value,
-                          }))
-                        }
-                        required
-                      />
-                    </label>
-                  )}
+                  <label className="text-sm font-semibold text-[#163968]">
+                    Start Time (e.g., 10:00 AM)
+                    {chosenType === "COMBINE" ? "" : " — optional"}
+                    <input
+                      placeholder="10:00 AM"
+                      className="mt-1 w-full rounded-lg border border-black/15 px-3 py-2"
+                      value={form.startTime ?? ""}
+                      onChange={(e) =>
+                        setForm((f: any) => ({
+                          ...f,
+                          startTime: e.target.value,
+                        }))
+                      }
+                      required={chosenType === "COMBINE"}
+                    />
+                  </label>
 
                   <div className="grid grid-cols-2 gap-3">
                     <label className="text-sm font-semibold text-[#163968]">

@@ -1,8 +1,12 @@
 import React, { useState } from "react";
+import { useLocation } from "react-router-dom";
 import { api, setToken } from "../../lib/api";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 
 export default function Login() {
+  const location = useLocation();
+  const redirectTo =
+    (location.state as { from?: string } | null)?.from ?? "/";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -17,7 +21,7 @@ export default function Login() {
       const { token, user } = await api.login(email, password);
       setToken(token);
       localStorage.setItem("user", JSON.stringify(user));
-      window.location.href = "/";
+      window.location.href = redirectTo;
     } catch (err: any) {
       setError(err.message ?? "Login failed");
     } finally {

@@ -8,6 +8,7 @@ export const RoleNameValues = [
     "SCOUT",
     "ADMIN",
     "FAN",
+    "MEMBER",
 ];
 export const EventTypeValues = ["TOURNAMENT", "COMBINE", "SHOWCASE"];
 export const RegistrationStatusValues = [
