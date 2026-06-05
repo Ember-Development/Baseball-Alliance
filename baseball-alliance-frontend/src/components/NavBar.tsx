@@ -133,7 +133,7 @@ const NavBar: React.FC = () => {
   return (
     <nav
       className={[
-        "fixed inset-x-0 top-0 z-90",
+        "fixed inset-x-0 top-0 z-[100] overflow-visible",
         "backdrop-blur-md backdrop-saturate-150",
         "transition-all duration-300",
         scrolled
@@ -147,20 +147,20 @@ const NavBar: React.FC = () => {
 
       <div className="relative mx-auto max-w-8xl px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         {/* Left: Brand */}
-        <div className="flex items-center gap-3">
-          <Link to="/" aria-label="Go to Home">
+        <div className="flex h-20 items-center gap-3 overflow-hidden">
+          <Link to="/" aria-label="Go to Home" className="flex h-full items-center">
             <img
               src={BA}
               alt="Baseball Alliance"
-              className="h-40 2xl:h-40 xl:h-32 lg:h-28 w-auto object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.4)] cursor-pointer"
+              className="h-40 2xl:h-40 xl:h-32 lg:h-28 w-auto max-h-full object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.4)] cursor-pointer"
             />
           </Link>
         </div>
 
         {/* Center: Desktop nav */}
-        <ul className="hidden lg:flex items-center 2xl:gap-6 xl:gap-3 lg:gap-2.5 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+        <ul className="hidden lg:flex items-center 2xl:gap-6 xl:gap-3 lg:gap-2.5 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[110]">
           {links.map((label) => (
-            <li key={label} className="relative">
+            <li key={label} className="relative z-[110]">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -200,7 +200,7 @@ const NavBar: React.FC = () => {
               {label === "Leaderboard" && (
                 <div
                   className={[
-                    "absolute top-full left-1/2 -translate-x-1/2 mt-2",
+                    "absolute top-full left-1/2 -translate-x-1/2 mt-2 z-[110]",
                     "xl:w-72 lg:w-56",
                     "transition-all duration-200 origin-top",
                     dropdownOpen
@@ -266,7 +266,7 @@ const NavBar: React.FC = () => {
               Login
             </Link>
           ) : (
-            <div className="hidden lg:block relative" ref={avatarRef}>
+            <div className="hidden lg:block relative z-[110]" ref={avatarRef}>
               <button
                 onClick={() => setAvatarOpen((v) => !v)}
                 aria-haspopup="menu"
@@ -281,7 +281,7 @@ const NavBar: React.FC = () => {
               {avatarOpen && (
                 <div
                   role="menu"
-                  className="absolute right-0 mt-2 w-48 rounded-xl border border-white/15 bg-white/100 backdrop-blur-xl shadow-xl overflow-hidden"
+                  className="absolute right-0 mt-2 z-[110] w-48 rounded-xl border border-white/15 bg-white/100 backdrop-blur-xl shadow-xl overflow-hidden"
                 >
                   <div className="px-3 py-2 text-xs text-black/60">
                     {user.fullName}
@@ -303,6 +303,14 @@ const NavBar: React.FC = () => {
                         className="block px-4 py-2 text-sm font-semibold text-[#163968] hover:bg-white/70"
                       >
                         Events
+                      </Link>
+                      <Link
+                        role="menuitem"
+                        to="/admin/users"
+                        onClick={() => setAvatarOpen(false)}
+                        className="block px-4 py-2 text-sm font-semibold text-[#163968] hover:bg-white/70"
+                      >
+                        Playbook import
                       </Link>
                       {/* Page builder paused — restore route in App.tsx first */}
                       {/* <Link

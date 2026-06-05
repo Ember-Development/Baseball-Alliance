@@ -1,7 +1,10 @@
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { ApiError, apiGet, apiPostJson } from "@/lib/apiClient";
+import MatchAthleteSummary, {
+  MatchLegalFooter,
+} from "@/components/bams/MatchAthleteSummary";
+import MatchCollegeCard from "@/components/bams/MatchCollegeCard";
 import {
-  formatFallbackFitEntry,
   normalizeProgramFiltersResponse,
   type MatchResponseV1,
   type MatchRowV1,
@@ -32,32 +35,6 @@ import {
   X,
   Zap,
 } from "lucide-react";
-
-/* ── visual helpers ────────────────────────────────────────────── */
-
-function scoreBg(v: number) {
-  if (v >= 80) return "bg-emerald-500";
-  if (v >= 60) return "bg-blue-500";
-  if (v >= 40) return "bg-amber-500";
-  return "bg-slate-400";
-}
-
-function scoreText(v: number) {
-  if (v >= 80) return "text-emerald-700";
-  if (v >= 60) return "text-blue-700";
-  if (v >= 40) return "text-amber-700";
-  return "text-slate-600";
-}
-
-function fitBadge(label: string) {
-  const l = label.toLowerCase();
-  if (l.includes("strong") || l.includes("excellent"))
-    return "bg-emerald-100 text-emerald-800 border-emerald-200";
-  if (l.includes("good")) return "bg-blue-100 text-blue-800 border-blue-200";
-  if (l.includes("fair") || l.includes("moderate"))
-    return "bg-amber-100 text-amber-800 border-amber-200";
-  return "bg-slate-100 text-slate-700 border-slate-200";
-}
 
 /* ── shared classes ────────────────────────────────────────────── */
 
@@ -199,96 +176,6 @@ function ChipSelect({
 const DEFAULT_MATCH_LIMIT = 30;
 const MAX_MATCH_LIMIT = 200;
 const initialForm: MatchFormFields = MATCH_PRESETS[0]!.apply();
-
-/* ── sub-component: single match card ──────────────────────────── */
-
-function MatchCard({ match, rank }: { match: MatchRowV1; rank: number }) {
-  const [open, setOpen] = useState(false);
-  const score = Math.round(match.overallScore);
-  const bd = match.scoreBreakdown;
-
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition-shadow">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-bold text-slate-400">#{rank}</span>
-            <span
-              className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${fitBadge(match.fitLabel)}`}
-            >
-              {match.fitLabel}
-            </span>
-          </div>
-          <h4 className="text-base font-bold text-slate-800 truncate">
-            {match.schoolName}
-          </h4>
-          <p className="text-sm text-slate-500 mt-0.5">
-            {match.division} &middot; {match.conference} &middot; {match.state}
-          </p>
-          {match.conferenceTierLabel && (
-            <span className="inline-block mt-1 text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
-              {match.conferenceTierLabel}
-            </span>
-          )}
-        </div>
-        <div className="text-center shrink-0">
-          <div className={`text-2xl font-bold ${scoreText(score)}`}>
-            {score}
-          </div>
-          <div className="text-[10px] text-slate-400 uppercase tracking-wide font-medium">
-            Score
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2">
-        {(
-          [
-            ["Athletic", bd.athleticFit],
-            ["Location", bd.locationFit],
-            ["School", bd.schoolFit],
-            ["Cost", bd.affordabilityFit],
-          ] as const
-        ).map(([lbl, val]) => (
-          <div key={lbl}>
-            <div className="flex justify-between text-xs mb-1">
-              <span className="text-slate-500">{lbl}</span>
-              <span className="font-medium text-slate-700">
-                {Math.round(val)}
-              </span>
-            </div>
-            <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all ${scoreBg(val)}`}
-                style={{ width: `${val}%` }}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {match.reasons.length > 0 && (
-        <div className="mt-3">
-          <button
-            onClick={() => setOpen(!open)}
-            className="text-xs font-medium text-[#163968] hover:underline"
-          >
-            {open
-              ? "Hide details"
-              : `View insights (${match.reasons.length})`}
-          </button>
-          {open && (
-            <ul className="mt-2 text-xs text-slate-600 space-y-1 pl-4 list-disc">
-              {match.reasons.map((r, i) => (
-                <li key={i}>{r}</li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
 
 /* ── main component ────────────────────────────────────────────── */
 
@@ -1051,74 +938,11 @@ export function MatchFixturePanel() {
       {/* results */}
       {matchRes && matchRes.matches.length > 0 && (
         <div className="space-y-6">
-          {/* athlete profile summary (enriched response) */}
-          {matchRes.athleteProfile && (
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="text-base font-semibold text-slate-800">
-                  Your Athlete Profile
-                </h3>
-                <span
-                  className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
-                    matchRes.athleteProfile.confidence === "high"
-                      ? "bg-emerald-100 text-emerald-800 border-emerald-200"
-                      : matchRes.athleteProfile.confidence === "medium"
-                        ? "bg-amber-100 text-amber-800 border-amber-200"
-                        : "bg-slate-100 text-slate-600 border-slate-200"
-                  }`}
-                >
-                  {matchRes.athleteProfile.confidence} confidence
-                </span>
-              </div>
-              <div className="flex flex-wrap gap-2 text-sm">
-                {matchRes.athleteProfile.resolvedLevel != null &&
-                  String(matchRes.athleteProfile.resolvedLevel).trim() !== "" && (
-                  <span className="rounded-lg bg-[#163968]/10 text-[#163968] px-2.5 py-1 font-semibold">
-                    {matchRes.athleteProfile.resolvedLevel}
-                  </span>
-                )}
-                {matchRes.athleteProfile.resolvedTier != null &&
-                  !Number.isNaN(Number(matchRes.athleteProfile.resolvedTier)) && (
-                  <span className="rounded-lg bg-slate-100 text-slate-700 px-2.5 py-1">
-                    Tier {matchRes.athleteProfile.resolvedTier}
-                  </span>
-                )}
-                {matchRes.athleteProfile.positionGroup != null &&
-                  String(matchRes.athleteProfile.positionGroup).trim() !== "" && (
-                  <span className="rounded-lg bg-slate-100 text-slate-700 px-2.5 py-1">
-                    {matchRes.athleteProfile.positionGroup}
-                  </span>
-                )}
-                {matchRes.athleteProfile.flags?.leftHandedBoost && (
-                  <span className="rounded-lg bg-blue-100 text-blue-700 px-2.5 py-1">LHP Boost</span>
-                )}
-                {matchRes.athleteProfile.flags?.twoWay && (
-                  <span className="rounded-lg bg-purple-100 text-purple-700 px-2.5 py-1">Two-Way</span>
-                )}
-                {matchRes.athleteProfile.flags?.multiPosition && (
-                  <span className="rounded-lg bg-teal-100 text-teal-700 px-2.5 py-1">Multi-Position</span>
-                )}
-                {matchRes.athleteProfile.flags?.academicTier && (
-                  <span className="rounded-lg bg-amber-100 text-amber-700 px-2.5 py-1">
-                    Academics: {matchRes.athleteProfile.flags.academicTier}
-                  </span>
-                )}
-              </div>
-              {(() => {
-                const fallbackLabels = (
-                  matchRes.athleteProfile.fallbackFits ?? []
-                )
-                  .map((f) => formatFallbackFitEntry(f))
-                  .filter((s): s is string => s != null && s.length > 0);
-                if (fallbackLabels.length === 0) return null;
-                return (
-                  <p className="text-xs text-slate-500">
-                    Also fits: {fallbackLabels.join(", ")}
-                  </p>
-                );
-              })()}
-            </div>
-          )}
+          <MatchAthleteSummary
+            athleteProfile={
+              matchRes.athleteProfile ?? { confidence: "low" }
+            }
+          />
 
           <div className="space-y-3">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
@@ -1162,7 +986,7 @@ export function MatchFixturePanel() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filteredMatches.map((m) => (
-                <MatchCard
+                <MatchCollegeCard
                   key={m.id}
                   match={m}
                   rank={rankForMatch(m)}
@@ -1170,6 +994,8 @@ export function MatchFixturePanel() {
               ))}
             </div>
           )}
+
+          <MatchLegalFooter />
 
           {matchRes.matches.length <
             Math.min(matchRes.total, MAX_MATCH_LIMIT) && (

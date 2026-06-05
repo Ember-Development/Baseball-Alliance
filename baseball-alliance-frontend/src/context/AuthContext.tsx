@@ -64,6 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // token invalid or request failed — clear state to be safe
       setUser(null);
       localStorage.removeItem("user");
+      setApiToken(null);
     }
   };
 

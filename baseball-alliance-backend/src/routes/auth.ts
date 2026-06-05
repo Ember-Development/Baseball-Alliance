@@ -6,6 +6,8 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { JwtUser, requireAuth } from "../middleware/requireAuth.js";
 import { UserPublic } from "../types.js";
+import { requestMagicLink, verifyMagicLink } from "../services/magicLink.js";
+import { userHasBamsAccess } from "../services/playbookCsv.js";
 
 const r = Router();
 
@@ -92,6 +94,98 @@ r.get("/me", requireAuth, async (req, res) => {
   if (!me) return res.status(404).json({ error: "Not found" });
 
   return res.json(toUserPublic(me));
+});
+
+const MagicLinkRequestSchema = z.object({
+  email: z.string().email(),
+});
+
+/** POST /auth/magic-link — email a one-time BAMS sign-in link */
+r.post("/magic-link", async (req, res) => {
+  try {
+    const parsed = MagicLinkRequestSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ errors: parsed.error.flatten() });
+    }
+
+    const out = await requestMagicLink(parsed.data.email);
+    const body: {
+      ok: true;
+      message: string;
+      devLink?: string;
+      devNote?: "user_not_found" | "no_bams_access";
+      devCheckedEmail?: string;
+    } = {
+      ok: true,
+      message:
+        "If an account with BAMS access exists for that email, a sign-in link has been sent.",
+    };
+    if (out.devLink) body.devLink = out.devLink;
+    if (out.devNote) body.devNote = out.devNote;
+    if (out.devCheckedEmail) body.devCheckedEmail = out.devCheckedEmail;
+    return res.json(body);
+  } catch (e) {
+    console.error("POST /auth/magic-link:", e);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+const MagicLinkVerifySchema = z.object({
+  token: z.string().min(16),
+});
+
+/** POST /auth/magic-link/verify — exchange token for JWT */
+r.post("/magic-link/verify", async (req, res) => {
+  try {
+    if (!ENV.JWT_SECRET) {
+      return res.status(500).json({ error: "Server configuration error" });
+    }
+
+    const parsed = MagicLinkVerifySchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ errors: parsed.error.flatten() });
+    }
+
+    const result = await verifyMagicLink(parsed.data.token);
+    if ("error" in result) {
+      return res.status(401).json({ error: result.error });
+    }
+
+    const payload: JwtUser = {
+      id: result.user.id,
+      email: result.user.email,
+      roles: result.user.roles.map(
+        (r) => r.role as UserPublic["roles"][number]
+      ),
+    };
+
+    return res.json({
+      token: signToken(payload),
+      user: toUserPublic(result.user),
+    });
+  } catch (e) {
+    console.error("POST /auth/magic-link/verify:", e);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+/** GET /auth/bams-profile — BAMS member profile for current user */
+r.get("/bams-profile", requireAuth, async (req, res) => {
+  const me = await prisma.user.findUnique({
+    where: { id: req.user!.id },
+    include: { roles: true, bamsMember: true },
+  });
+  if (!me) return res.status(404).json({ error: "Not found" });
+  if (!userHasBamsAccess(me.roles)) {
+    return res.status(403).json({ error: "BAMS access required" });
+  }
+
+  return res.json({
+    user: toUserPublic(me),
+    profile: me.bamsMember,
+    playbookId: me.playbookId,
+    playbookImportedAt: me.playbookImportedAt,
+  });
 });
 
 export default r;

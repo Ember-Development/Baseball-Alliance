@@ -5,6 +5,10 @@ import { useCountdown } from "../hooks/useCountdown";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../lib/api";
 import type { EventPublic, EventType } from "../lib/event";
+import {
+  calendarDateTimeToLocalDate,
+  formatCalendarDate,
+} from "../lib/calendarDate";
 import EventCreateModal from "./ui/EventCreateModal";
 import ba from "../assets/baicon.png";
 import ballWatermark from "../assets/baseballheader.png";
@@ -22,41 +26,15 @@ type ShowcaseEvent = {
   registerUrl: string;
 };
 
-function buildStartDateTime(e: EventPublic): Date {
-  const base = new Date(e.startDate);
-  if (e.startTime) {
-    const m = e.startTime.trim().match(/^(\d{1,2}):?(\d{2})?\s*(AM|PM)$/i);
-    if (m) {
-      let h = parseInt(m[1], 10);
-      const mins = m[2] ? parseInt(m[2], 10) : 0;
-      const ampm = m[3].toUpperCase();
-      if (ampm === "PM" && h < 12) h += 12;
-      if (ampm === "AM" && h === 12) h = 0;
-      base.setHours(h, mins, 0, 0);
-    }
-  }
-  return base;
-}
-
 function formatEventDate(e: EventPublic): string {
-  const a = new Date(e.startDate);
-  const b = new Date(e.endDate);
-  const sameDay = a.toDateString() === b.toDateString();
-  const opts: Intl.DateTimeFormatOptions = {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  };
-  if (sameDay) return a.toLocaleDateString(undefined, opts);
-  return `${a.toLocaleDateString(undefined, opts)} – ${b.toLocaleDateString(undefined, opts)}`;
+  const start = formatCalendarDate(e.startDate);
+  const end = formatCalendarDate(e.endDate);
+  if (start === end) return start;
+  return `${start} – ${end}`;
 }
 
 function formatEventTime(e: EventPublic): string {
-  if (e.startTime) return e.startTime;
-  return new Date(e.startDate).toLocaleTimeString(undefined, {
-    hour: "numeric",
-    minute: "2-digit",
-  });
+  return e.startTime?.trim() ?? "";
 }
 
 function eventDescription(type: EventType): string {
@@ -76,7 +54,7 @@ function eventPublicToShowcase(e: EventPublic): ShowcaseEvent {
     title: e.title,
     description: eventDescription(e.type),
     date: formatEventDate(e),
-    dateForCountdown: buildStartDateTime(e),
+    dateForCountdown: calendarDateTimeToLocalDate(e.startDate, e.startTime),
     time: formatEventTime(e),
     venue: e.venue ? `${e.venue} · ${e.city}, ${e.state}` : `${e.city}, ${e.state}`,
     serial: `BA-${e.id.replace(/[^a-zA-Z0-9]/g, "").slice(0, 12).toUpperCase()}`,
@@ -379,7 +357,10 @@ function RealTicket({
             </p>
 
             <div className="mt-1 sm:mt-2 grid grid-cols-1 sm:grid-cols-2 gap-y-1 gap-x-4 text-[15px]">
-              <Line label="When" value={`${date} · ${time}`} />
+              <Line
+                label="When"
+                value={time ? `${date} · ${time}` : date}
+              />
               <Line label="Where" value={venue} />
             </div>
 
@@ -583,7 +564,7 @@ function StubTicket({
               {title}
             </h3>
             <p className="text-[13px] text-black/80 mt-1">
-              {date} · {time}
+              {time ? `${date} · ${time}` : date}
             </p>
             <p className="text-[12px] text-black/70">{venue}</p>
             <span className="font-mono text-[10px] text-black/50 mt-2">
@@ -603,7 +584,11 @@ function StubTicket({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label={`${title} on ${date} at ${time}. Opens in a new tab.`}
+      aria-label={
+        time
+          ? `${title} on ${date} at ${time}. Opens in a new tab.`
+          : `${title} on ${date}. Opens in a new tab.`
+      }
       className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#163968] rounded-lg"
     >
       {card}

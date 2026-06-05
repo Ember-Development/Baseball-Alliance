@@ -23,6 +23,7 @@ import {
   ExternalLink,
   Globe,
 } from "lucide-react";
+import ModalPortal, { BAMS_MODAL_Z } from "@/components/bams/ModalPortal";
 
 /* ── detail field component ───────────────────────────────────── */
 
@@ -455,10 +456,11 @@ export function ProgramsExplorer() {
         ].filter((l) => l.url);
 
         return (
-          <div
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4"
-            onClick={() => setDetail(null)}
-          >
+          <ModalPortal>
+            <div
+              className={`fixed inset-0 ${BAMS_MODAL_Z} flex items-center justify-center bg-black/40 p-4`}
+              onClick={() => setDetail(null)}
+            >
             <div
               className="bg-white rounded-2xl max-w-2xl w-full shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
               onClick={(e) => e.stopPropagation()}
@@ -640,6 +642,7 @@ export function ProgramsExplorer() {
               </div>
             </div>
           </div>
+          </ModalPortal>
         );
       })()}
     </div>
