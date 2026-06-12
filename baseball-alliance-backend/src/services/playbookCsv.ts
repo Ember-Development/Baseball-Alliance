@@ -1,6 +1,7 @@
-import { RoleName } from "@prisma/client";
+import { BamsMembershipTier, RoleName } from "@prisma/client";
 import { prisma } from "../db.js";
 import { requestMagicLink } from "./magicLink.js";
+import { parseMembershipTier } from "./bamsMembership.js";
 
 export type PlaybookImportRow = {
   email: string;
@@ -8,6 +9,7 @@ export type PlaybookImportRow = {
   phone?: string;
   dob?: Date;
   playbookId?: string;
+  membership?: BamsMembershipTier;
   gradYear?: string;
   primaryPosition?: string;
   secondaryPosition?: string;
@@ -67,6 +69,7 @@ const COLUMN_ALIASES: Record<keyof Omit<PlaybookImportRow, "dob">, string[]> = {
     "member id",
     "id",
   ],
+  membership: ["membership", "bams membership", "bams tier", "tier", "plan"],
   gradYear: [
     "grad year",
     "grad year - hs",
@@ -240,12 +243,27 @@ export function parsePlaybookCsv(csvText: string): {
       continue;
     }
 
+    const membershipRaw = cell(line, col.membership);
+    let membership: BamsMembershipTier | undefined;
+    if (membershipRaw) {
+      membership = parseMembershipTier(membershipRaw);
+      if (!membership) {
+        errors.push({
+          row: rowNum,
+          email,
+          message: 'Invalid membership (use "bams" or "bams-premium")',
+        });
+        continue;
+      }
+    }
+
     rows.push({
       email,
       fullName,
       phone: cell(line, col.phone),
       dob: parseDob(cell(line, dobIdx)),
       playbookId: cell(line, col.playbookId)?.trim() || undefined,
+      membership,
       gradYear: cell(line, col.gradYear),
       primaryPosition: cell(line, col.primaryPosition),
       secondaryPosition: cell(line, col.secondaryPosition),
@@ -312,7 +330,7 @@ async function applyMemberImport(
   existing: ImportUser,
   row: PlaybookImportRow,
   email: string,
-  profileData: Record<string, string | undefined>
+  profileData: Record<string, string | BamsMembershipTier | undefined>
 ): Promise<void> {
   await prisma.user.update({
     where: { id: existing.id },
@@ -386,6 +404,7 @@ export async function importPlaybookMembers(
         city: row.city,
         state: row.state,
         zip: row.zip,
+        membership: row.membership ?? BamsMembershipTier.BAMS,
       };
 
       const found = await findUserForImport(row, email);
@@ -451,7 +470,13 @@ export async function importPlaybookMembers(
         }
       }
 
-      await applyMemberImport(existing, row, email, profileData);
+      await applyMemberImport(existing, row, email, {
+        ...profileData,
+        membership:
+          row.membership ??
+          existing.bamsMember?.membership ??
+          BamsMembershipTier.BAMS,
+      });
 
       const signInEmailSent = await sendImportWelcomeEmail(email);
       const emailChanged =

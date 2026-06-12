@@ -12,33 +12,55 @@ function isCsvFile(file: File): boolean {
   return name.endsWith(".csv") || file.type.includes("csv") || file.type.includes("excel");
 }
 
+type UploadKind = "users" | "events";
+
 export default function AdminUsersImportPage() {
   const { user, loading: authLoading } = useAuth();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const userFileInputRef = useRef<HTMLInputElement>(null);
+  const eventFileInputRef = useRef<HTMLInputElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
-  const [file, setFile] = useState<File | null>(null);
-  const [dragOver, setDragOver] = useState(false);
+  const [userFile, setUserFile] = useState<File | null>(null);
+  const [eventFile, setEventFile] = useState<File | null>(null);
+  const [dragOver, setDragOver] = useState<UploadKind | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [fileHint, setFileHint] = useState<string | null>(null);
+  const [userFileHint, setUserFileHint] = useState<string | null>(null);
+  const [eventFileHint, setEventFileHint] = useState<string | null>(null);
   const [result, setResult] = useState<PlaybookImportResult | null>(null);
 
-  function selectFile(next: File | null) {
+  function selectFile(kind: UploadKind, next: File | null) {
     if (next && !isCsvFile(next)) {
-      setFile(null);
-      setFileHint("Please choose a .csv file exported from Playbook.");
+      if (kind === "users") {
+        setUserFile(null);
+        setUserFileHint("Please choose a .csv file exported from Playbook.");
+      } else {
+        setEventFile(null);
+        setEventFileHint("Please choose a .csv event export file.");
+      }
       return;
     }
-    setFile(next);
-    setFileHint(null);
+
+    if (kind === "users") {
+      setUserFile(next);
+      setUserFileHint(null);
+    } else {
+      setEventFile(next);
+      setEventFileHint(null);
+    }
     setError(null);
     setResult(null);
   }
 
-  function clearFile() {
-    setFile(null);
-    setFileHint(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+  function clearFile(kind: UploadKind) {
+    if (kind === "users") {
+      setUserFile(null);
+      setUserFileHint(null);
+      if (userFileInputRef.current) userFileInputRef.current.value = "";
+    } else {
+      setEventFile(null);
+      setEventFileHint(null);
+      if (eventFileInputRef.current) eventFileInputRef.current.value = "";
+    }
   }
 
   if (authLoading) {
@@ -54,9 +76,9 @@ export default function AdminUsersImportPage() {
   }
 
   async function runImport() {
-    if (!file) {
-      setFileHint("Choose a Playbook CSV file before importing.");
-      fileInputRef.current?.focus();
+    if (!userFile) {
+      setUserFileHint("Choose a Playbook CSV file before importing.");
+      userFileInputRef.current?.focus();
       return;
     }
     if (!hasAuthToken()) {
@@ -66,11 +88,16 @@ export default function AdminUsersImportPage() {
 
     setLoading(true);
     setError(null);
-    setFileHint(null);
+    setUserFileHint(null);
+    setEventFileHint(null);
     setResult(null);
     try {
-      const csv = await file.text();
-      const res = await api.importPlaybookUsers(csv);
+      const csv = await userFile.text();
+      const eventCsv = eventFile ? await eventFile.text() : undefined;
+      const res = await api.importPlaybookUsers(csv, {
+        eventCsv,
+        eventFileName: eventFile?.name,
+      });
       setResult(res);
       requestAnimationFrame(() => {
         resultRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -87,6 +114,126 @@ export default function AdminUsersImportPage() {
     await runImport();
   }
 
+  function renderDropZone(
+    kind: UploadKind,
+    file: File | null,
+    fileHint: string | null,
+    inputRef: React.RefObject<HTMLInputElement | null>,
+    title: string,
+    subtitle: string
+  ) {
+    const isDragOver = dragOver === kind;
+
+    return (
+      <>
+        <input
+          ref={inputRef}
+          type="file"
+          accept={CSV_ACCEPT}
+          className="sr-only"
+          onChange={(e) => selectFile(kind, e.target.files?.[0] ?? null)}
+        />
+
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => inputRef.current?.click()}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              inputRef.current?.click();
+            }
+          }}
+          onDragEnter={(e) => {
+            e.preventDefault();
+            setDragOver(kind);
+          }}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragOver(kind);
+          }}
+          onDragLeave={(e) => {
+            e.preventDefault();
+            if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+              setDragOver((current) => (current === kind ? null : current));
+            }
+          }}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragOver(null);
+            selectFile(kind, e.dataTransfer.files?.[0] ?? null);
+          }}
+          className={[
+            "rounded-2xl border-2 border-dashed p-6 text-center transition-colors cursor-pointer",
+            "focus:outline-none focus-visible:ring-2 focus-visible:ring-[#163968] focus-visible:ring-offset-2",
+            fileHint
+              ? "border-amber-400 bg-amber-50/60"
+              : isDragOver
+                ? "border-[#163968] bg-[#163968]/5"
+                : file
+                  ? "border-emerald-400 bg-emerald-50/40"
+                  : "border-slate-300 bg-slate-50/80 hover:border-[#163968]/50 hover:bg-[#163968]/[0.03]",
+          ].join(" ")}
+        >
+          {file ? (
+            <div className="space-y-3">
+              <FileSpreadsheet className="w-9 h-9 text-emerald-600 mx-auto" />
+              <div>
+                <p className="text-sm font-semibold text-slate-900">{file.name}</p>
+                <p className="text-xs text-slate-500 mt-1">
+                  {(file.size / 1024).toFixed(1)} KB · ready to import
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    inputRef.current?.click();
+                  }}
+                  className="inline-flex items-center gap-2 rounded-lg border border-[#163968]/25 bg-white px-4 py-2 text-sm font-semibold text-[#163968] shadow-sm hover:bg-[#163968]/5"
+                >
+                  <Upload className="w-4 h-4" />
+                  Choose a different file
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    clearFile(kind);
+                  }}
+                  className="inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-white/80"
+                >
+                  <X className="w-4 h-4" />
+                  Remove
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <FileUp className="w-10 h-10 text-[#163968]/70 mx-auto" />
+              <div className="space-y-1">
+                <p className="text-base font-semibold text-[#163968]">{title}</p>
+                <p className="text-sm text-slate-600">{subtitle}</p>
+              </div>
+              <span className="inline-flex items-center gap-2 rounded-xl bg-[#163968] px-5 py-2.5 text-sm font-semibold text-white shadow-sm pointer-events-none">
+                <Upload className="w-4 h-4" />
+                Browse files
+              </span>
+              <p className="text-xs text-slate-500">.csv files only</p>
+            </div>
+          )}
+        </div>
+
+        {fileHint && (
+          <p className="text-sm text-amber-700" role="alert">
+            {fileHint}
+          </p>
+        )}
+      </>
+    );
+  }
+
   return (
     <AdminPageShell>
       <div className="max-w-2xl mx-auto space-y-6">
@@ -96,144 +243,78 @@ export default function AdminUsersImportPage() {
           </h1>
           <p className="mt-2 text-sm text-slate-600">
             Export users or participants from Playbook as CSV, then upload here.
-            Each row creates or updates a member account with BAMS access (magic-link
-            sign-in at <code className="text-xs bg-slate-100 px-1 rounded">/bams</code>
-            ).
+            Optionally include a showcase event CSV so BAMS event data syncs to
+            each member&apos;s profile by Playbook ID. Members sign in at{" "}
+            <code className="text-xs bg-slate-100 px-1 rounded">/bams</code> via
+            magic link.
           </p>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-700 space-y-2">
-          <p className="font-semibold text-[#163968]">Required CSV columns</p>
-          <ul className="list-disc list-inside space-y-1">
-            <li>
-              <strong>Email</strong> — &quot;Email&quot;, &quot;Account Email&quot;,
-              &quot;E-mail&quot;, etc.
-            </li>
-            <li>
-              <strong>Name</strong> — &quot;Full Name&quot;, or &quot;First Name&quot; +
-              &quot;Last Name&quot;
-            </li>
-          </ul>
-          <p className="font-semibold text-[#163968] pt-2">Optional columns</p>
-          <p className="text-slate-600">
-            Phone, DOB, Playbook ID, grad year, positions, bats/throws, height,
-            weight, school, city, state, zip — mapped automatically when headers match
-            common Playbook export labels.
-          </p>
+        <div className="rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-700 space-y-4">
+          <div>
+            <p className="font-semibold text-[#163968]">1. User file (required)</p>
+            <ul className="list-disc list-inside space-y-1 mt-2">
+              <li>
+                <strong>Email</strong> — &quot;Email&quot;, &quot;Account Email&quot;,
+                &quot;E-mail&quot;, etc.
+              </li>
+              <li>
+                <strong>Name</strong> — &quot;Full Name&quot;, or &quot;First Name&quot; +
+                &quot;Last Name&quot;
+              </li>
+            </ul>
+            <p className="text-slate-600 mt-2">
+              Optional: Phone, DOB, Playbook ID,{" "}
+              <strong>membership</strong> (<code className="text-xs bg-slate-100 px-1 rounded">bams</code>{" "}
+              or{" "}
+              <code className="text-xs bg-slate-100 px-1 rounded">bams-premium</code>
+              ), grad year, positions, bats/throws, height, weight, school, city,
+              state, zip.
+            </p>
+          </div>
+
+          <div>
+            <p className="font-semibold text-[#163968]">2. Event file (optional)</p>
+            <p className="text-slate-600 mt-2">
+              One row per event athlete. Required columns:{" "}
+              <strong>Event ID</strong>, <strong>Event Name</strong> (include date in
+              parentheses, e.g. Showcase (6/7/26)), <strong>ID</strong> (Playbook
+              player id). Optional: first_name, last_name, and metric columns such as
+              60-time, exit-velocity, fastball-velocity, etc. Grad year and primary
+              position are taken from the user file when missing.
+            </p>
+          </div>
         </div>
 
         <form
           onSubmit={onImport}
-          className="rounded-xl border border-slate-200 bg-white p-5 space-y-4"
+          className="rounded-xl border border-slate-200 bg-white p-5 space-y-5"
         >
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept={CSV_ACCEPT}
-            className="sr-only"
-            onChange={(e) => selectFile(e.target.files?.[0] ?? null)}
-          />
-
-          <div
-            role="button"
-            tabIndex={0}
-            onClick={() => fileInputRef.current?.click()}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                fileInputRef.current?.click();
-              }
-            }}
-            onDragEnter={(e) => {
-              e.preventDefault();
-              setDragOver(true);
-            }}
-            onDragOver={(e) => {
-              e.preventDefault();
-              setDragOver(true);
-            }}
-            onDragLeave={(e) => {
-              e.preventDefault();
-              if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-                setDragOver(false);
-              }
-            }}
-            onDrop={(e) => {
-              e.preventDefault();
-              setDragOver(false);
-              selectFile(e.dataTransfer.files?.[0] ?? null);
-            }}
-            className={[
-              "rounded-2xl border-2 border-dashed p-8 text-center transition-colors cursor-pointer",
-              "focus:outline-none focus-visible:ring-2 focus-visible:ring-[#163968] focus-visible:ring-offset-2",
-              fileHint
-                ? "border-amber-400 bg-amber-50/60"
-                : dragOver
-                  ? "border-[#163968] bg-[#163968]/5"
-                  : file
-                    ? "border-emerald-400 bg-emerald-50/40"
-                    : "border-slate-300 bg-slate-50/80 hover:border-[#163968]/50 hover:bg-[#163968]/[0.03]",
-            ].join(" ")}
-          >
-            {file ? (
-              <div className="space-y-3">
-                <FileSpreadsheet className="w-10 h-10 text-emerald-600 mx-auto" />
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">{file.name}</p>
-                  <p className="text-xs text-slate-500 mt-1">
-                    {(file.size / 1024).toFixed(1)} KB · ready to import
-                  </p>
-                </div>
-                <div className="flex flex-wrap items-center justify-center gap-2">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      fileInputRef.current?.click();
-                    }}
-                    className="inline-flex items-center gap-2 rounded-lg border border-[#163968]/25 bg-white px-4 py-2 text-sm font-semibold text-[#163968] shadow-sm hover:bg-[#163968]/5"
-                  >
-                    <Upload className="w-4 h-4" />
-                    Choose a different file
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      clearFile();
-                    }}
-                    className="inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-white/80"
-                  >
-                    <X className="w-4 h-4" />
-                    Remove
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <FileUp className="w-12 h-12 text-[#163968]/70 mx-auto" />
-                <div className="space-y-1">
-                  <p className="text-base font-semibold text-[#163968]">
-                    Upload Playbook CSV
-                  </p>
-                  <p className="text-sm text-slate-600">
-                    Drag and drop your file here, or click to browse
-                  </p>
-                </div>
-                <span className="inline-flex items-center gap-2 rounded-xl bg-[#163968] px-5 py-2.5 text-sm font-semibold text-white shadow-sm pointer-events-none">
-                  <Upload className="w-4 h-4" />
-                  Browse files
-                </span>
-                <p className="text-xs text-slate-500">.csv files only</p>
-              </div>
+          <div className="space-y-2">
+            <p className="text-sm font-semibold text-[#163968]">Playbook user CSV</p>
+            {renderDropZone(
+              "users",
+              userFile,
+              userFileHint,
+              userFileInputRef,
+              "Upload Playbook CSV",
+              "Drag and drop your user export here, or click to browse"
             )}
           </div>
 
-          {fileHint && (
-            <p className="text-sm text-amber-700" role="alert">
-              {fileHint}
+          <div className="space-y-2">
+            <p className="text-sm font-semibold text-[#163968]">
+              Showcase event CSV <span className="font-normal text-slate-500">(optional)</span>
             </p>
-          )}
+            {renderDropZone(
+              "events",
+              eventFile,
+              eventFileHint,
+              eventFileInputRef,
+              "Upload event CSV",
+              "Sync showcase metrics to imported members by Playbook ID"
+            )}
+          </div>
 
           {error && (
             <div className="text-sm text-red-600 space-y-2" role="alert">
@@ -285,6 +366,43 @@ export default function AdminUsersImportPage() {
                 </>
               )}
             </p>
+            {result.eventImport && (
+              <div className="rounded-lg bg-[#163968]/5 border border-[#163968]/15 px-3 py-2 text-slate-700 space-y-1">
+                <p className="font-medium text-[#163968]">Event sync</p>
+                <p>
+                  {result.eventImport.eventRowCount} event row
+                  {result.eventImport.eventRowCount === 1 ? "" : "s"} imported
+                  {result.eventImport.linkedToMembers > 0 && (
+                    <>
+                      {" "}
+                      · {result.eventImport.linkedToMembers} linked to Playbook
+                      member
+                      {result.eventImport.linkedToMembers === 1 ? "" : "s"}
+                    </>
+                  )}
+                </p>
+                {result.eventImport.unlinkedPlayerIds.length > 0 && (
+                  <p className="text-amber-800">
+                    Unlinked Playbook IDs (no matching user in import or database):{" "}
+                    {result.eventImport.unlinkedPlayerIds.join(", ")}
+                  </p>
+                )}
+                {(result.eventImport.parseErrors.length > 0 ||
+                  result.eventImport.rowErrors.length > 0) && (
+                  <div className="max-h-32 overflow-y-auto text-xs text-slate-600 space-y-1 pt-1">
+                    {[...result.eventImport.parseErrors, ...result.eventImport.rowErrors].map(
+                      (e, i) => (
+                        <p key={`event-${e.row}-${i}`}>
+                          Row {e.row}
+                          {"playerId" in e && e.playerId ? ` (${e.playerId})` : ""}:{" "}
+                          {e.message}
+                        </p>
+                      )
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
             {((result.emailsSent ?? 0) > 0 || (result.emailsFailed ?? 0) > 0) && (
               <p className="text-slate-600">
                 {(result.emailsSent ?? 0) > 0 && (

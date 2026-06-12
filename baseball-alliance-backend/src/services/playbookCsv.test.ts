@@ -38,4 +38,20 @@ bob@test.org,Bob,Jones`;
     expect(rows[0].phone).toBe("512-743-9272");
     expect(rows[0].playbookId).toBe("12");
   });
+
+  it("parses membership column", () => {
+    const csv = `Email,Full Name,Membership
+a@example.com,Alice Smith,bams-premium`;
+    const { rows, errors } = parsePlaybookCsv(csv);
+    expect(errors).toHaveLength(0);
+    expect(rows[0].membership).toBe("BAMS_PREMIUM");
+  });
+
+  it("rejects invalid membership values", () => {
+    const csv = `Email,Full Name,Membership
+a@example.com,Alice Smith,gold`;
+    const { rows, errors } = parsePlaybookCsv(csv);
+    expect(rows).toHaveLength(0);
+    expect(errors[0]?.message).toContain("Invalid membership");
+  });
 });

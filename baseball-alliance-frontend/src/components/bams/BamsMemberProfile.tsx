@@ -3,6 +3,10 @@ import { api, type BamsProfileResponse } from "../../lib/api";
 import { useAuth } from "../../context/AuthContext";
 import SavedMatchesPanel from "./SavedMatchesPanel";
 
+function membershipLabel(label: BamsProfileResponse["membershipLabel"]): string {
+  return label === "bams-premium" ? "BAMS Premium" : "BAMS";
+}
+
 function Field({
   label,
   value,
@@ -57,6 +61,25 @@ export default function BamsMemberProfile() {
           Signed in as {user?.fullName ?? data.user.fullName} ({data.user.email}
           )
         </p>
+        <div className="mt-3 rounded-lg border border-[#163968]/15 bg-[#163968]/5 px-3 py-2 text-sm text-slate-700">
+          <p>
+            <span className="font-medium text-[#163968]">Membership:</span>{" "}
+            {membershipLabel(data.membershipLabel)}
+          </p>
+          <p className="mt-1">
+            <span className="font-medium text-[#163968]">BAMS match runs:</span>{" "}
+            {data.matchRunsRemaining} of {data.matchRunsLimit} remaining
+            {data.matchRunsUsed > 0 && (
+              <span className="text-slate-500"> ({data.matchRunsUsed} used)</span>
+            )}
+          </p>
+          {data.matchRunsRemaining === 0 && (
+            <p className="mt-1 text-amber-800">
+              You&apos;ve used all included match runs. Saved matches on this
+              profile are still available.
+            </p>
+          )}
+        </div>
         <dl className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="Grad year" value={p?.gradYear} />
           <Field label="Primary position" value={p?.primaryPosition} />

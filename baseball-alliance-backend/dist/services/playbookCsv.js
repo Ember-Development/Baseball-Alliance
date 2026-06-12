@@ -1,6 +1,7 @@
-import { RoleName } from "@prisma/client";
+import { BamsMembershipTier, RoleName } from "@prisma/client";
 import { prisma } from "../db.js";
 import { requestMagicLink } from "./magicLink.js";
+import { parseMembershipTier } from "./bamsMembership.js";
 const COLUMN_ALIASES = {
     email: [
         "email",
@@ -29,6 +30,7 @@ const COLUMN_ALIASES = {
         "member id",
         "id",
     ],
+    membership: ["membership", "bams membership", "bams tier", "tier", "plan"],
     gradYear: [
         "grad year",
         "grad year - hs",
@@ -186,12 +188,26 @@ export function parsePlaybookCsv(csvText) {
             errors.push({ row: rowNum, email, message: "Missing name (full name or first + last)" });
             continue;
         }
+        const membershipRaw = cell(line, col.membership);
+        let membership;
+        if (membershipRaw) {
+            membership = parseMembershipTier(membershipRaw);
+            if (!membership) {
+                errors.push({
+                    row: rowNum,
+                    email,
+                    message: 'Invalid membership (use "bams" or "bams-premium")',
+                });
+                continue;
+            }
+        }
         rows.push({
             email,
             fullName,
             phone: cell(line, col.phone),
             dob: parseDob(cell(line, dobIdx)),
-            playbookId: cell(line, col.playbookId),
+            playbookId: cell(line, col.playbookId)?.trim() || undefined,
+            membership,
             gradYear: cell(line, col.gradYear),
             primaryPosition: cell(line, col.primaryPosition),
             secondaryPosition: cell(line, col.secondaryPosition),
@@ -305,6 +321,7 @@ export async function importPlaybookMembers(rows) {
                 city: row.city,
                 state: row.state,
                 zip: row.zip,
+                membership: row.membership ?? BamsMembershipTier.BAMS,
             };
             const found = await findUserForImport(row, email);
             if (!found?.user) {
@@ -364,7 +381,12 @@ export async function importPlaybookMembers(rows) {
                     continue;
                 }
             }
-            await applyMemberImport(existing, row, email, profileData);
+            await applyMemberImport(existing, row, email, {
+                ...profileData,
+                membership: row.membership ??
+                    existing.bamsMember?.membership ??
+                    BamsMembershipTier.BAMS,
+            });
             const signInEmailSent = await sendImportWelcomeEmail(email);
             const emailChanged = matchedBy === "playbookId" && existing.email !== email;
             console.log(`[playbook-import] updated ${email} (${row.fullName})${emailChanged ? ` — email was ${existing.email}` : ""}`);

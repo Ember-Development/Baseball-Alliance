@@ -194,6 +194,10 @@ model BamsMemberProfile {
   state             String?
   zip               String?
 
+  /// Playbook import tier — controls BAMS match run allowance
+  membership   BamsMembershipTier @default(BAMS)
+  matchRunsUsed Int               @default(0)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -216,6 +220,11 @@ enum BamsMatchStatus {
   SUCCESS
   FAILED
   SKIPPED
+}
+
+enum BamsMembershipTier {
+  BAMS
+  BAMS_PREMIUM
 }
 
 /// User-uploaded Baseball Alliance event export (source of truth for showcase metrics)

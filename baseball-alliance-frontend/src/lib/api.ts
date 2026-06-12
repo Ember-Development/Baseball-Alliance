@@ -29,9 +29,19 @@ export type BamsMemberProfile = {
   city?: string | null;
   state?: string | null;
   zip?: string | null;
+  membership?: "BAMS" | "BAMS_PREMIUM" | null;
+  matchRunsUsed?: number | null;
 };
 
-export type BamsProfileResponse = {
+export type BamsMembershipUsage = {
+  membership: "BAMS" | "BAMS_PREMIUM";
+  membershipLabel: "bams" | "bams-premium";
+  matchRunsUsed: number;
+  matchRunsLimit: number;
+  matchRunsRemaining: number;
+};
+
+export type BamsProfileResponse = BamsMembershipUsage & {
   user: { id: string; email: string; fullName: string; roles: string[] };
   profile: BamsMemberProfile | null;
   playbookId: string | null;
@@ -97,6 +107,17 @@ export type PlaybookImportResult = {
   }>;
   errors: Array<{ row: number; email?: string; message: string }>;
   parseErrors: Array<{ row: number; email?: string; message: string }>;
+  eventImport?: PlaybookEventImportResult;
+};
+
+export type PlaybookEventImportResult = {
+  uploadId?: string;
+  eventRowCount: number;
+  linkedToMembers: number;
+  unlinkedPlayerIds: string[];
+  warnings: string[];
+  parseErrors: Array<{ row: number; message: string }>;
+  rowErrors: Array<{ row: number; playerId?: string; message: string }>;
 };
 
 export type BamsEventUploadSummary = {
@@ -281,10 +302,17 @@ export const api = {
     return request<BamsProfileResponse>("/auth/bams-profile");
   },
 
-  async importPlaybookUsers(csv: string) {
+  async importPlaybookUsers(
+    csv: string,
+    options?: { eventCsv?: string; eventFileName?: string }
+  ) {
     return request<PlaybookImportResult>("/admin/users/import-playbook", {
       method: "POST",
-      body: JSON.stringify({ csv }),
+      body: JSON.stringify({
+        csv,
+        eventCsv: options?.eventCsv,
+        eventFileName: options?.eventFileName,
+      }),
     });
   },
 
@@ -371,18 +399,20 @@ export const api = {
       };
     }
   ) {
-    return request<{
-      uploadId: string;
-      matched: number;
-      failed: number;
-      skipped: number;
-      results: Array<{
-        athleteUuid: string;
-        matchStatus: string;
-        matchError?: string;
-        validationDetails?: unknown;
-      }>;
-    }>(`/bams/events/${encodeURIComponent(uploadId)}/match`, {
+    return request<
+      BamsMembershipUsage & {
+        uploadId: string;
+        matched: number;
+        failed: number;
+        skipped: number;
+        results: Array<{
+          athleteUuid: string;
+          matchStatus: string;
+          matchError?: string;
+          validationDetails?: unknown;
+        }>;
+      }
+    >(`/bams/events/${encodeURIComponent(uploadId)}/match`, {
       method: "POST",
       body: JSON.stringify(body ?? {}),
     });
