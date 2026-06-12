@@ -8,6 +8,7 @@ import { JwtUser, requireAuth } from "../middleware/requireAuth.js";
 import { UserPublic } from "../types.js";
 import { requestMagicLink, verifyMagicLink } from "../services/magicLink.js";
 import { userHasBamsAccess } from "../services/playbookCsv.js";
+import { membershipUsageSummary } from "../services/bamsMembership.js";
 
 const r = Router();
 
@@ -180,11 +181,15 @@ r.get("/bams-profile", requireAuth, async (req, res) => {
     return res.status(403).json({ error: "BAMS access required" });
   }
 
+  const membership = me.bamsMember?.membership ?? "BAMS";
+  const matchRunsUsed = me.bamsMember?.matchRunsUsed ?? 0;
+
   return res.json({
     user: toUserPublic(me),
     profile: me.bamsMember,
     playbookId: me.playbookId,
     playbookImportedAt: me.playbookImportedAt,
+    ...membershipUsageSummary({ membership, matchRunsUsed }),
   });
 });
 

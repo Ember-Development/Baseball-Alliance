@@ -5,6 +5,7 @@ import {
   type BamsEventResultsResponse,
   type BamsEventUploadResponse,
   type BamsEventUploadSummary,
+  type BamsMembershipUsage,
   type BamsSyncedEventSummary,
 } from "../../lib/api";
 import type { MatchResponseV1 } from "../../types/collegeMatch";
@@ -15,6 +16,7 @@ import {
   matchPreferencesToApi,
   type MatchPreferences,
 } from "./matchPreferences";
+import { useAuth } from "../../context/AuthContext";
 import {
   AlertCircle,
   Calendar,
@@ -87,6 +89,11 @@ function uploadLabel(upload: BamsEventUploadSummary): string {
 }
 
 export default function BamsEventMatchPanel() {
+  const { user } = useAuth();
+  const isAdmin = user?.roles?.includes("ADMIN") ?? false;
+  const [membershipUsage, setMembershipUsage] = useState<BamsMembershipUsage | null>(
+    null
+  );
   const [uploadId, setUploadId] = useState<string | null>(null);
   const [syncedEvents, setSyncedEvents] = useState<BamsSyncedEventSummary[]>(
     []
@@ -141,6 +148,29 @@ export default function BamsEventMatchPanel() {
   );
 
   useEffect(() => {
+    let cancelled = false;
+    void api
+      .getBamsProfile()
+      .then((profile) => {
+        if (!cancelled) {
+          setMembershipUsage({
+            membership: profile.membership,
+            membershipLabel: profile.membershipLabel,
+            matchRunsUsed: profile.matchRunsUsed,
+            matchRunsLimit: profile.matchRunsLimit,
+            matchRunsRemaining: profile.matchRunsRemaining,
+          });
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setMembershipUsage(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
     if (uploadId) return;
     let cancelled = false;
     setLoadingUploads(true);
@@ -170,6 +200,9 @@ export default function BamsEventMatchPanel() {
       cancelled = true;
     };
   }, [uploadId]);
+
+  const canRunMatch =
+    isAdmin || (membershipUsage?.matchRunsRemaining ?? 0) > 0;
 
   useEffect(() => {
     if (!uploadId) return;
@@ -273,6 +306,14 @@ export default function BamsEventMatchPanel() {
         athleteUuids: targets?.map((a) => a.athleteUuid),
         limit: COMPARE_POOL_SIZE,
         preferences: prefsPayload,
+      });
+      const profile = await api.getBamsProfile();
+      setMembershipUsage({
+        membership: profile.membership,
+        membershipLabel: profile.membershipLabel,
+        matchRunsUsed: profile.matchRunsUsed,
+        matchRunsLimit: profile.matchRunsLimit,
+        matchRunsRemaining: profile.matchRunsRemaining,
       });
       await loadResults(uploadId, selectedEvent);
       // Results changed — allow re-saving the fresh match.
@@ -610,10 +651,39 @@ export default function BamsEventMatchPanel() {
 
       <MatchPreferencesForm value={preferences} onChange={setPreferences} />
 
+      {membershipUsage && !isAdmin && (
+        <div
+          className={[
+            "rounded-xl border px-4 py-3 text-sm",
+            membershipUsage.matchRunsRemaining > 0
+              ? "border-[#163968]/20 bg-[#163968]/5 text-slate-700"
+              : "border-amber-200 bg-amber-50 text-amber-900",
+          ].join(" ")}
+        >
+          <p>
+            <span className="font-semibold text-[#163968]">
+              {membershipUsage.membershipLabel === "bams-premium"
+                ? "BAMS Premium"
+                : "BAMS"}
+            </span>
+            {" · "}
+            {membershipUsage.matchRunsRemaining} of {membershipUsage.matchRunsLimit}{" "}
+            match run
+            {membershipUsage.matchRunsLimit === 1 ? "" : "s"} remaining
+          </p>
+          {membershipUsage.matchRunsRemaining === 0 && (
+            <p className="mt-1">
+              You&apos;ve used all included match runs. You can still view saved
+              matches on your profile.
+            </p>
+          )}
+        </div>
+      )}
+
       <div className="flex flex-wrap gap-3">
         <button
           type="button"
-          disabled={matchBusy || athletes.length === 0}
+          disabled={matchBusy || athletes.length === 0 || !canRunMatch}
           onClick={() => void runMatch()}
           className="inline-flex items-center gap-2 rounded-xl bg-[#163968] text-white font-semibold px-5 py-2.5 text-sm disabled:opacity-50"
         >
@@ -758,7 +828,7 @@ export default function BamsEventMatchPanel() {
                 {selectedAthlete.matchStatus === "PENDING" && (
                   <button
                     type="button"
-                    disabled={matchBusy}
+                    disabled={matchBusy || !canRunMatch}
                     onClick={() => void runMatch([selectedAthlete])}
                     className="text-sm font-semibold text-[#163968] hover:underline"
                   >

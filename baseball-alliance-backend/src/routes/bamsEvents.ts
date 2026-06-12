@@ -14,6 +14,10 @@ import {
 import { parseEventExportCsv } from "../services/eventCsvParser.js";
 import { buildMatchRequestFromEventRow } from "../services/eventCsvToMatchRequest.js";
 import { mergeMatchPreferences } from "../services/mergeMatchPreferences.js";
+import {
+  canRunBamsMatch,
+  membershipUsageSummary,
+} from "../services/bamsMembership.js";
 
 const r = Router();
 
@@ -326,6 +330,14 @@ r.post("/:uploadId/match", async (req, res) => {
   const access = await assertUploadAccess(req.params.uploadId, req.user!.id);
   if (!access) return res.status(404).json({ error: "Upload not found" });
 
+  const memberProfile = await prisma.bamsMemberProfile.findUnique({
+    where: { userId: req.user!.id },
+    select: { membership: true, matchRunsUsed: true },
+  });
+  const membership = memberProfile?.membership ?? "BAMS";
+  const matchRunsUsed = memberProfile?.matchRunsUsed ?? 0;
+  const roles = req.user!.roles ?? [];
+
   const { upload } = access;
   let targets = filterAthletesForAccess(upload.athletes, access);
   if (parsed.data.eventName) {
@@ -338,6 +350,24 @@ r.post("/:uploadId/match", async (req, res) => {
     targets = targets.filter((a: (typeof targets)[number]) =>
       set.has(a.athleteUuid)
     );
+  }
+
+  if (targets.length === 0) {
+    return res.status(400).json({ error: "No athletes selected to match" });
+  }
+
+  if (
+    !canRunBamsMatch({
+      roles,
+      membership,
+      matchRunsUsed,
+    })
+  ) {
+    const usage = membershipUsageSummary({ membership, matchRunsUsed });
+    return res.status(403).json({
+      error: "BAMS match run limit reached",
+      ...usage,
+    });
   }
 
   const limit = parsed.data.limit ?? 50;
@@ -451,6 +481,26 @@ r.post("/:uploadId/match", async (req, res) => {
     }
   }
 
+  const shouldCountRun = !roles.includes("ADMIN");
+  if (shouldCountRun) {
+    await prisma.bamsMemberProfile.upsert({
+      where: { userId: req.user!.id },
+      create: {
+        userId: req.user!.id,
+        membership,
+        matchRunsUsed: 1,
+      },
+      update: {
+        matchRunsUsed: { increment: 1 },
+      },
+    });
+  }
+
+  const usage = membershipUsageSummary({
+    membership,
+    matchRunsUsed: shouldCountRun ? matchRunsUsed + 1 : matchRunsUsed,
+  });
+
   return res.json({
     uploadId: upload.id,
     matched: results.filter((r) => r.matchStatus === BamsMatchStatus.SUCCESS)
@@ -460,6 +510,7 @@ r.post("/:uploadId/match", async (req, res) => {
     skipped: results.filter((r) => r.matchStatus === BamsMatchStatus.SKIPPED)
       .length,
     results,
+    ...usage,
   });
 });
 

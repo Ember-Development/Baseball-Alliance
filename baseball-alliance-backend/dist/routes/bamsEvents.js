@@ -1,7 +1,7 @@
 import { Router } from "express";
 import express from "express";
 import { z } from "zod";
-import { BamsMatchStatus } from "@prisma/client";
+import { BamsMatchStatus, Prisma } from "@prisma/client";
 import { prisma } from "../db.js";
 import { requireAuth } from "../middleware/requireAuth.js";
 import { requireBamsAccess } from "../middleware/requireBamsAccess.js";
@@ -10,6 +10,7 @@ import { BamsApiError, bamsErrorToHttp, postBamsMatch, } from "../services/bamsA
 import { parseEventExportCsv } from "../services/eventCsvParser.js";
 import { buildMatchRequestFromEventRow } from "../services/eventCsvToMatchRequest.js";
 import { mergeMatchPreferences } from "../services/mergeMatchPreferences.js";
+import { canRunBamsMatch, membershipUsageSummary, } from "../services/bamsMembership.js";
 const r = Router();
 r.use(express.json({ limit: "6mb" }));
 r.use(requireAuth);
@@ -63,11 +64,44 @@ function athleteSummary(row) {
         matchError: row.matchError,
     };
 }
-async function assertUploadOwner(uploadId, userId) {
-    return prisma.bamsEventUpload.findFirst({
-        where: { id: uploadId, userId },
+async function getMemberPlaybookId(userId) {
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { playbookId: true },
+    });
+    return user?.playbookId?.trim() || null;
+}
+const uploadWithAthletesArgs = Prisma.validator()({
+    include: { athletes: { orderBy: { rowIndex: "asc" } } },
+});
+async function assertUploadAccess(uploadId, userId) {
+    const upload = await prisma.bamsEventUpload.findUnique({
+        where: { id: uploadId },
         include: { athletes: { orderBy: { rowIndex: "asc" } } },
     });
+    if (!upload)
+        return null;
+    if (upload.userId === userId) {
+        return { upload, fullAccess: true, playbookId: null };
+    }
+    const playbookId = await getMemberPlaybookId(userId);
+    if (!playbookId)
+        return null;
+    const linked = upload.athletes.some((a) => (a.playerId?.trim() || "") === playbookId);
+    if (!linked)
+        return null;
+    return { upload, fullAccess: false, playbookId };
+}
+function filterAthletesForAccess(athletes, access) {
+    if (access.fullAccess)
+        return athletes;
+    if (!access.playbookId)
+        return [];
+    return athletes.filter((a) => (a.playerId?.trim() || "") === access.playbookId);
+}
+function syncedAthleteDisplayName(row) {
+    const name = [row.firstName, row.lastName].filter(Boolean).join(" ");
+    return name || row.athleteUuid;
 }
 /** POST /api/bams/events/upload */
 r.post("/upload", bamsUploadRateLimit, async (req, res) => {
@@ -144,6 +178,58 @@ r.post("/upload", bamsUploadRateLimit, async (req, res) => {
         rows: upload.athletes.map(athleteSummary),
     });
 });
+/** GET /api/bams/events/member-options — synced event rows + own uploads */
+r.get("/member-options", async (req, res) => {
+    const userId = req.user.id;
+    const playbookId = await getMemberPlaybookId(userId);
+    const myUploads = await prisma.bamsEventUpload.findMany({
+        where: { userId },
+        orderBy: { createdAt: "desc" },
+        take: 20,
+        select: {
+            id: true,
+            fileName: true,
+            eventName: true,
+            eventStartDate: true,
+            rowCount: true,
+            createdAt: true,
+        },
+    });
+    const syncedRows = playbookId
+        ? await prisma.bamsEventAthleteRow.findMany({
+            where: { playerId: playbookId },
+            include: {
+                upload: {
+                    select: {
+                        id: true,
+                        fileName: true,
+                        eventName: true,
+                        eventStartDate: true,
+                        createdAt: true,
+                    },
+                },
+            },
+            orderBy: [{ upload: { createdAt: "desc" } }, { rowIndex: "asc" }],
+        })
+        : [];
+    return res.json({
+        playbookId,
+        syncedEvents: syncedRows.map((row) => ({
+            athleteRowId: row.id,
+            uploadId: row.uploadId,
+            athleteUuid: row.athleteUuid,
+            displayName: syncedAthleteDisplayName(row),
+            primaryPosition: row.primaryPosition,
+            gradYear: row.gradYear,
+            eventName: row.eventName ?? row.upload.eventName,
+            eventStartDate: row.eventStartDate ?? row.upload.eventStartDate,
+            fileName: row.upload.fileName,
+            matchStatus: row.matchStatus,
+            uploadCreatedAt: row.upload.createdAt,
+        })),
+        myUploads,
+    });
+});
 /** GET /api/bams/events/uploads — recent uploads for current user */
 r.get("/uploads", async (req, res) => {
     const uploads = await prisma.bamsEventUpload.findMany({
@@ -167,16 +253,38 @@ r.post("/:uploadId/match", async (req, res) => {
     if (!parsed.success) {
         return res.status(400).json({ errors: parsed.error.flatten() });
     }
-    const upload = await assertUploadOwner(req.params.uploadId, req.user.id);
-    if (!upload)
+    const access = await assertUploadAccess(req.params.uploadId, req.user.id);
+    if (!access)
         return res.status(404).json({ error: "Upload not found" });
-    let targets = upload.athletes;
+    const memberProfile = await prisma.bamsMemberProfile.findUnique({
+        where: { userId: req.user.id },
+        select: { membership: true, matchRunsUsed: true },
+    });
+    const membership = memberProfile?.membership ?? "BAMS";
+    const matchRunsUsed = memberProfile?.matchRunsUsed ?? 0;
+    const roles = req.user.roles ?? [];
+    const { upload } = access;
+    let targets = filterAthletesForAccess(upload.athletes, access);
     if (parsed.data.eventName) {
         targets = targets.filter((a) => a.eventName === parsed.data.eventName);
     }
     if (parsed.data.athleteUuids?.length) {
         const set = new Set(parsed.data.athleteUuids);
         targets = targets.filter((a) => set.has(a.athleteUuid));
+    }
+    if (targets.length === 0) {
+        return res.status(400).json({ error: "No athletes selected to match" });
+    }
+    if (!canRunBamsMatch({
+        roles,
+        membership,
+        matchRunsUsed,
+    })) {
+        const usage = membershipUsageSummary({ membership, matchRunsUsed });
+        return res.status(403).json({
+            error: "BAMS match run limit reached",
+            ...usage,
+        });
     }
     const limit = parsed.data.limit ?? 50;
     const offset = parsed.data.offset ?? 0;
@@ -270,6 +378,24 @@ r.post("/:uploadId/match", async (req, res) => {
             throw e;
         }
     }
+    const shouldCountRun = !roles.includes("ADMIN");
+    if (shouldCountRun) {
+        await prisma.bamsMemberProfile.upsert({
+            where: { userId: req.user.id },
+            create: {
+                userId: req.user.id,
+                membership,
+                matchRunsUsed: 1,
+            },
+            update: {
+                matchRunsUsed: { increment: 1 },
+            },
+        });
+    }
+    const usage = membershipUsageSummary({
+        membership,
+        matchRunsUsed: shouldCountRun ? matchRunsUsed + 1 : matchRunsUsed,
+    });
     return res.json({
         uploadId: upload.id,
         matched: results.filter((r) => r.matchStatus === BamsMatchStatus.SUCCESS)
@@ -279,20 +405,22 @@ r.post("/:uploadId/match", async (req, res) => {
         skipped: results.filter((r) => r.matchStatus === BamsMatchStatus.SKIPPED)
             .length,
         results,
+        ...usage,
     });
 });
 /** GET /api/bams/events/:uploadId/results */
 r.get("/:uploadId/results", async (req, res) => {
-    const upload = await assertUploadOwner(req.params.uploadId, req.user.id);
-    if (!upload)
+    const access = await assertUploadAccess(req.params.uploadId, req.user.id);
+    if (!access)
         return res.status(404).json({ error: "Upload not found" });
+    const { upload } = access;
     const eventFilter = req.query.eventName;
-    let athletes = upload.athletes;
+    let athletes = filterAthletesForAccess(upload.athletes, access);
     if (eventFilter) {
         athletes = athletes.filter((a) => a.eventName === eventFilter);
     }
     const events = [
-        ...new Map(upload.athletes.map((a) => [
+        ...new Map(athletes.map((a) => [
             `${a.eventName ?? ""}|${a.eventStartDate ?? ""}`,
             {
                 eventName: a.eventName,
