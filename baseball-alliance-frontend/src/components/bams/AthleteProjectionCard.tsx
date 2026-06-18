@@ -156,8 +156,13 @@ export default function AthleteProjectionCard({ athleteProfile: ap }: Props) {
 
 export function MatchLegalFooter() {
   return (
-    <p className="text-[11px] leading-relaxed text-slate-400 text-center px-2">
-      {MATCH_COPY.footer}
-    </p>
+    <div className="rounded-xl border border-slate-300 bg-slate-50 px-5 py-4 sm:px-6 sm:py-5">
+      <p className="text-xs font-bold uppercase tracking-wide text-slate-500 mb-2 text-center">
+        Important
+      </p>
+      <p className="text-sm sm:text-base leading-relaxed text-slate-700 text-center max-w-3xl mx-auto">
+        {MATCH_COPY.footer}
+      </p>
+    </div>
   );
 }

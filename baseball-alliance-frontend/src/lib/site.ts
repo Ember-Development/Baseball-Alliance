@@ -21,23 +21,12 @@ export type ContactCtaPayload = {
   imageUrl?: string | null;
 };
 
-export type MembershipFeaturePayload = {
-  id: string;
-  title: string;
-  body: string;
-};
-
 export type MembershipPagePayload = {
   heroEyebrow: string | null;
   heroCtaLabel: string | null;
-  overviewSectionTitle: string | null;
   videoSectionTitle: string | null;
-  whatsIncludedTitle: string | null;
-  introBlurb: string | null;
-  features: MembershipFeaturePayload[];
-  bottomCtaTitle: string | null;
-  bottomCtaBody: string | null;
-  bottomCtaButtonLabel: string | null;
+  bamsSectionTitle: string | null;
+  bamsSectionBody: string | null;
 };
 
 export type LeadershipStatPayload = {

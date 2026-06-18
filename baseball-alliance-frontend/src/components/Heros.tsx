@@ -152,6 +152,14 @@ const Hero: React.FC = () => {
 
       {/* Global tint */}
       <div className="absolute inset-0 z-30 bg-black/20 pointer-events-none" />
+      {/* Top scrim — keeps navbar readable over bright video frames */}
+      <div
+        className="absolute inset-x-0 top-0 h-36 z-30 pointer-events-none"
+        style={{
+          background:
+            "linear-gradient(to bottom, rgba(0,0,0,0.72), rgba(0,0,0,0.35) 55%, rgba(0,0,0,0))",
+        }}
+      />
       {/* Time-of-day color grade */}
       <div
         className={`absolute inset-0 z-30 pointer-events-none ${

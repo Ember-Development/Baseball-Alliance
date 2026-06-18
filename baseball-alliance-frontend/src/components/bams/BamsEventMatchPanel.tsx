@@ -3,8 +3,6 @@ import {
   api,
   type BamsAthleteRowSummary,
   type BamsEventResultsResponse,
-  type BamsEventUploadResponse,
-  type BamsEventUploadSummary,
   type BamsMembershipUsage,
   type BamsSyncedEventSummary,
 } from "../../lib/api";
@@ -22,8 +20,6 @@ import {
   Calendar,
   ChevronRight,
   ExternalLink,
-  FileUp,
-  History,
   Loader2,
   Sparkles,
   Play,
@@ -72,22 +68,6 @@ function metricsPreview(raw?: Record<string, string>) {
     .filter(Boolean) as { label: string; value: string }[];
 }
 
-function formatUploadDate(iso: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
-
-function uploadLabel(upload: BamsEventUploadSummary): string {
-  if (upload.eventName) return upload.eventName;
-  if (upload.fileName) return upload.fileName;
-  return "Event upload";
-}
-
 export default function BamsEventMatchPanel() {
   const { user } = useAuth();
   const isAdmin = user?.roles?.includes("ADMIN") ?? false;
@@ -98,20 +78,16 @@ export default function BamsEventMatchPanel() {
   const [syncedEvents, setSyncedEvents] = useState<BamsSyncedEventSummary[]>(
     []
   );
-  const [pastUploads, setPastUploads] = useState<BamsEventUploadSummary[]>([]);
   const [memberPlaybookId, setMemberPlaybookId] = useState<string | null>(null);
   const [loadingUploads, setLoadingUploads] = useState(true);
   const [selectingUploadId, setSelectingUploadId] = useState<string | null>(
     null
   );
-  const [showUploadForm, setShowUploadForm] = useState(false);
   const [results, setResults] = useState<BamsEventResultsResponse | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
   const [selectedAthleteId, setSelectedAthleteId] = useState<string | null>(
     null
   );
-  const [file, setFile] = useState<File | null>(null);
-  const [busy, setBusy] = useState(false);
   const [matchBusy, setMatchBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [warnings, setWarnings] = useState<string[]>([]);
@@ -179,18 +155,12 @@ export default function BamsEventMatchPanel() {
       .then((res) => {
         if (!cancelled) {
           setSyncedEvents(res.syncedEvents);
-          setPastUploads(res.myUploads);
           setMemberPlaybookId(res.playbookId);
-          setShowUploadForm(
-            res.syncedEvents.length === 0 && res.myUploads.length === 0
-          );
         }
       })
       .catch(() => {
         if (!cancelled) {
           setSyncedEvents([]);
-          setPastUploads([]);
-          setShowUploadForm(true);
         }
       })
       .finally(() => {
@@ -222,27 +192,6 @@ export default function BamsEventMatchPanel() {
     | MatchResponseV1
     | undefined;
 
-  async function openEventUpload(
-    upload: BamsEventUploadSummary,
-    athleteRowId?: string
-  ) {
-    setSelectingUploadId(upload.id);
-    setError(null);
-    try {
-      setUploadId(upload.id);
-      setSelectedEvent(upload.eventName);
-      await loadResults(upload.id, upload.eventName, {
-        selectFirst: !athleteRowId,
-        athleteRowId,
-      });
-    } catch (err: unknown) {
-      setUploadId(null);
-      setError(err instanceof Error ? err.message : "Failed to load event");
-    } finally {
-      setSelectingUploadId(null);
-    }
-  }
-
   async function selectSyncedEvent(event: BamsSyncedEventSummary) {
     setSelectingUploadId(event.uploadId);
     setError(null);
@@ -257,34 +206,6 @@ export default function BamsEventMatchPanel() {
       setError(err instanceof Error ? err.message : "Failed to load event");
     } finally {
       setSelectingUploadId(null);
-    }
-  }
-
-  async function selectExistingUpload(upload: BamsEventUploadSummary) {
-    await openEventUpload(upload);
-  }
-
-  async function onUpload(e: React.FormEvent) {
-    e.preventDefault();
-    if (!file) return;
-    setBusy(true);
-    setError(null);
-    setWarnings([]);
-    try {
-      const csv = await file.text();
-      const res: BamsEventUploadResponse = await api.uploadBamsEventCsv(
-        csv,
-        file.name
-      );
-      setUploadId(res.uploadId);
-      setWarnings(res.warnings);
-      const firstEvent = res.events[0]?.eventName ?? null;
-      setSelectedEvent(firstEvent);
-      await loadResults(res.uploadId, firstEvent, { selectFirst: true });
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Upload failed");
-    } finally {
-      setBusy(false);
     }
   }
 
@@ -354,14 +275,12 @@ export default function BamsEventMatchPanel() {
     setResults(null);
     setSelectedEvent(null);
     setSelectedAthleteId(null);
-    setFile(null);
     setWarnings([]);
     setError(null);
     setPreferences({ ...DEFAULT_MATCH_PREFERENCES });
     setSavingId(null);
     setSavedIds(new Set());
     setSaveError(null);
-    setShowUploadForm(false);
     setPreferencesUpdated(false);
     lastMatchStatesRef.current = null;
   }
@@ -374,8 +293,8 @@ export default function BamsEventMatchPanel() {
             Choose event data
           </h2>
           <p className="mt-2 text-sm text-slate-600">
-            Select event data synced to your Playbook profile, a previous CSV
-            upload, or upload a new export to run college matching through BAMS.
+            Select event data synced to your Playbook profile to run college
+            matching through BAMS.
           </p>
         </div>
 
@@ -449,143 +368,18 @@ export default function BamsEventMatchPanel() {
         ) : memberPlaybookId ? (
           <p className="text-sm text-slate-500 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
             No showcase event data is linked to Playbook ID{" "}
-            <strong>{memberPlaybookId}</strong> yet. Upload an event CSV below,
-            or ask your admin to import event data with your player ID.
+            <strong>{memberPlaybookId}</strong> yet. Ask your admin to import
+            event data with your player ID.
           </p>
         ) : (
           <p className="text-sm text-slate-500 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
             Your account has no Playbook ID on file, so synced event data
-            cannot be matched automatically. Upload an event CSV below.
+            cannot be matched automatically. Contact Baseball Alliance support
+            to link your profile.
           </p>
         )}
 
-        {pastUploads.length > 0 ? (
-          <section className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
-              <History className="w-4 h-4 text-[#163968]" />
-              <h3 className="text-sm font-semibold text-slate-800">
-                Your CSV uploads
-              </h3>
-            </div>
-            <ul className="divide-y divide-slate-100">
-              {pastUploads.map((upload) => {
-                const busy = selectingUploadId === upload.id;
-                return (
-                  <li key={upload.id}>
-                    <button
-                      type="button"
-                      disabled={Boolean(selectingUploadId)}
-                      onClick={() => void selectExistingUpload(upload)}
-                      className="w-full text-left px-5 py-4 hover:bg-slate-50 transition flex items-center gap-3 disabled:opacity-60"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-slate-800 truncate">
-                          {uploadLabel(upload)}
-                        </p>
-                        <p className="text-xs text-slate-500 mt-0.5 flex flex-wrap items-center gap-x-2">
-                          {upload.eventStartDate && (
-                            <span className="inline-flex items-center gap-1">
-                              <Calendar className="w-3 h-3" />
-                              {upload.eventStartDate}
-                            </span>
-                          )}
-                          <span className="inline-flex items-center gap-1">
-                            <Users className="w-3 h-3" />
-                            {upload.rowCount} athlete
-                            {upload.rowCount === 1 ? "" : "s"}
-                          </span>
-                          {upload.fileName && (
-                            <span className="truncate">{upload.fileName}</span>
-                          )}
-                          <span>· {formatUploadDate(upload.createdAt)}</span>
-                        </p>
-                      </div>
-                      {busy ? (
-                        <Loader2 className="w-4 h-4 animate-spin text-[#163968] shrink-0" />
-                      ) : (
-                        <ChevronRight className="w-4 h-4 text-slate-300 shrink-0" />
-                      )}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-        ) : null}
-
-        {(syncedEvents.length > 0 || pastUploads.length > 0) && !showUploadForm && (
-          <button
-            type="button"
-            onClick={() => setShowUploadForm(true)}
-            className="w-full rounded-xl border border-dashed border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-[#163968] hover:border-[#163968]/40 hover:bg-slate-50 transition"
-          >
-            Upload a new event CSV
-          </button>
-        )}
-
-        {(showUploadForm ||
-          (syncedEvents.length === 0 && pastUploads.length === 0)) && (
-          <>
-            {(syncedEvents.length > 0 || pastUploads.length > 0) && (
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                Or upload new
-              </p>
-            )}
-
-            <div className="rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-700 space-y-2">
-              <p className="font-semibold text-[#163968]">Required columns</p>
-              <p className="text-slate-600">
-                event_name, event_start_date, athlete_uuid, primary_position,
-                grad_year — plus metric columns such as 60-time, exit-velocity,
-                infield-velocity, etc.
-              </p>
-            </div>
-
-            <form
-              onSubmit={onUpload}
-              className="rounded-2xl border-2 border-dashed border-slate-200 bg-white p-8 text-center space-y-4"
-            >
-              <FileUp className="w-10 h-10 text-[#163968]/60 mx-auto" />
-              <label className="block cursor-pointer">
-                <span className="text-sm font-semibold text-[#163968]">
-                  Choose event CSV
-                </span>
-                <input
-                  type="file"
-                  accept=".csv,text/csv"
-                  className="hidden"
-                  onChange={(ev) => setFile(ev.target.files?.[0] ?? null)}
-                />
-              </label>
-              {file && (
-                <p className="text-xs text-slate-500">{file.name}</p>
-              )}
-              {error && (
-                <p className="text-sm text-red-600" role="alert">
-                  {error}
-                </p>
-              )}
-              <button
-                type="submit"
-                disabled={!file || busy}
-                className="w-full rounded-xl bg-[#163968] text-white font-semibold py-2.5 text-sm disabled:opacity-50"
-              >
-                {busy ? (
-                  <span className="inline-flex items-center gap-2 justify-center">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Uploading…
-                  </span>
-                ) : (
-                  "Upload & parse"
-                )}
-              </button>
-            </form>
-          </>
-        )}
-
-        {error &&
-          !showUploadForm &&
-          (syncedEvents.length > 0 || pastUploads.length > 0) && (
+        {error && syncedEvents.length === 0 && (
           <p className="text-sm text-red-600" role="alert">
             {error}
           </p>
@@ -600,7 +394,7 @@ export default function BamsEventMatchPanel() {
         <div>
           <h2 className="text-xl font-bold text-[#163968]">Your event data</h2>
           <p className="text-sm text-slate-600 mt-1">
-            {results?.fileName ?? "Upload"} · {results?.rowCount ?? 0} athletes
+            {results?.fileName ?? "Event data"} · {results?.rowCount ?? 0} athletes
           </p>
         </div>
         <button

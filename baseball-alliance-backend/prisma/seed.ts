@@ -425,8 +425,9 @@ async function main() {
           },
           {
             pageKey: "membership",
-            title: "Membership",
-            subtitle: "Perks for players & teams",
+            title: "MEMBERSHIP",
+            subtitle:
+              "Your membership unlocks verified performance data, elevated visibility, and access to education, the BAMS college-matching tool and exclusive experiences.",
             imageUrl: null,
           },
           {

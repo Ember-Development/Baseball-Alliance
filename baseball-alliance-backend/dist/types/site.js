@@ -64,23 +64,13 @@ export const PageHeaderInputSchema = z.object({
     subtitle: optionalNullableString,
     imageUrl: optionalUrl,
 });
-export const MembershipFeatureSchema = z.object({
-    id: z.string().min(1),
-    title: z.string(),
-    body: z.string(),
-});
 export const MembershipPagePayloadSchema = z
     .object({
     heroEyebrow: z.string().nullable(),
     heroCtaLabel: z.string().nullable(),
-    overviewSectionTitle: z.string().nullable(),
     videoSectionTitle: z.string().nullable(),
-    whatsIncludedTitle: z.string().nullable(),
-    introBlurb: z.string().nullable(),
-    features: z.array(MembershipFeatureSchema),
-    bottomCtaTitle: z.string().nullable(),
-    bottomCtaBody: z.string().nullable(),
-    bottomCtaButtonLabel: z.string().nullable(),
+    bamsSectionTitle: z.string().nullable(),
+    bamsSectionBody: z.string().nullable(),
 })
     .strict();
 export const LeadershipStatSchema = z.object({
