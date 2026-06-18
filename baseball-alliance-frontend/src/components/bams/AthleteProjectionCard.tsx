@@ -35,9 +35,26 @@ function confidenceTone(
 
 type Props = {
   athleteProfile: AthleteProfile;
+  sharedBenchmarkReasons?: string[];
 };
 
-export default function AthleteProjectionCard({ athleteProfile: ap }: Props) {
+function athleteFlags(ap: AthleteProfile): string[] {
+  const flags: string[] = [];
+  const f = ap.flags;
+  if (f?.verifiedData) flags.push(MATCH_COPY.athlete.verifiedBadge);
+  if (f?.twoWay) flags.push("Two-way player");
+  if (f?.multiPosition) flags.push("Multi-position");
+  if (f?.leftHandedBoost) flags.push("Left-handed boost");
+  if (f?.academicTier) {
+    flags.push(`Academic tier: ${f.academicTier}`);
+  }
+  return flags;
+}
+
+export default function AthleteProjectionCard({
+  athleteProfile: ap,
+  sharedBenchmarkReasons = [],
+}: Props) {
   const [metricsOpen, setMetricsOpen] = useState(false);
   const projected = formatProjectedLevel(ap.resolvedLevel, ap.resolvedTier);
   const statBased = hasStatBasedLevel(ap);
@@ -45,6 +62,7 @@ export default function AthleteProjectionCard({ athleteProfile: ap }: Props) {
   const fallbackChips = (ap.fallbackFits ?? [])
     .map((f) => formatFallbackFitEntry(f))
     .filter((s): s is string => Boolean(s));
+  const profileFlags = athleteFlags(ap);
 
   if (!statBased) {
     return (
@@ -76,11 +94,16 @@ export default function AthleteProjectionCard({ athleteProfile: ap }: Props) {
         >
           {confidenceCopy(ap.confidence, ap.flags?.verifiedData)}
         </span>
-        {ap.flags?.verifiedData && (
-          <span className="text-xs font-semibold rounded-full border border-emerald-200 bg-emerald-50 text-emerald-800 px-3 py-1.5">
-            {MATCH_COPY.athlete.verifiedBadge}
-          </span>
-        )}
+        {profileFlags
+          .filter((f) => f !== MATCH_COPY.athlete.verifiedBadge)
+          .map((flag) => (
+            <span
+              key={flag}
+              className="text-xs font-semibold rounded-full border border-slate-200 bg-white text-slate-700 px-3 py-1.5"
+            >
+              {flag}
+            </span>
+          ))}
       </div>
 
       {fallbackChips.length > 0 && (
@@ -104,6 +127,19 @@ export default function AthleteProjectionCard({ athleteProfile: ap }: Props) {
       <p className="text-sm text-slate-600 leading-relaxed border-t border-slate-200/80 pt-3">
         {MATCH_COPY.athlete.explainer}
       </p>
+
+      {sharedBenchmarkReasons.length > 0 && (
+        <div className="rounded-xl border border-slate-200 bg-white/80 px-4 py-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
+            {MATCH_COPY.athlete.benchmarkHeadline}
+          </p>
+          <ul className="text-sm text-slate-700 space-y-1.5 list-disc pl-5">
+            {sharedBenchmarkReasons.map((r) => (
+              <li key={r}>{r}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {metrics.length > 0 && (
         <div className="rounded-xl border border-slate-200 bg-white/80">

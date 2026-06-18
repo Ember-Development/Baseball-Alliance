@@ -340,7 +340,13 @@ export type MatchRowV1 = {
   division: string;
   conference: string;
   state: string;
+  city?: string | null;
+  schoolType?: string | null;
+  enrollment?: number | null;
   overallScore: number;
+  matchFitBand?: string | null;
+  matchFitBandLabel?: string | null;
+  similarFitGroup?: string | null;
   scoreBreakdown: ScoreBreakdown;
   fitLabel: string;
   reasons: string[];

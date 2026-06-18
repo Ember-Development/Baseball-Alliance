@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import type { MatchResponseV1 } from "@/types/collegeMatch";
+import type { SavedMatchPreferencesInput } from "../../lib/api";
 import { AlertCircle, BookmarkPlus, Check, Info, Loader2 } from "lucide-react";
 import AthleteProjectionCard, { MatchLegalFooter } from "./AthleteProjectionCard";
 import SchoolMatchCard from "./SchoolMatchCard";
@@ -7,23 +8,49 @@ import MatchComparePanel from "./MatchComparePanel";
 import MatchFitExplainer, {
   MatchFitExplainerTrigger,
 } from "./MatchFitExplainer";
+import MatchClusterBanner from "./MatchClusterBanner";
+import PreferenceNudge from "./PreferenceNudge";
 import { MATCH_COPY } from "./matchResultsCopy";
 import { TOP_MATCH_LIMIT, hasStatBasedLevel } from "./matchResultsUi";
+import type { MatchPreferences } from "./matchPreferences";
+import { DEFAULT_MATCH_PREFERENCES } from "./matchPreferences";
+import {
+  buildMatchSegments,
+  contextFromMatchPreferences,
+  contextFromSavedPreferences,
+  findSharedBenchmarkReasons,
+  isTiedWithPrevious,
+  shouldShowPreferenceNudge,
+  type MatchPreferenceContext,
+} from "./matchResultsCluster";
 
 type Props = {
   matchRes: MatchResponseV1 | null;
   error?: string | null;
-  /** When true, show note that preferences changed the ranking. */
   preferencesUpdated?: boolean;
+  preferences?: MatchPreferences | SavedMatchPreferencesInput | null;
+  onScrollToPreferences?: () => void;
   onSave?: () => void | Promise<void>;
   saving?: boolean;
   saved?: boolean;
 };
 
+function resolvePreferenceContext(
+  preferences?: MatchPreferences | SavedMatchPreferencesInput | null
+): MatchPreferenceContext {
+  if (!preferences) return contextFromMatchPreferences(DEFAULT_MATCH_PREFERENCES);
+  if ("athleticFitW" in preferences) {
+    return contextFromMatchPreferences(preferences);
+  }
+  return contextFromSavedPreferences(preferences);
+}
+
 export default function MatchResultsDisplay({
   matchRes,
   error,
   preferencesUpdated,
+  preferences,
+  onScrollToPreferences,
   onSave,
   saving,
   saved,
@@ -33,6 +60,10 @@ export default function MatchResultsDisplay({
   const [explainerOpen, setExplainerOpen] = useState(false);
 
   const allMatches = matchRes?.matches ?? [];
+  const prefContext = useMemo(
+    () => resolvePreferenceContext(preferences),
+    [preferences]
+  );
 
   const topMatches = useMemo(
     () => allMatches.slice(0, TOP_MATCH_LIMIT),
@@ -44,6 +75,20 @@ export default function MatchResultsDisplay({
     if (!q) return topMatches;
     return topMatches.filter((m) => m.schoolName.toLowerCase().includes(q));
   }, [topMatches, search]);
+
+  const sharedReasonsList = useMemo(
+    () => findSharedBenchmarkReasons(topMatches),
+    [topMatches]
+  );
+  const sharedReasons = useMemo(
+    () => new Set(sharedReasonsList),
+    [sharedReasonsList]
+  );
+
+  const segments = useMemo(
+    () => buildMatchSegments(filteredTop),
+    [filteredTop]
+  );
 
   if (error) {
     return (
@@ -62,11 +107,19 @@ export default function MatchResultsDisplay({
   const topScore = allMatches[0]?.overallScore ?? 0;
   const showTargetNote =
     allMatches.length > 0 && topScore < 75 && hasStatBasedLevel(ap);
+  const showNudge = shouldShowPreferenceNudge(topMatches, prefContext);
 
   return (
     <div className="space-y-6">
-      {showSummary && (
-        <AthleteProjectionCard athleteProfile={ap ?? { confidence: "low" }} />
+      {showSummary && ap && (
+        <AthleteProjectionCard
+          athleteProfile={ap}
+          sharedBenchmarkReasons={sharedReasonsList}
+        />
+      )}
+
+      {showNudge && (
+        <PreferenceNudge onScrollToPreferences={onScrollToPreferences} />
       )}
 
       {preferencesUpdated && (
@@ -124,10 +177,54 @@ export default function MatchResultsDisplay({
             </p>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredTop.map((m, i) => (
-              <SchoolMatchCard key={m.id} match={m} rank={i + 1} />
-            ))}
+          <div className="space-y-6">
+            {segments.map((segment) => {
+              if (segment.kind === "single") {
+                const idx = filteredTop.indexOf(segment.match);
+                return (
+                  <div
+                    key={segment.match.id}
+                    className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                  >
+                    <SchoolMatchCard
+                      match={segment.match}
+                      rank={segment.rank}
+                      preferences={prefContext}
+                      sharedReasons={sharedReasons}
+                      tiedWithPrevious={isTiedWithPrevious(filteredTop, idx)}
+                    />
+                  </div>
+                );
+              }
+
+              return (
+                <div key={segment.groupKey} className="space-y-4">
+                  <MatchClusterBanner
+                    scoreBreakdown={segment.scoreBreakdown}
+                    sampleMatch={segment.matches[0]}
+                    preferences={prefContext}
+                  />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {segment.matches.map((m, i) => {
+                      const idx = filteredTop.indexOf(m);
+                      return (
+                        <SchoolMatchCard
+                          key={m.id}
+                          match={m}
+                          rank={segment.startRank + i}
+                          preferences={prefContext}
+                          sharedReasons={sharedReasons}
+                          inCluster
+                          tiedWithPrevious={
+                            i > 0 || isTiedWithPrevious(filteredTop, idx)
+                          }
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           {hasMorePrograms && (
