@@ -4,9 +4,10 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useSiteEditMode } from "../context/SiteEditModeContext";
 
+const NAV_HEIGHT = 80;
+
 const NavBar: React.FC = () => {
   const [open, setOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [avatarOpen, setAvatarOpen] = useState(false);
   const avatarRef = useRef<HTMLDivElement>(null);
@@ -15,13 +16,6 @@ const NavBar: React.FC = () => {
 
   const location = useLocation();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 10);
-    onScroll();
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   // close avatar menu on outside click
   useEffect(() => {
@@ -40,8 +34,8 @@ const NavBar: React.FC = () => {
     "Leaderboard",
     "Leadership",
     "Membership",
+    "BAMS",
   ];
-  const NAV_HEIGHT = 80;
 
   const leaderboardItems = [
     {
@@ -59,6 +53,9 @@ const NavBar: React.FC = () => {
   ];
 
   const isHomePage = location.pathname === "/";
+
+  const navLinkClass =
+    "text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.85)] hover:text-red-300";
 
   const smoothScrollTo = (id: string) => {
     const el = document.getElementById(id);
@@ -111,6 +108,11 @@ const NavBar: React.FC = () => {
       return;
     }
 
+    if (label === "BAMS") {
+      navigate("/bams");
+      return;
+    }
+
     handleScroll(label.toLowerCase());
   };
 
@@ -135,15 +137,12 @@ const NavBar: React.FC = () => {
       className={[
         "fixed inset-x-0 top-0 z-[100] overflow-visible",
         "backdrop-blur-md backdrop-saturate-150",
-        "transition-all duration-300",
-        scrolled
-          ? "bg-white/7 border-white/15 shadow-[0_8px_32px_rgba(0,0,0,0.25)]"
-          : "bg-white/5 border-white/10",
-        "border-b",
+        "transition-all duration-300 border-b",
+        "bg-gradient-to-b from-black/80 via-black/50 to-black/10 border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.35)]",
       ].join(" ")}
     >
       {/* gradient hairline accent */}
-      <div className="absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-transparent via-red-400/70 to-transparent pointer-events-none" />
+      <div className="absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-transparent via-white/25 to-transparent pointer-events-none" />
 
       <div className="relative mx-auto max-w-8xl px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         {/* Left: Brand */}
@@ -152,7 +151,7 @@ const NavBar: React.FC = () => {
             <img
               src={BA}
               alt="Baseball Alliance"
-              className="h-40 2xl:h-40 xl:h-32 lg:h-28 w-auto max-h-full object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.4)] cursor-pointer"
+              className="h-40 2xl:h-40 xl:h-32 lg:h-28 w-auto max-h-full object-contain cursor-pointer drop-shadow-[0_2px_10px_rgba(0,0,0,0.75)] brightness-110"
             />
           </Link>
         </div>
@@ -166,8 +165,8 @@ const NavBar: React.FC = () => {
                   e.stopPropagation();
                   handleNavClick(label);
                 }}
-                className={`group relative 2xl:px-3 xl:px-2 lg:px-1.5 2xl:py-2 xl:py-1.5 lg:py-1.5 2xl:text-base xl:text-sm lg:text-xs font-semibold uppercase 2xl:tracking-wide xl:tracking-normal lg:tracking-tight text-[#163968] hover:text-red-500 transition flex items-center gap-1 ${
-                  label === "Leaderboard" && dropdownOpen ? "text-red-500" : ""
+                className={`group relative 2xl:px-3 xl:px-2 lg:px-1.5 2xl:py-2 xl:py-1.5 lg:py-1.5 2xl:text-base xl:text-sm lg:text-xs font-semibold uppercase 2xl:tracking-wide xl:tracking-normal lg:tracking-tight transition flex items-center gap-1 ${navLinkClass} ${
+                  label === "Leaderboard" && dropdownOpen ? "text-red-300" : ""
                 }`}
                 aria-label={label}
                 aria-haspopup={label === "Leaderboard" ? "menu" : undefined}
@@ -232,8 +231,8 @@ const NavBar: React.FC = () => {
         {/* Right: Actions */}
         <div className="flex items-center gap-3">
           {user?.roles?.includes("ADMIN") && (
-            <div className="hidden lg:flex items-center gap-2 pr-1 border-r border-[#163968]/15">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#163968]/70 whitespace-nowrap">
+            <div className="hidden lg:flex items-center gap-2 pr-1 border-r border-white/20">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-white/75 whitespace-nowrap">
                 {contentEditMode ? "Editing" : "View only"}
               </span>
               <button
@@ -261,7 +260,7 @@ const NavBar: React.FC = () => {
           {!user ? (
             <Link
               to="/login"
-              className="hidden lg:inline-flex px-5 py-2 rounded-full text-sm font-bold uppercase tracking-wide border border-[#163968] bg-white/5 hover:bg-white/10 text-[#163968] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] transition"
+              className="hidden lg:inline-flex px-5 py-2 rounded-full text-sm font-bold uppercase tracking-wide border border-white/35 bg-white/10 text-white hover:bg-white/20 shadow-[0_2px_12px_rgba(0,0,0,0.25)] transition"
             >
               Login
             </Link>
@@ -337,12 +336,12 @@ const NavBar: React.FC = () => {
 
           {/* Mobile menu button */}
           <button
-            className="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl border border-[#163968]/45 bg-white/5 hover:bg-white/10 transition"
+            className="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl border border-white/35 bg-white/10 hover:bg-white/20 transition"
             onClick={() => setOpen((v) => !v)}
             aria-label="Toggle menu"
           >
             <svg
-              className={`h-5 w-5 text-[#163968] transition-transform ${
+              className={`h-5 w-5 text-white transition-transform ${
                 open ? "rotate-90" : ""
               }`}
               viewBox="0 0 24 24"
@@ -376,7 +375,7 @@ const NavBar: React.FC = () => {
         ].join(" ")}
       >
         <div className="mx-auto max-w-7xl px-4 pb-4">
-          <div className="rounded-2xl border border-white/10 bg-black/5 backdrop-blur-md p-2">
+          <div className="rounded-2xl border border-white/15 bg-black/40 backdrop-blur-md p-2">
             {links.map((label) => (
               <div key={label} className="w-full">
                 {label !== "Leaderboard" ? (
@@ -393,7 +392,7 @@ const NavBar: React.FC = () => {
                         setOpen(false);
                       }
                     }}
-                    className="w-full text-left px-3 py-3 rounded-xl text-sm font-semibold uppercase tracking-wide text-[#163968] hover:text-red-500 hover:bg-white/10 transition flex items-center justify-between"
+                    className="w-full text-left px-3 py-3 rounded-xl text-sm font-semibold uppercase tracking-wide text-white hover:text-red-300 hover:bg-white/10 transition flex items-center justify-between"
                   >
                     {label}
                   </button>
@@ -404,7 +403,7 @@ const NavBar: React.FC = () => {
                         e.stopPropagation();
                         setDropdownOpen((v) => !v);
                       }}
-                      className="w-full text-left px-3 py-3 rounded-xl text-sm font-semibold uppercase tracking-wide text-[#163968] hover:text-red-500 hover:bg-white/10 transition flex items-center justify-between"
+                      className="w-full text-left px-3 py-3 rounded-xl text-sm font-semibold uppercase tracking-wide text-white hover:text-red-300 hover:bg-white/10 transition flex items-center justify-between"
                       aria-haspopup="menu"
                       aria-expanded={dropdownOpen}
                     >
@@ -481,7 +480,7 @@ const NavBar: React.FC = () => {
               <div className="pt-2">
                 <Link
                   to="/login"
-                  className="block w-full px-4 py-3 rounded-xl text-sm uppercase tracking-wide border border-white/20 bg-white/5 hover:bg-white/10 text-[#163968] font-semibold transition text-center"
+                  className="block w-full px-4 py-3 rounded-xl text-sm uppercase tracking-wide border border-white/25 bg-white/10 hover:bg-white/20 text-white font-semibold transition text-center"
                 >
                   Login
                 </Link>
@@ -496,7 +495,7 @@ const NavBar: React.FC = () => {
                     setOpen(false);
                     logout();
                   }}
-                  className="block w-full px-4 py-3 rounded-xl text-sm uppercase tracking-wide border border-white/20 bg-white/5 hover:bg-white/10 text-[#163968] font-semibold transition text-center"
+                  className="block w-full px-4 py-3 rounded-xl text-sm uppercase tracking-wide border border-white/25 bg-white/10 hover:bg-white/20 text-white font-semibold transition text-center"
                 >
                   Logout
                 </button>

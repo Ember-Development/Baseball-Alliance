@@ -117,7 +117,7 @@ export default function MatchPreferencesForm({ value, onChange }: Props) {
           Your preferences
         </h3>
         <p className="text-sm text-slate-600 mt-1">
-          Showcase stats come from your event upload. Set what matters most for
+          Showcase stats come from your synced event data. Set what matters most for
           school fit before running match.
         </p>
       </div>

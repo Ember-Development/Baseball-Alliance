@@ -108,7 +108,26 @@ const Footer: React.FC = () => {
           <p>Baseball Alliance LLC</p>
           <p>2100 Downing Lane, Ste A, Leander, TX 78641</p>
           <p>Phone: (817) 320-4911</p>
-          <p>Customer Service: keith@baseballalliance.co</p>
+          <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-x-8 gap-y-2 pt-1">
+            <p>
+              Customer Service:{" "}
+              <a
+                href="mailto:keith@baseballalliance.co"
+                className="hover:text-black underline-offset-4 hover:underline"
+              >
+                keith@baseballalliance.co
+              </a>
+            </p>
+            <p>
+              Tech Support:{" "}
+              <a
+                href="mailto:gunnar@goatnet.com"
+                className="hover:text-black underline-offset-4 hover:underline"
+              >
+                gunnar@goatnet.com
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </footer>

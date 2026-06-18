@@ -19,47 +19,10 @@ const EDDIE_VIDEO_URL =
 export const DEFAULT_MEMBERSHIP_PAGE: MembershipPagePayload = {
   heroEyebrow: "Baseball Alliance",
   heroCtaLabel: "Join Membership",
-  overviewSectionTitle: "Membership Overview",
   videoSectionTitle: "Membership Information Video",
-  whatsIncludedTitle: "What's Included",
-  introBlurb:
-    "Baseball Alliance Membership is designed to give players meaningful exposure and long-term support.",
-  features: [
-    {
-      id: "feat-verified",
-      title: "Verified Performance Data",
-      body: "Members receive verified performance data that lives beyond events, helping elevate their profile through trusted metrics, leaderboards, and athlete features.",
-    },
-    {
-      id: "feat-visibility",
-      title: "Ongoing Visibility",
-      body: "This information is paired with ongoing visibility through content, interviews, and event coverage that helps players stay relevant and discoverable over time.",
-    },
-    {
-      id: "feat-education",
-      title: "Educational Resources",
-      body: "Membership unlocks access to exclusive interviews and insights from players, coaches, and industry voices.",
-    },
-    {
-      id: "feat-college",
-      title: "College-Matching System",
-      body: "A college-matching system built to help athletes identify the right opportunities and pathways for their development.",
-    },
-    {
-      id: "feat-community",
-      title: "Community & Network",
-      body: "Members gain access to livestreams, exclusive experiences, and a growing network focused on accountability, development, and opportunity.",
-    },
-    {
-      id: "feat-partners",
-      title: "Partners & Discounts",
-      body: "Athletes unlock access to best-in-class partners, discounts, and opportunities designed to support training, performance, and long-term growth.",
-    },
-  ],
-  bottomCtaTitle: "Ready to Elevate Your Game?",
-  bottomCtaBody:
-    "Join Baseball Alliance Membership and unlock the tools, visibility, and community you need to reach the next level.",
-  bottomCtaButtonLabel: "Get Started Today",
+  bamsSectionTitle: "Baseball Alliance Matching System (BAMS)",
+  bamsSectionBody:
+    "BAMS transforms verified performance metrics into actionable recruiting insights. By comparing your data against college recruiting benchmarks and collegiate programs, BAMS identifies schools that align with your athletic and academic profile. Through college fit analysis, benchmark comparisons, and personalized recruiting insights, athletes and families gain a clearer understanding of where they stand today, where they can improve, and what opportunities may be available as they progress through their recruiting journey.",
 };
 
 export function mergeMembershipPage(raw: unknown): MembershipPagePayload {
@@ -71,21 +34,9 @@ export function mergeMembershipPage(raw: unknown): MembershipPagePayload {
   return {
     heroEyebrow: r.heroEyebrow ?? d.heroEyebrow,
     heroCtaLabel: r.heroCtaLabel ?? d.heroCtaLabel,
-    overviewSectionTitle: r.overviewSectionTitle ?? d.overviewSectionTitle,
     videoSectionTitle: r.videoSectionTitle ?? d.videoSectionTitle,
-    whatsIncludedTitle: r.whatsIncludedTitle ?? d.whatsIncludedTitle,
-    introBlurb: r.introBlurb ?? d.introBlurb,
-    features:
-      Array.isArray(r.features) && r.features.length > 0
-        ? r.features.map((f, i) => ({
-            id: f.id || `feat-${i}`,
-            title: f.title ?? "",
-            body: f.body ?? "",
-          }))
-        : d.features,
-    bottomCtaTitle: r.bottomCtaTitle ?? d.bottomCtaTitle,
-    bottomCtaBody: r.bottomCtaBody ?? d.bottomCtaBody,
-    bottomCtaButtonLabel: r.bottomCtaButtonLabel ?? d.bottomCtaButtonLabel,
+    bamsSectionTitle: r.bamsSectionTitle ?? d.bamsSectionTitle,
+    bamsSectionBody: r.bamsSectionBody ?? d.bamsSectionBody,
   };
 }
 
