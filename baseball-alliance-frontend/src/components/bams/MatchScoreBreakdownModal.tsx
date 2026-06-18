@@ -27,6 +27,7 @@ export default function MatchScoreBreakdownModal({
   preferences,
 }: Props) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const sb = match.scoreBreakdown;
   const fit = fitLabelDisplay(match.fitLabel);
   const headline = fitBandHeadline(match);
   const athleticSub = normalizeAthleticSubBreakdown(match.athleticFitBreakdown);
@@ -36,7 +37,6 @@ export default function MatchScoreBreakdownModal({
     preferences,
     sb.affordabilityFit
   );
-  const sb = match.scoreBreakdown;
 
   useEffect(() => {
     if (!open) return;
