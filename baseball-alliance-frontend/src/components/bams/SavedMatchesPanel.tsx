@@ -94,7 +94,10 @@ export default function SavedMatchesPanel() {
             Saved {formatDate(detail.createdAt)}
           </p>
         </div>
-        <MatchResultsDisplay matchRes={detail.matchResponse} />
+        <MatchResultsDisplay
+          matchRes={detail.matchResponse}
+          preferences={detail.preferences}
+        />
       </div>
     );
   }

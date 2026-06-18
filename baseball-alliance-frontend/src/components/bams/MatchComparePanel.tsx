@@ -12,6 +12,7 @@ import {
   fitLabelDisplay,
   formatMatchFitValue,
 } from "./matchResultsCopy";
+import { fitBandHeadline } from "./matchResultsCluster";
 
 const MAX_COMPARE = 4;
 
@@ -214,7 +215,7 @@ export default function MatchComparePanel({ matches, athleteProfile }: Props) {
             className="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm"
           />
           <label className="flex items-center gap-2 text-sm text-slate-600">
-            Min {MATCH_COPY.school.matchFitShort.toLowerCase()}
+            Min {MATCH_COPY.school.overallScoreLabel.toLowerCase()}
             <input
               type="range"
               min={0}
@@ -266,6 +267,7 @@ export default function MatchComparePanel({ matches, athleteProfile }: Props) {
           {filtered.map((m) => {
             const isSelected = selected.includes(m.id);
             const disabled = !isSelected && selected.length >= MAX_COMPARE;
+            const headline = fitBandHeadline(m);
             return (
               <button
                 key={m.id}
@@ -295,14 +297,14 @@ export default function MatchComparePanel({ matches, athleteProfile }: Props) {
                   </span>
                 </span>
                 <span
-                  className="shrink-0 flex flex-col items-center text-center min-w-[2.75rem]"
-                  title={MATCH_COPY.school.matchFitLabel}
+                  className="shrink-0 flex flex-col items-end text-right min-w-[5.5rem]"
+                  title={`${headline.primary} · Score ${headline.secondary}`}
                 >
-                  <span className="text-sm font-bold text-slate-700 tabular-nums leading-none">
-                    {formatMatchFitValue(m.overallScore)}
+                  <span className="text-xs font-bold text-[#163968] leading-tight">
+                    {headline.primary}
                   </span>
-                  <span className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide text-slate-400 leading-none">
-                    Fit
+                  <span className="mt-0.5 text-[10px] text-slate-400 tabular-nums leading-none">
+                    Score {headline.secondary}
                   </span>
                 </span>
               </button>
@@ -350,12 +352,17 @@ export default function MatchComparePanel({ matches, athleteProfile }: Props) {
               </tr>
             </thead>
             <tbody>
+              <CompareTextRow
+                label={MATCH_COPY.school.fitBandLabel}
+                values={selectedMatches.map((m) => fitBandHeadline(m).primary)}
+                emphasize
+              />
               <CompareRow
-                label={MATCH_COPY.school.matchFitLabel}
+                label={MATCH_COPY.school.overallScoreLabel}
                 values={selectedMatches.map((m) =>
                   Number(formatMatchFitValue(m.overallScore))
                 )}
-                emphasize
+                subdued
               />
               <CompareRow
                 label={MATCH_COPY.breakdown.athleticFit.label}
@@ -401,13 +408,13 @@ export default function MatchComparePanel({ matches, athleteProfile }: Props) {
   );
 }
 
-function CompareRow({
+function CompareTextRow({
   label,
   values,
   emphasize,
 }: {
   label: string;
-  values: (number | null)[];
+  values: string[];
   emphasize?: boolean;
 }) {
   return (
@@ -419,11 +426,48 @@ function CompareRow({
       </td>
       {values.map((v, i) => (
         <td key={i} className="p-2">
+          <span
+            className={`font-medium ${emphasize ? "text-[#163968] font-semibold" : "text-slate-700"}`}
+          >
+            {v}
+          </span>
+        </td>
+      ))}
+    </tr>
+  );
+}
+
+function CompareRow({
+  label,
+  values,
+  emphasize,
+  subdued,
+}: {
+  label: string;
+  values: (number | null)[];
+  emphasize?: boolean;
+  subdued?: boolean;
+}) {
+  return (
+    <tr className="border-t border-slate-100">
+      <td
+        className={`p-2 text-slate-600 ${emphasize ? "font-semibold text-slate-800" : ""} ${subdued ? "text-xs" : ""}`}
+      >
+        {label}
+      </td>
+      {values.map((v, i) => (
+        <td key={i} className={`p-2 ${subdued ? "text-xs" : ""}`}>
           {v == null ? (
             <span className="text-slate-300">—</span>
           ) : (
             <span
-              className={`font-medium ${emphasize ? compatibilityTextClass(v) : "text-slate-700"}`}
+              className={`font-medium ${
+                emphasize
+                  ? compatibilityTextClass(v)
+                  : subdued
+                    ? "text-slate-500 tabular-nums"
+                    : "text-slate-700"
+              }`}
             >
               {v}
             </span>

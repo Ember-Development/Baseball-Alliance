@@ -99,6 +99,7 @@ export default function BamsEventMatchPanel() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [preferencesUpdated, setPreferencesUpdated] = useState(false);
   const lastMatchStatesRef = useRef<string | null>(null);
+  const preferencesSectionRef = useRef<HTMLDivElement>(null);
 
   const loadResults = useCallback(
     async (
@@ -443,7 +444,9 @@ export default function BamsEventMatchPanel() {
         </div>
       )}
 
-      <MatchPreferencesForm value={preferences} onChange={setPreferences} />
+      <div ref={preferencesSectionRef} className="scroll-mt-24">
+        <MatchPreferencesForm value={preferences} onChange={setPreferences} />
+      </div>
 
       {membershipUsage && !isAdmin && (
         <div
@@ -640,7 +643,14 @@ export default function BamsEventMatchPanel() {
 
               <MatchResultsDisplay
                 matchRes={matchRes ?? null}
+                preferences={preferences}
                 preferencesUpdated={preferencesUpdated}
+                onScrollToPreferences={() =>
+                  preferencesSectionRef.current?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                  })
+                }
                 error={
                   selectedAthlete.matchStatus === "FAILED"
                     ? selectedAthlete.matchError

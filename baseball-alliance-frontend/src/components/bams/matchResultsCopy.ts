@@ -12,6 +12,8 @@ export const MATCH_COPY = {
       "Add showcase metrics (60 time, exit velocity, arm strength, etc.) to see your projected level. Until then, matches are based mainly on preferences.",
     preferencesOnlyNote:
       "Until then, matches are based mainly on your school and location preferences.",
+    benchmarkHeadline: "How your metrics compare",
+    flagsHeadline: "Profile factors",
   },
   confidence: {
     high: "High confidence (3+ metrics)",
@@ -22,9 +24,24 @@ export const MATCH_COPY = {
   school: {
     matchFitLabel: "School compatibility",
     matchFitShort: "Match fit",
+    fitBandLabel: "Fit band",
+    overallScoreLabel: "Overall score",
     whyThisMatch: "Why this match?",
+    whyThisNumber: "Why this number?",
     programCompetitiveness: "Program competitiveness",
     topReasonsPrefix: "Why we matched this school",
+    tieBadge: "Same fit score · Ranked by conference & profile",
+    schoolIdentity: "School profile",
+  },
+  cluster: {
+    bannerTitle: "Same fit tier",
+    bannerBody:
+      "These schools match your profile similarly. Ranked by conference strength and school profile.",
+    sharedScores: "Shared fit scores for this group",
+  },
+  nudge: {
+    body: "Add preferred states or school preferences to differentiate these matches.",
+    action: "Update preferences above",
   },
   results: {
     heading: (count: number) => `Top ${count} school matches`,
@@ -44,6 +61,8 @@ export const MATCH_COPY = {
   explainer: {
     triggerGlobal: "How match fit works",
     triggerSchool: "Why this number?",
+    rankingNote:
+      "Among schools with the same score, order reflects conference strength and school profile — not a meaningful gap in fit.",
     sections: [
       {
         title: "What does match fit mean?",

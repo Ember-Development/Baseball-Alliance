@@ -5,6 +5,11 @@ import MatchAthleteSummary, {
 } from "@/components/bams/MatchAthleteSummary";
 import MatchCollegeCard from "@/components/bams/MatchCollegeCard";
 import {
+  findSharedBenchmarkReasons,
+  isTiedWithPrevious,
+  type MatchPreferenceContext,
+} from "@/components/bams/matchResultsCluster";
+import {
   normalizeProgramFiltersResponse,
   type MatchResponseV1,
   type MatchRowV1,
@@ -216,6 +221,27 @@ export function MatchFixturePanel() {
       m.schoolName.toLowerCase().includes(q),
     );
   }, [matchRes?.matches, matchSearch]);
+
+  const prefContext = useMemo<MatchPreferenceContext>(() => {
+    const parseCsv = (s: string) =>
+      s
+        .split(",")
+        .map((x) => x.trim())
+        .filter(Boolean);
+    return {
+      preferredStates: parseCsv(form.preferredStatesCsv),
+      preferredDivisions: parseCsv(form.preferredDivisionsCsv),
+      preferredConferences: parseCsv(form.preferredConferencesCsv),
+      schoolTypePreference: form.schoolTypePreference,
+      schoolSizePreference: form.schoolSizePreference,
+      tuitionPreference: form.tuitionPreference,
+    };
+  }, [form]);
+
+  const sharedReasons = useMemo(
+    () => new Set(findSharedBenchmarkReasons(matchRes?.matches ?? [])),
+    [matchRes?.matches]
+  );
 
   function rankForMatch(m: MatchRowV1): number {
     if (!matchRes) return 0;
@@ -985,11 +1011,14 @@ export function MatchFixturePanel() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {filteredMatches.map((m) => (
+              {filteredMatches.map((m, idx) => (
                 <MatchCollegeCard
                   key={m.id}
                   match={m}
                   rank={rankForMatch(m)}
+                  preferences={prefContext}
+                  sharedReasons={sharedReasons}
+                  tiedWithPrevious={isTiedWithPrevious(filteredMatches, idx)}
                 />
               ))}
             </div>

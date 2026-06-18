@@ -1,7 +1,14 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import type { AthleticSubBreakdown, ScoreBreakdown } from "@/types/collegeMatch";
+import type { AthleticSubBreakdown, MatchRowV1, ScoreBreakdown } from "@/types/collegeMatch";
 import { MATCH_COPY } from "./matchResultsCopy";
+import {
+  type MatchPreferenceContext,
+  athleticDimensionLabel,
+  affordabilityNeutralInfo,
+  locationNeutralInfo,
+  schoolNeutralInfo,
+} from "./matchResultsCluster";
 
 const DIMENSIONS = [
   {
@@ -43,11 +50,26 @@ function Bar({
   label,
   value,
   tooltip,
+  neutralDetail,
 }: {
   label: string;
   value: number;
   tooltip?: string;
+  neutralDetail?: string;
 }) {
+  if (neutralDetail) {
+    return (
+      <div className="text-xs">
+        <div className="flex justify-between items-baseline gap-2 mb-0.5">
+          <span className="text-slate-600" title={tooltip}>
+            {label}
+          </span>
+          <span className="font-medium text-amber-800">{neutralDetail}</span>
+        </div>
+      </div>
+    );
+  }
+
   const display = Math.round(value);
   return (
     <div>
@@ -79,20 +101,114 @@ function Bar({
   );
 }
 
+function TextRow({ label, display }: { label: string; display: string }) {
+  return (
+    <div className="flex justify-between gap-2 text-xs">
+      <span className="text-slate-600">{label}</span>
+      <span className="font-medium text-slate-700 text-right">{display}</span>
+    </div>
+  );
+}
+
 type Props = {
   scoreBreakdown: ScoreBreakdown;
   athleticSubBreakdown?: AthleticSubBreakdown | null;
   compact?: boolean;
   defaultAthleticOpen?: boolean;
+  variant?: "bars" | "text";
+  match?: MatchRowV1;
+  preferences?: MatchPreferenceContext;
 };
+
+function dimensionDisplay(
+  key: (typeof DIMENSIONS)[number]["key"],
+  scoreBreakdown: ScoreBreakdown,
+  match: MatchRowV1 | undefined,
+  preferences: MatchPreferenceContext | undefined,
+  variant: "bars" | "text"
+): { value: number; display: string; neutralDetail?: string } {
+  const score = scoreBreakdown[key];
+
+  if (key === "athleticFit" && match) {
+    return { value: score, display: athleticDimensionLabel(match) };
+  }
+
+  if (!preferences || !match) {
+    return { value: score, display: String(Math.round(score)) };
+  }
+
+  if (key === "locationFit") {
+    const info = locationNeutralInfo(match, preferences);
+    if (info.isNeutral) {
+      return {
+        value: score,
+        display: info.detail ?? "Neutral",
+        neutralDetail:
+          variant === "bars"
+            ? info.detail ?? "Neutral — no preference set"
+            : undefined,
+      };
+    }
+  }
+
+  if (key === "schoolFit") {
+    const info = schoolNeutralInfo(match, preferences);
+    if (info.isNeutral) {
+      return {
+        value: score,
+        display: info.detail ?? "Neutral",
+        neutralDetail:
+          variant === "bars"
+            ? info.detail ?? "Neutral — no preference set"
+            : undefined,
+      };
+    }
+  }
+
+  if (key === "affordabilityFit") {
+    const info = affordabilityNeutralInfo(preferences, score);
+    if (info.isNeutral) {
+      return {
+        value: score,
+        display: info.detail ?? "Neutral",
+        neutralDetail:
+          variant === "bars"
+            ? info.detail ?? "Neutral — no preference set"
+            : undefined,
+      };
+    }
+  }
+
+  return { value: score, display: String(Math.round(score)) };
+}
 
 export default function MatchFitBreakdown({
   scoreBreakdown,
   athleticSubBreakdown,
   compact = false,
   defaultAthleticOpen = false,
+  variant = "bars",
+  match,
+  preferences,
 }: Props) {
   const [athleticOpen, setAthleticOpen] = useState(defaultAthleticOpen);
+
+  if (variant === "text") {
+    return (
+      <div className="space-y-1.5 rounded-lg bg-slate-50/80 border border-slate-100 px-3 py-2">
+        {DIMENSIONS.map(({ key, label }) => {
+          const dim = dimensionDisplay(
+            key,
+            scoreBreakdown,
+            match,
+            preferences,
+            "text"
+          );
+          return <TextRow key={key} label={label} display={dim.display} />;
+        })}
+      </div>
+    );
+  }
 
   return (
     <div className={compact ? "space-y-2.5" : "space-y-3"}>
@@ -103,14 +219,24 @@ export default function MatchFitBreakdown({
             : "grid grid-cols-1 sm:grid-cols-2 gap-3"
         }
       >
-        {DIMENSIONS.map(({ key, label, tooltip }) => (
-          <Bar
-            key={key}
-            label={label}
-            value={scoreBreakdown[key]}
-            tooltip={tooltip}
-          />
-        ))}
+        {DIMENSIONS.map(({ key, label, tooltip }) => {
+          const dim = dimensionDisplay(
+            key,
+            scoreBreakdown,
+            match,
+            preferences,
+            "bars"
+          );
+          return (
+            <Bar
+              key={key}
+              label={label}
+              value={dim.value}
+              tooltip={tooltip}
+              neutralDetail={dim.neutralDetail}
+            />
+          );
+        })}
       </div>
 
       {athleticSubBreakdown && (
