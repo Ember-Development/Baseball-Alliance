@@ -7,8 +7,14 @@ import {
   type BamsSyncedEventSummary,
 } from "../../lib/api";
 import type { MatchResponseV1 } from "../../types/collegeMatch";
+import { normalizeMetricAssessment } from "../../types/collegeMatch";
 import MatchResultsDisplay from "./MatchResultsDisplay";
+import { ShowcaseStatsBlock } from "./AthleteProjectionCard";
 import MatchPreferencesForm from "./MatchPreferencesForm";
+import {
+  parseShowcaseCsvRow,
+  formatShowcaseStatEntries,
+} from "../../lib/showcaseMetrics";
 import { DEFAULT_MATCH_PREFERENCES } from "./matchPreferences";
 import {
   matchPreferencesToApi,
@@ -30,20 +36,6 @@ import {
 /** How many programs to pull per match run for the top-30 view + compare tools. */
 const COMPARE_POOL_SIZE = 150;
 
-const METRIC_LABELS: Record<string, string> = {
-  "60-time": "60-yard",
-  "exit-velocity": "Exit velo",
-  "infield-velocity": "IF throw",
-  "outfield-velocity": "OF throw",
-  "pop-time": "Pop time",
-  "catcher-velocity": "Catcher throw",
-  "fastball-velocity": "Fastball",
-  height_feet: "Height (ft)",
-  height_inches: "Height (in)",
-  weight: "Weight",
-  gpa: "GPA",
-};
-
 function statusBadge(status: string) {
   switch (status) {
     case "SUCCESS":
@@ -55,17 +47,6 @@ function statusBadge(status: string) {
     default:
       return "bg-slate-100 text-slate-600 border-slate-200";
   }
-}
-
-function metricsPreview(raw?: Record<string, string>) {
-  if (!raw) return [];
-  return Object.entries(METRIC_LABELS)
-    .map(([key, label]) => {
-      const v = raw[key]?.trim();
-      if (!v || v === "0") return null;
-      return { label, value: v };
-    })
-    .filter(Boolean) as { label: string; value: string }[];
 }
 
 export default function BamsEventMatchPanel() {
@@ -192,6 +173,33 @@ export default function BamsEventMatchPanel() {
   const matchRes = selectedAthlete?.matchResponse as
     | MatchResponseV1
     | undefined;
+
+  const showcaseMetrics = useMemo(
+    () =>
+      selectedAthlete?.rawRow
+        ? parseShowcaseCsvRow(selectedAthlete.rawRow)
+        : null,
+    [selectedAthlete?.rawRow]
+  );
+
+  const gradedMetricKeys = useMemo(
+    () =>
+      normalizeMetricAssessment(matchRes?.athleteProfile?.metricAssessment).map(
+        (m) => m.metric
+      ),
+    [matchRes?.athleteProfile?.metricAssessment]
+  );
+
+  const showcaseStatEntries = useMemo(
+    () =>
+      showcaseMetrics
+        ? formatShowcaseStatEntries(showcaseMetrics, {
+            primaryPosition: selectedAthlete?.primaryPosition,
+            gradedMetricKeys,
+          })
+        : [],
+    [showcaseMetrics, selectedAthlete?.primaryPosition, gradedMetricKeys]
+  );
 
   async function selectSyncedEvent(event: BamsSyncedEventSummary) {
     setSelectingUploadId(event.uploadId);
@@ -601,26 +609,11 @@ export default function BamsEventMatchPanel() {
                   </p>
                 )}
 
-                <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
-                    Showcase metrics (from export)
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {metricsPreview(selectedAthlete.rawRow).map((m) => (
-                      <span
-                        key={m.label}
-                        className="text-xs bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg"
-                      >
-                        {m.label}: <strong>{m.value}</strong>
-                      </span>
-                    ))}
-                    {metricsPreview(selectedAthlete.rawRow).length === 0 && (
-                      <span className="text-xs text-slate-400">
-                        No metrics in row
-                      </span>
-                    )}
-                  </div>
-                </div>
+                {showcaseStatEntries.length > 0 ? (
+                  <ShowcaseStatsBlock entries={showcaseStatEntries} />
+                ) : (
+                  <span className="text-xs text-slate-400">No metrics in row</span>
+                )}
 
                 {selectedAthlete.matchStatus === "PENDING" && (
                   <button
@@ -645,6 +638,9 @@ export default function BamsEventMatchPanel() {
                 matchRes={matchRes ?? null}
                 preferences={preferences}
                 preferencesUpdated={preferencesUpdated}
+                showcaseMetrics={showcaseMetrics}
+                primaryPosition={selectedAthlete.primaryPosition}
+                showShowcaseHeader={false}
                 onScrollToPreferences={() =>
                   preferencesSectionRef.current?.scrollIntoView({
                     behavior: "smooth",

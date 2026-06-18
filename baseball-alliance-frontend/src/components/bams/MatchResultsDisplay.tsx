@@ -18,11 +18,11 @@ import {
   buildMatchSegments,
   contextFromMatchPreferences,
   contextFromSavedPreferences,
-  findSharedBenchmarkReasons,
   isTiedWithPrevious,
   shouldShowPreferenceNudge,
   type MatchPreferenceContext,
 } from "./matchResultsCluster";
+import type { ShowcaseMetrics } from "@/lib/showcaseMetrics";
 
 type Props = {
   matchRes: MatchResponseV1 | null;
@@ -33,6 +33,11 @@ type Props = {
   onSave?: () => void | Promise<void>;
   saving?: boolean;
   saved?: boolean;
+  showcaseMetrics?: ShowcaseMetrics | null;
+  primaryPosition?: string;
+  secondaryPosition?: string;
+  playerType?: "pitcher" | "hitter";
+  showShowcaseHeader?: boolean;
 };
 
 function resolvePreferenceContext(
@@ -54,6 +59,11 @@ export default function MatchResultsDisplay({
   onSave,
   saving,
   saved,
+  showcaseMetrics,
+  primaryPosition,
+  secondaryPosition,
+  playerType,
+  showShowcaseHeader,
 }: Props) {
   const [search, setSearch] = useState("");
   const [showCompare, setShowCompare] = useState(false);
@@ -76,14 +86,7 @@ export default function MatchResultsDisplay({
     return topMatches.filter((m) => m.schoolName.toLowerCase().includes(q));
   }, [topMatches, search]);
 
-  const sharedReasonsList = useMemo(
-    () => findSharedBenchmarkReasons(topMatches),
-    [topMatches]
-  );
-  const sharedReasons = useMemo(
-    () => new Set(sharedReasonsList),
-    [sharedReasonsList]
-  );
+  const sharedReasons = useMemo(() => new Set<string>(), []);
 
   const segments = useMemo(
     () => buildMatchSegments(filteredTop),
@@ -114,7 +117,11 @@ export default function MatchResultsDisplay({
       {showSummary && ap && (
         <AthleteProjectionCard
           athleteProfile={ap}
-          sharedBenchmarkReasons={sharedReasonsList}
+          showcaseMetrics={showcaseMetrics}
+          primaryPosition={primaryPosition}
+          secondaryPosition={secondaryPosition}
+          playerType={playerType}
+          showShowcaseHeader={showShowcaseHeader}
         />
       )}
 

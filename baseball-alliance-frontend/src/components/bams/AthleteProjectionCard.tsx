@@ -1,8 +1,14 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import type { AthleteProfile } from "@/types/collegeMatch";
-import { formatFallbackFitEntry } from "@/types/collegeMatch";
+import { formatFallbackFitEntry, normalizeMetricAssessment } from "@/types/collegeMatch";
+import type { ShowcaseMetrics } from "@/lib/showcaseMetrics";
 import {
+  formatShowcaseStatEntries,
+  showcaseExplainerCopy,
+} from "@/lib/showcaseMetrics";
+import {
+  buildGradedMetricCompareBullets,
   formatProjectedLevel,
   hasStatBasedLevel,
   metricDisplayName,
@@ -35,7 +41,12 @@ function confidenceTone(
 
 type Props = {
   athleteProfile: AthleteProfile;
-  sharedBenchmarkReasons?: string[];
+  showcaseMetrics?: ShowcaseMetrics | null;
+  primaryPosition?: string;
+  secondaryPosition?: string;
+  playerType?: "pitcher" | "hitter";
+  /** When false, showcase stats render only in the parent athlete header. */
+  showShowcaseHeader?: boolean;
 };
 
 function athleteFlags(ap: AthleteProfile): string[] {
@@ -53,12 +64,51 @@ function athleteFlags(ap: AthleteProfile): string[] {
 
 export default function AthleteProjectionCard({
   athleteProfile: ap,
-  sharedBenchmarkReasons = [],
+  showcaseMetrics,
+  primaryPosition,
+  secondaryPosition,
+  playerType = "hitter",
+  showShowcaseHeader = true,
 }: Props) {
   const [metricsOpen, setMetricsOpen] = useState(false);
   const projected = formatProjectedLevel(ap.resolvedLevel, ap.resolvedTier);
   const statBased = hasStatBasedLevel(ap);
   const metrics = sortMetricAssessment(ap.metricAssessment);
+  const gradedMetricKeys = useMemo(
+    () => normalizeMetricAssessment(ap.metricAssessment).map((m) => m.metric),
+    [ap.metricAssessment]
+  );
+  const showcaseEntries = useMemo(
+    () =>
+      showcaseMetrics
+        ? formatShowcaseStatEntries(showcaseMetrics, {
+            primaryPosition,
+            gradedMetricKeys,
+            playerType,
+            secondaryPosition,
+          })
+        : [],
+    [
+      showcaseMetrics,
+      primaryPosition,
+      gradedMetricKeys,
+      playerType,
+      secondaryPosition,
+    ]
+  );
+  const gradedCompareBullets = useMemo(
+    () => buildGradedMetricCompareBullets(ap),
+    [ap]
+  );
+  const layerCExplainer = useMemo(() => {
+    if (!showcaseMetrics || !projected) return null;
+    return showcaseExplainerCopy(
+      showcaseMetrics,
+      metrics.length,
+      primaryPosition ?? "",
+      projected
+    );
+  }, [showcaseMetrics, metrics.length, primaryPosition, projected]);
   const fallbackChips = (ap.fallbackFits ?? [])
     .map((f) => formatFallbackFitEntry(f))
     .filter((s): s is string => Boolean(s));
@@ -73,6 +123,9 @@ export default function AthleteProjectionCard({
         <p className="text-sm text-amber-900/90 leading-relaxed">
           {MATCH_COPY.athlete.lowConfidenceBody}
         </p>
+        {showcaseEntries.length > 0 && showShowcaseHeader && (
+          <ShowcaseStatsBlock entries={showcaseEntries} />
+        )}
       </div>
     );
   }
@@ -124,17 +177,27 @@ export default function AthleteProjectionCard({
         </div>
       )}
 
+      {showcaseEntries.length > 0 && showShowcaseHeader && (
+        <ShowcaseStatsBlock entries={showcaseEntries} />
+      )}
+
+      {layerCExplainer && (
+        <p className="text-sm text-slate-600 leading-relaxed rounded-xl border border-slate-200 bg-white/80 px-4 py-3">
+          {layerCExplainer}
+        </p>
+      )}
+
       <p className="text-sm text-slate-600 leading-relaxed border-t border-slate-200/80 pt-3">
         {MATCH_COPY.athlete.explainer}
       </p>
 
-      {sharedBenchmarkReasons.length > 0 && (
+      {gradedCompareBullets.length > 0 && (
         <div className="rounded-xl border border-slate-200 bg-white/80 px-4 py-3">
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">
             {MATCH_COPY.athlete.benchmarkHeadline}
           </p>
           <ul className="text-sm text-slate-700 space-y-1.5 list-disc pl-5">
-            {sharedBenchmarkReasons.map((r) => (
+            {gradedCompareBullets.map((r) => (
               <li key={r}>{r}</li>
             ))}
           </ul>
@@ -187,6 +250,36 @@ export default function AthleteProjectionCard({
         </div>
       )}
     </section>
+  );
+}
+
+export function ShowcaseStatsBlock({
+  entries,
+}: {
+  entries: ReturnType<typeof formatShowcaseStatEntries>;
+}) {
+  return (
+    <div>
+      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
+        Showcase metrics (from export)
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {entries.map((m) => (
+          <span
+            key={m.key}
+            className="text-xs bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg"
+            title={m.annotation}
+          >
+            {m.label}: <strong>{m.value}</strong>
+            {m.annotation && (
+              <span className="text-slate-500 font-normal ml-1">
+                ({m.annotation})
+              </span>
+            )}
+          </span>
+        ))}
+      </div>
+    </div>
   );
 }
 
