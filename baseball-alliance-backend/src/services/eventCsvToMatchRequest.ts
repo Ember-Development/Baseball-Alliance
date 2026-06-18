@@ -27,6 +27,28 @@ export const REQUIRED_EVENT_HEADERS = [
   "grad_year",
 ] as const;
 
+type ShowcaseMetrics = {
+  sixtyTime?: number;
+  exitVelocity?: number;
+  shuttle510?: number;
+  infieldVelocity?: number;
+  outfieldVelocity?: number;
+  catcherVelocity?: number;
+  popTime?: number;
+  fastballVelocity?: number;
+  offspeedVelocity?: number;
+  changeupVelocity?: number;
+};
+
+type PositionGroup =
+  | "CORNER_OF"
+  | "CF"
+  | "MIDDLE_IF"
+  | "CORNER_IF"
+  | "C"
+  | "RHP"
+  | "LHP";
+
 function isBlank(val: string | undefined): boolean {
   if (val === undefined) return true;
   return val.trim() === "";
@@ -52,6 +74,122 @@ function handLetter(raw: string | undefined): string | undefined {
   if (t.startsWith("l") || t === "left") return "L";
   if (t.startsWith("s") || t === "switch") return "S";
   return raw.trim().charAt(0).toUpperCase();
+}
+
+function parseShowcaseFromRow(row: EventCsvRow): ShowcaseMetrics {
+  return {
+    sixtyTime: parseNumber(row["60-time"]),
+    shuttle510: parseNumber(row["5-10-5-shuttle"]),
+    exitVelocity: parseNumber(row["exit-velocity"]),
+    outfieldVelocity: parseNumber(row["outfield-velocity"]),
+    infieldVelocity: parseNumber(row["infield-velocity"]),
+    catcherVelocity: parseNumber(row["catcher-velocity"]),
+    popTime: parseNumber(row["pop-time"]),
+    fastballVelocity: parseNumber(row["fastball-velocity"]),
+    offspeedVelocity: parseNumber(row["offspeed-velocity"]),
+    changeupVelocity: parseNumber(row["changeup-velocity"]),
+  };
+}
+
+function normalizePositionGroup(primaryPosition: string): PositionGroup {
+  const p = primaryPosition.trim().toLowerCase();
+  if (
+    ["rf", "lf", "of", "outfield", "right field", "left field"].some((k) =>
+      p.includes(k)
+    )
+  ) {
+    return "CORNER_OF";
+  }
+  if (["cf", "center field"].some((k) => p.includes(k))) return "CF";
+  if (["ss", "2b", "shortstop", "second base"].some((k) => p.includes(k))) {
+    return "MIDDLE_IF";
+  }
+  if (["3b", "1b", "third base", "first base"].some((k) => p.includes(k))) {
+    return "CORNER_IF";
+  }
+  if (["c", "catcher"].some((k) => p.includes(k))) return "C";
+  if (["lhp", "left"].some((k) => p.includes(k) && p.includes("p"))) {
+    return "LHP";
+  }
+  return "RHP";
+}
+
+function resolveArmVelocity(
+  showcase: ShowcaseMetrics,
+  group: PositionGroup
+): { inf?: number; of?: number } {
+  const inf = showcase.infieldVelocity;
+  const of = showcase.outfieldVelocity;
+  if (group === "CORNER_OF" || group === "CF") {
+    return { of: of ?? inf };
+  }
+  if (group === "MIDDLE_IF" || group === "CORNER_IF") {
+    return { inf: inf ?? of };
+  }
+  return { inf, of };
+}
+
+function detectTwoWay(
+  playerType: string,
+  primaryPosition: string,
+  secondaryPosition: string | undefined,
+  showcase: ShowcaseMetrics
+): boolean {
+  const hasPitchingData = showcase.fastballVelocity != null;
+  const primaryIsHitter =
+    playerType === "hitter" &&
+    !["rhp", "lhp", "p", "pitcher"].includes(
+      primaryPosition.trim().toLowerCase()
+    );
+  const secondaryIsPitcher =
+    secondaryPosition != null &&
+    ["rhp", "lhp", "p", "pitcher"].some((pos) =>
+      secondaryPosition.toLowerCase().includes(pos)
+    );
+  return primaryIsHitter && hasPitchingData && secondaryIsPitcher;
+}
+
+function buildPositionAwareMetrics(
+  showcase: ShowcaseMetrics,
+  playerType: "pitcher" | "hitter",
+  primaryPosition: string,
+  secondaryPosition?: string
+): Record<string, number> {
+  const group = normalizePositionGroup(primaryPosition);
+  const arm = resolveArmVelocity(showcase, group);
+  const isPitcher =
+    playerType === "pitcher" || group === "RHP" || group === "LHP";
+  const isTwoWay = detectTwoWay(
+    playerType,
+    primaryPosition,
+    secondaryPosition,
+    showcase
+  );
+  const metrics: Record<string, number> = {};
+
+  if (showcase.exitVelocity != null) {
+    metrics.maxExitVelocity = showcase.exitVelocity;
+  }
+  if (showcase.sixtyTime != null) metrics.sixtyTime = showcase.sixtyTime;
+
+  if (arm.inf != null) metrics.infThrowingVelocity = arm.inf;
+  if (arm.of != null) metrics.ofThrowingVelocity = arm.of;
+
+  if (group === "C") {
+    if (showcase.catcherVelocity != null) {
+      metrics.catcherArmVelocity = showcase.catcherVelocity;
+    }
+    if (showcase.popTime != null) metrics.catcherPopTime = showcase.popTime;
+  }
+
+  if (isPitcher || isTwoWay) {
+    if (showcase.fastballVelocity != null) {
+      metrics.fastballVelocity = showcase.fastballVelocity;
+      metrics.topVelocity = showcase.fastballVelocity;
+    }
+  }
+
+  return metrics;
 }
 
 export function handednessFromBatThrow(row: EventCsvRow): string | undefined {
@@ -83,33 +221,27 @@ export function buildMatchRequestFromEventRow(
     errors.push("grad_year must be between 2000 and 2040");
   }
 
-  const metrics: Record<string, number> = {};
+  const playerType = resolvePlayerType(row);
+  const showcase = parseShowcaseFromRow(row);
 
-  const sixty = parseNumber(row["60-time"]);
-  if (sixty !== undefined) metrics.sixtyTime = sixty;
+  let secondary =
+    row.secondary_position?.trim() ||
+    row.secondaryposition?.trim() ||
+    undefined;
 
-  const exitVel = parseNumber(row["exit-velocity"]);
-  if (exitVel !== undefined) {
-    metrics.maxExitVelocity = exitVel;
+  if (
+    detectTwoWay(playerType, primaryPosition, secondary, showcase) &&
+    !secondary
+  ) {
+    secondary = "RHP";
   }
 
-  const infVel = parseNumber(row["infield-velocity"]);
-  if (infVel !== undefined) metrics.infThrowingVelocity = infVel;
-
-  const ofVel = parseNumber(row["outfield-velocity"]);
-  if (ofVel !== undefined) metrics.ofThrowingVelocity = ofVel;
-
-  const pop = parseNumber(row["pop-time"]);
-  if (pop !== undefined) metrics.catcherPopTime = pop;
-
-  const catchVel = parseNumber(row["catcher-velocity"]);
-  if (catchVel !== undefined) metrics.catcherArmVelocity = catchVel;
-
-  const fb = parseNumber(row["fastball-velocity"]);
-  if (fb !== undefined) {
-    metrics.fastballVelocity = fb;
-    metrics.topVelocity = fb;
-  }
+  const metrics = buildPositionAwareMetrics(
+    showcase,
+    playerType,
+    primaryPosition,
+    secondary
+  );
 
   const feet = parseNumber(row.height_feet);
   const inches = parseNumber(row.height_inches) ?? 0;
@@ -122,18 +254,11 @@ export function buildMatchRequestFromEventRow(
   if (weight !== undefined && weight > 0) metrics.weightLbs = weight;
 
   const gpa = parsePositiveNumber(row.gpa);
-
-  const secondary =
-    row.secondary_position?.trim() ||
-    row.secondaryposition?.trim() ||
-    undefined;
-
   const handedness = handednessFromBatThrow(row);
-
   const hasMetrics = Object.keys(metrics).length > 0;
 
   const request: Record<string, unknown> = {
-    playerType: resolvePlayerType(row),
+    playerType,
     primaryPosition,
     preferredStates: [],
     preferredDivisions: [],

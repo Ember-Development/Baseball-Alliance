@@ -400,29 +400,25 @@ r.post("/:uploadId/match", async (req, res) => {
       continue;
     }
 
-    let matchBody =
-      (row.matchRequest as Record<string, unknown> | null) ?? null;
-    if (!matchBody) {
-      const built = buildMatchRequestFromEventRow(
-        row.rawRow as Record<string, string>
-      );
-      if (built.errors.length > 0) {
-        await prisma.bamsEventAthleteRow.update({
-          where: { id: row.id },
-          data: {
-            matchStatus: BamsMatchStatus.FAILED,
-            matchError: built.errors.join("; "),
-          },
-        });
-        results.push({
-          athleteUuid: row.athleteUuid,
+    const built = buildMatchRequestFromEventRow(
+      row.rawRow as Record<string, string>
+    );
+    if (built.errors.length > 0) {
+      await prisma.bamsEventAthleteRow.update({
+        where: { id: row.id },
+        data: {
           matchStatus: BamsMatchStatus.FAILED,
           matchError: built.errors.join("; "),
-        });
-        continue;
-      }
-      matchBody = built.request;
+        },
+      });
+      results.push({
+        athleteUuid: row.athleteUuid,
+        matchStatus: BamsMatchStatus.FAILED,
+        matchError: built.errors.join("; "),
+      });
+      continue;
     }
+    let matchBody = built.request;
 
     matchBody = mergeMatchPreferences(
       matchBody,

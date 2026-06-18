@@ -23,12 +23,17 @@ function normalizeMetricKey(metric: string): string {
 }
 
 const METRIC_LABELS: Record<string, string> = {
-  // BAMS API (SCREAMING_SNAKE)
-  sixty_time: "60-yard dash",
+  // BAMS API graded keys (SCREAMING_SNAKE)
   exit_velocity: "Exit velocity",
-  arm_strength_inf: "Infield arm strength",
-  arm_strength_of: "Outfield arm strength",
-  arm_strength_c: "Catcher arm strength",
+  sixty_time: "60-yard time",
+  arm_strength_inf: "Infield arm",
+  arm_strength_of: "Outfield arm",
+  arm_strength_c: "Catcher arm",
+  catcher_pop_time: "Pop time",
+  catcher_arm_velo: "Catcher arm",
+  pitching_velo_rhp: "Pitching velocity",
+  pitching_velo_lhp: "Pitching velocity",
+  // Legacy / alternate keys
   arm_strength: "Arm strength",
   pop_time: "Pop time",
   fastball_velocity: "Fastball velocity",
@@ -40,7 +45,7 @@ const METRIC_LABELS: Record<string, string> = {
   catcher_arm_velocity: "Catcher throw velocity",
   strike_percentage: "Strike percentage",
   // Match request / CSV camelCase
-  sixtytime: "60-yard dash",
+  sixtytime: "60-yard time",
   maxexitvelocity: "Max exit velocity",
   avgexitvelocity: "Avg exit velocity",
   infthrowingvelocity: "Infield throw velocity",
@@ -130,17 +135,19 @@ export function metricDisplayName(metric: string): string {
 
 export function metricFitBandLabel(fitBand: string): string {
   const b = fitBand.toLowerCase().replace(/_/g, " ");
+  if (b.includes("impact")) return "Impact";
   if (b.includes("competitive")) return "Competitive";
-  if (b.includes("floor")) return "Floor";
   if (b.includes("below")) return "Below floor";
+  if (b.includes("floor")) return "Floor";
   return fitBand;
 }
 
 export function metricFitBandClass(fitBand: string): string {
   const b = fitBand.toLowerCase();
+  if (b.includes("impact")) return "bg-violet-100 text-violet-900";
   if (b.includes("competitive")) return "bg-emerald-100 text-emerald-800";
-  if (b.includes("floor")) return "bg-amber-100 text-amber-800";
   if (b.includes("below")) return "bg-slate-100 text-slate-600";
+  if (b.includes("floor")) return "bg-amber-100 text-amber-800";
   return "bg-slate-100 text-slate-700";
 }
 
@@ -233,10 +240,24 @@ export function matchFacetValues(
 export function sortMetricAssessment(
   entries: AthleteProfile["metricAssessment"] | unknown
 ): MetricAssessmentEntry[] {
-  const order = ["competitive", "floor", "below"];
+  const order = ["impact", "competitive", "floor", "below"];
   return normalizeMetricAssessment(entries).sort((a, b) => {
     const ai = order.findIndex((o) => a.fitBand.toLowerCase().includes(o));
     const bi = order.findIndex((o) => b.fitBand.toLowerCase().includes(o));
     return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+  });
+}
+
+/** Per-metric graded comparison bullets — one line per metricAssessment entry. */
+export function buildGradedMetricCompareBullets(
+  ap: AthleteProfile
+): string[] {
+  const level =
+    formatProjectedLevel(ap.resolvedLevel, ap.resolvedTier) ?? "your level";
+  return sortMetricAssessment(ap.metricAssessment).map((m) => {
+    const name = metricDisplayName(m.metric);
+    const band = metricFitBandLabel(m.fitBand);
+    const levelFit = m.levelFit?.trim() || level;
+    return `${name} (${m.value}): ${band} for ${levelFit}`;
   });
 }
